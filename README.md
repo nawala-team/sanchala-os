@@ -94,7 +94,9 @@
 
 <div align="center">
 
-<img src="branding/security-layers.svg" alt="Sanchala Security Layers" width="100%"/>
+<picture>
+  <img src="branding/security-layers.svg" alt="Sanchala Security Layers"/>
+</picture>
 
 </div>
 
