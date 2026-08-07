@@ -153,38 +153,65 @@ jobs:
           if-no-files-found: warn
 
       - name: Create Release and Upload ISO
-        if: github.event_name == 'workflow_dispatch' || github.event_name == 'release'
+        if: github.event_name == 'workflow_dispatch' || github.event_name == 'release' || github.event_name == 'push'
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: v${{ env.ISO_VERSION }}-${{ env.ISO_CODENAME }}
-          name: "Sanchala OS ${{ env.ISO_VERSION }} (${{ env.ISO_CODENAME }})"
+          tag_name: v1.0.0
+          name: "Sanchala OS v1.0 Astra ⚡"
           body: |
-            ## 🚀 Sanchala OS ${{ env.ISO_VERSION }} (${{ env.ISO_CODENAME }})
+            # 🎉 Sanchala OS v1.0 "Astra" - Initial Release
             
-            ### 📥 Download
-            - **ISO**: `sanchala-${{ env.ISO_VERSION }}-${{ env.ISO_CODENAME }}-x86_64.iso`
-            - **SHA256**: Verify integrity with `.sha256` file
-            - **MD5**: Verify integrity with `.md5` file
+            > **Astra** (अस्त्र) - Sanskrit for "Divine Weapon" - Represents the powerful, precise, and protective nature of this OS.
             
-            ### ✨ Features
-            - 🖥️ KDE Plasma 6 Desktop
-            - 🔒 8-Layer Security Architecture
-            - 🦊 Firefox Browser (Brave available via Chaotic-AUR)
-            - 📦 Flatpak Support
-            - 🎨 Modern UI/UX inspired by macOS
+            ## ✨ Highlights
             
-            ### 🔑 Live Session Credentials
+            - 🎨 **macOS-inspired UI/UX** with KDE Plasma 6
+            - 🔒 **8-Layer Security Architecture** (Beyond Apple-level)
+            - 📦 **100% Linux App Compatibility** (Flatpak, Snap, AppImage, AUR)
+            - 🌐 **Firefox Browser** built-in (Brave available via Chaotic-AUR)
+            - 🔄 **Btrfs Snapshots** with automatic recovery
+            - ⚡ **Performance optimized** with zram & preload
+            
+            ## 🛡️ Security Features
+            
+            | Layer | Feature |
+            |-------|---------|
+            | 1 | Secure Boot + TPM 2.0 |
+            | 2 | LUKS2 Full Disk Encryption |
+            | 3 | SELinux/AppArmor |
+            | 4 | Application Sandboxing |
+            | 5 | Firewall |
+            | 6 | Privacy Guard |
+            | 7 | Secure DNS (DoH/DoT) |
+            | 8 | Anti-Forensics Tools |
+            
+            ## 📥 Download
+            
+            | File | Description |
+            |------|-------------|
+            | `sanchala-1.0.0-Astra-x86_64.iso` | Live/Install ISO |
+            | `.sha256` | SHA256 checksum |
+            | `.md5` | MD5 checksum |
+            
+            ## 🔑 Live Session Credentials
+            
             - **Username**: `sanchala`
             - **Password**: `sanchala`
             
-            ### 📋 Requirements
-            - 64-bit processor (x86_64)
-            - 4GB RAM minimum (8GB recommended)
-            - 20GB disk space
-            - UEFI or BIOS boot support
+            ## 📋 System Requirements
+            
+            | Spec | Minimum | Recommended |
+            |------|---------|-------------|
+            | CPU | 64-bit dual-core | Quad-core+ |
+            | RAM | 4 GB | 8 GB+ |
+            | Storage | 30 GB | 50 GB+ SSD |
+            | GPU | OpenGL 3.3 | Vulkan support |
             
             ---
-            Built with ❤️ by NAWALA Team
+            
+            **Part of [NAWALA Ecosystem](https://github.com/nawala-team)**
+            
+            © 2026 nawala-team | GPL-3.0 License
           draft: false
           prerelease: false
           files: |
