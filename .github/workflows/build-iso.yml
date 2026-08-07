@@ -152,10 +152,41 @@ jobs:
           retention-days: 7
           if-no-files-found: warn
 
-      - name: Upload to Release
-        if: github.event_name == 'release'
+      - name: Create Release and Upload ISO
+        if: github.event_name == 'workflow_dispatch' || github.event_name == 'release'
         uses: softprops/action-gh-release@v1
         with:
+          tag_name: v${{ env.ISO_VERSION }}-${{ env.ISO_CODENAME }}
+          name: "Sanchala OS ${{ env.ISO_VERSION }} (${{ env.ISO_CODENAME }})"
+          body: |
+            ## 🚀 Sanchala OS ${{ env.ISO_VERSION }} (${{ env.ISO_CODENAME }})
+            
+            ### 📥 Download
+            - **ISO**: `sanchala-${{ env.ISO_VERSION }}-${{ env.ISO_CODENAME }}-x86_64.iso`
+            - **SHA256**: Verify integrity with `.sha256` file
+            - **MD5**: Verify integrity with `.md5` file
+            
+            ### ✨ Features
+            - 🖥️ KDE Plasma 6 Desktop
+            - 🔒 8-Layer Security Architecture
+            - 🦊 Firefox Browser (Brave available via Chaotic-AUR)
+            - 📦 Flatpak Support
+            - 🎨 Modern UI/UX inspired by macOS
+            
+            ### 🔑 Live Session Credentials
+            - **Username**: `sanchala`
+            - **Password**: `sanchala`
+            
+            ### 📋 Requirements
+            - 64-bit processor (x86_64)
+            - 4GB RAM minimum (8GB recommended)
+            - 20GB disk space
+            - UEFI or BIOS boot support
+            
+            ---
+            Built with ❤️ by NAWALA Team
+          draft: false
+          prerelease: false
           files: |
             /tmp/archiso-out/*.iso
             /tmp/archiso-out/*.sha256
