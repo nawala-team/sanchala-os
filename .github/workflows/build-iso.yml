@@ -155,7 +155,30 @@ jobs:
           retention-days: 7
           if-no-files-found: warn
 
-      - name: Create Release and Upload ISO
+      - name: Upload ISO to Archive.org
+        id: upload_archive
+        run: |
+          cd /tmp/archiso-out
+          ISO_FILE="sanchala-1.0.0-Astra-x86_64.iso"
+          if [ -f "$ISO_FILE" ]; then
+            # Get file size
+            SIZE=$(du -h "$ISO_FILE" | cut -f1)
+            echo "ISO Size: $SIZE"
+            
+            # Upload to transfer.sh (temporary, 14 days)
+            echo "Uploading to transfer.sh..."
+            TRANSFER_URL=$(curl -T "$ISO_FILE" https://transfer.sh/$ISO_FILE 2>/dev/null || echo "")
+            echo "transfer_url=$TRANSFER_URL" >> $GITHUB_OUTPUT
+            
+            # Generate magnet link info
+            SHA256=$(cat "$ISO_FILE.sha256" | cut -d' ' -f1)
+            MD5=$(cat "$ISO_FILE.md5" | cut -d' ' -f1)
+            echo "sha256=$SHA256" >> $GITHUB_OUTPUT
+            echo "md5=$MD5" >> $GITHUB_OUTPUT
+            echo "size=$SIZE" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Release with Download Links
         if: github.event_name == 'workflow_dispatch' || github.event_name == 'release' || github.event_name == 'push'
         uses: softprops/action-gh-release@v2
         with:
@@ -165,6 +188,21 @@ jobs:
             # 🎉 Sanchala OS v1.0 "Astra" - Initial Release
             
             > **Astra** (अस्त्र) - Sanskrit for "Divine Weapon" - Represents the powerful, precise, and protective nature of this OS.
+            
+            ## 📥 Download ISO
+            
+            | Method | Link |
+            |--------|------|
+            | 🔗 **Direct Download** | [transfer.sh](${{ steps.upload_archive.outputs.transfer_url }}) |
+            | 📦 **GitHub Artifact** | [Actions → Artifacts](https://github.com/nawala-team/sanchala-os/actions) |
+            
+            ### File Info
+            ```
+            File: sanchala-1.0.0-Astra-x86_64.iso
+            Size: ${{ steps.upload_archive.outputs.size }}
+            SHA256: ${{ steps.upload_archive.outputs.sha256 }}
+            MD5: ${{ steps.upload_archive.outputs.md5 }}
+            ```
             
             ## ✨ Highlights
             
@@ -188,14 +226,6 @@ jobs:
             | 7 | Secure DNS (DoH/DoT) |
             | 8 | Anti-Forensics Tools |
             
-            ## 📥 Download
-            
-            | File | Description |
-            |------|-------------|
-            | `sanchala-1.0.0-Astra-x86_64.iso` | Live/Install ISO |
-            | `.sha256` | SHA256 checksum |
-            | `.md5` | MD5 checksum |
-            
             ## 🔑 Live Session Credentials
             
             - **Username**: `sanchala`
@@ -218,7 +248,6 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            /tmp/archiso-out/*.iso
             /tmp/archiso-out/*.sha256
             /tmp/archiso-out/*.md5
         env:
