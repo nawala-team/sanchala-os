@@ -9,8 +9,7 @@ class BandwidthLimiter:
     
     def _validate_interface(self, interface):
         """Validate network interface name"""
-        return bool(re.match(r'^[a-zA-Z0-9_-]+
-, interface)) and len(interface) <= 15
+        return bool(re.match(r"^[a-zA-Z0-9_-]+$", interface)) and len(interface) <= 15
     
     def _validate_rate(self, rate):
         """Validate rate is numeric"""
@@ -20,7 +19,6 @@ class BandwidthLimiter:
             return False
     
     def limit_app(self, app, download_kbps, upload_kbps):
-        # Using trickle for app-level limiting
         if not self._validate_rate(download_kbps) or not self._validate_rate(upload_kbps):
             return None
         cmd = f"trickle -d {download_kbps} -u {upload_kbps} {app}"
@@ -30,26 +28,21 @@ class BandwidthLimiter:
         if not self._validate_interface(interface) or not self._validate_rate(rate):
             print("Invalid interface or rate")
             return False
-        # Remove existing qdisc first
-        subprocess.run(['sudo', 'tc', 'qdisc', 'del', 'dev', interface, 'root'], 
-                      stderr=subprocess.DEVNULL)
-        # Add new rate limit
-        result = subprocess.run(['sudo', 'tc', 'qdisc', 'add', 'dev', interface, 'root', 
-                                'tbf', 'rate', f'{rate}mbit', 'burst', '32kbit', 'latency', '400ms'])
+        subprocess.run(["sudo", "tc", "qdisc", "del", "dev", interface, "root"], stderr=subprocess.DEVNULL)
+        result = subprocess.run(["sudo", "tc", "qdisc", "add", "dev", interface, "root", 
+                                "tbf", "rate", f"{rate}mbit", "burst", "32kbit", "latency", "400ms"])
         return result.returncode == 0
     
     def remove_limit(self, interface):
         if not self._validate_interface(interface):
             return False
-        subprocess.run(['sudo', 'tc', 'qdisc', 'del', 'dev', interface, 'root'],
-                      stderr=subprocess.DEVNULL)
+        subprocess.run(["sudo", "tc", "qdisc", "del", "dev", interface, "root"], stderr=subprocess.DEVNULL)
         return True
     
     def show_status(self, interface):
         if not self._validate_interface(interface):
             return "Invalid interface"
-        result = subprocess.run(['tc', 'qdisc', 'show', 'dev', interface], 
-                               capture_output=True, text=True)
+        result = subprocess.run(["tc", "qdisc", "show", "dev", interface], capture_output=True, text=True)
         return result.stdout
 
 if __name__ == "__main__":
