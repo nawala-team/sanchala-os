@@ -8,7 +8,7 @@
 
 <img src="branding/logos/sanchala-banner.svg" alt="Sanchala OS" width="800"/>
 
-[![Version](https://img.shields.io/badge/Version-1.0%20Astra-gold?style=for-the-badge)](https://github.com/dansiapa/sanchala-os/releases)
+[![Version](https://img.shields.io/badge/Version-1.0%20Astra-gold?style=for-the-badge)](https://github.com/nawala-team/sanchala-os/releases)
 [![Base](https://img.shields.io/badge/Base-Arch%20Linux-1793D1?style=for-the-badge&logo=arch-linux)](https://archlinux.org)
 [![Desktop](https://img.shields.io/badge/Desktop-KDE%20Plasma%206-1D99F3?style=for-the-badge&logo=kde)](https://kde.org)
 [![Security](https://img.shields.io/badge/Security-Beyond%20Apple-FF3B30?style=for-the-badge&logo=apple)](docs/security/SECURITY.md)
@@ -161,11 +161,11 @@
 
 ## 📥 Download
 
-### Latest Release: **Sanchala OS 1.0 "Gati"**
+### Latest Release: **Sanchala OS 1.0 "Astra"**
 
 | Edition | Description | Download |
 |---------|-------------|----------|
-| **Standard** | Full desktop experience | [Download ISO](https://github.com/dansiapa/sanchala-os/releases) |
+| **Standard** | Full desktop experience | [Download ISO](https://github.com/nawala-team/sanchala-os/releases) |
 | **Minimal** | Base system + minimal DE | Coming Soon |
 | **Server** | No GUI, security focused | Coming Soon |
 
@@ -187,20 +187,20 @@
 
 ```bash
 # Download latest ISO
-wget https://github.com/dansiapa/sanchala-os/releases/download/v1.0/sanchala-1.0-gati-x86_64.iso
+wget https://github.com/nawala-team/sanchala-os/releases/download/v1.0/sanchala-1.0-astra-x86_64.iso
 
 # Verify signature
-gpg --verify sanchala-1.0-gati-x86_64.iso.sig
+gpg --verify sanchala-1.0-astra-x86_64.iso.sig
 
 # Create bootable USB
-sudo dd if=sanchala-1.0-gati-x86_64.iso of=/dev/sdX bs=4M status=progress
+sudo dd if=sanchala-1.0-astra-x86_64.iso of=/dev/sdX bs=4M status=progress
 ```
 
 ### Option 2: Build from Source
 
 ```bash
 # Clone repository
-git clone https://github.com/dansiapa/sanchala-os.git
+git clone https://github.com/nawala-team/sanchala-os.git
 cd sanchala-os
 
 # Install dependencies (on Arch Linux)
@@ -349,7 +349,7 @@ git push origin feature/your-feature
 | 🌐 Website | [sanchala.id](https://sanchala.id) |
 | 📚 Documentation | [docs.sanchala.id](https://docs.sanchala.id) |
 | 💬 Forum | [forum.sanchala.id](https://forum.sanchala.id) |
-| 🐛 Issues | [GitHub Issues](https://github.com/dansiapa/sanchala-os/issues) |
+| 🐛 Issues | [GitHub Issues](https://github.com/nawala-team/sanchala-os/issues) |
 | 🐦 Twitter | [@SanchalaOS](https://twitter.com/SanchalaOS) |
 
 </div>
