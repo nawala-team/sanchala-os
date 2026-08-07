@@ -133,18 +133,18 @@ jobs:
           ttf-jetbrains-mono
           ttf-fira-code
           
-          # Browser - Brave
-          brave-browser
+          # Browser - Firefox (Brave needs AUR, will add post-install)
+          firefox
           
           # System Tools
           networkmanager
           network-manager-applet
           bluez
           bluez-utils
-          pulseaudio
-          pulseaudio-bluetooth
           pipewire
+          pipewire-alsa
           pipewire-pulse
+          pipewire-jack
           wireplumber
           
           # Security
@@ -166,15 +166,9 @@ jobs:
           vim
           nano
           htop
-          neofetch
           fastfetch
+          base-devel
           
-          # Installer
-          calamares
-          calamares-extensions
-          
-          # AUR Helper
-          yay
           PACKAGES
 
       - name: Configure system files
@@ -262,6 +256,17 @@ jobs:
           
           # Set hostname
           echo "sanchala" > /etc/hostname
+          
+          # Setup Chaotic-AUR for AUR packages (Brave, Calamares, etc)
+          pacman-key --recv-key 3056513887B78AEB --keyserver keyserver.ubuntu.com
+          pacman-key --lsign-key 3056513887B78AEB
+          pacman -U --noconfirm 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst'
+          pacman -U --noconfirm 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst'
+          echo -e '\n[chaotic-aur]\nInclude = /etc/pacman.d/chaotic-mirrorlist' >> /etc/pacman.conf
+          pacman -Sy
+          
+          # Install AUR packages from Chaotic-AUR
+          pacman -S --noconfirm brave-bin calamares yay || true
           CUSTOMIZE
           chmod +x $AIROOTFS/root/customize_airootfs.sh
 
