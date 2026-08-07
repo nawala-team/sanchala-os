@@ -149,11 +149,11 @@
 
 | Desktop | App Launcher | File Manager |
 |---------|--------------|---------------|
-| ![Desktop](branding/mockups/desktop.png) | ![Launcher](branding/mockups/launcher.png) | ![Files](branding/mockups/files.png) |
+| ![Desktop](branding/mockups/desktop.svg) | ![Launcher](branding/mockups/launcher.svg) | ![Files](branding/mockups/files.svg) |
 
 | Settings | Security Center | App Store |
 |----------|-----------------|------------|
-| ![Settings](branding/mockups/settings.png) | ![Security](branding/mockups/security.png) | ![Store](branding/mockups/store.png) |
+| ![Settings](branding/mockups/settings.svg) | ![Security](branding/mockups/security.svg) | ![Store](branding/mockups/store.svg) |
 
 </div>
 
