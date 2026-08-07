@@ -27,23 +27,7 @@
 
 <div align="center">
 
-```
-╭─────────────────────────────────────────────────────────────────────────╮
-│                                                                         │
-│                        NAWALA ECOSYSTEM                                 │
-│              Sanskrit-inspired Modern Infrastructure                    │
-│                                                                         │
-│    ┌───────────────┐   ┌───────────────┐   ┌───────────────┐           │
-│    │   SANCHALA    │   │    NAWALA     │   │    RAKSHA     │           │
-│    │      OS       │   │    Gateway    │   │   Security    │           │
-│    │     संञ्चल     │   │      नवल      │   │     रक्षा     │           │
-│    │               │   │               │   │               │           │
-│    │  "Jalankan"   │   │   "Pesan"     │   │  "Lindungi"   │           │
-│    │  Foundation   │   │   API Mgmt    │   │   Monitoring  │           │
-│    └───────────────┘   └───────────────┘   └───────────────┘           │
-│                                                                         │
-╰─────────────────────────────────────────────────────────────────────────╯
-```
+<img src="branding/ecosystem-diagram.svg" alt="NAWALA Ecosystem" width="100%"/>
 
 </div>
 
@@ -110,21 +94,7 @@
 
 <div align="center">
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                    SANCHALA SECURITY LAYERS                         │
-├─────────────────────────────────────────────────────────────────────┤
-│  Layer 8  │  Zero Trust Network    │  WireGuard, mTLS, DoH         │
-│  Layer 7  │  Application Security  │  Sandbox, TCC Permissions     │
-│  Layer 6  │  Code Integrity        │  Signing, Verification        │
-│  Layer 5  │  Memory Protection     │  CFI, ASLR, Stack Protection  │
-│  Layer 4  │  Kernel Fortress       │  Hardened, LKRG, Lockdown     │
-│  Layer 3  │  System Integrity      │  Immutable Root, IMA/EVM      │
-│  Layer 2  │  Data Protection       │  LUKS2, TPM, fscrypt          │
-│  Layer 1  │  Secure Boot           │  UEFI, Measured Boot, UKI     │
-│  Layer 0  │  Hardware Security     │  TPM 2.0, IOMMU, HSM          │
-└─────────────────────────────────────────────────────────────────────┘
-```
+<img src="branding/security-layers.svg" alt="Sanchala Security Layers" width="100%"/>
 
 </div>
 
@@ -236,52 +206,11 @@ sudo ./iso/build-binary
 
 ## 📁 Project Structure
 
-```
-sanchala-os/
-├── 📂 iso/                     # ISO Builder
-│   ├── build-binary            # Main build script
-│   ├── packages/               # Package lists
-│   └── airootfs/               # Live system overlay
-│
-├── 📂 filesystem/              # OS Identity
-│   ├── os-release              # System identification
-│   ├── lsb-release             # LSB info
-│   └── logos/                  # System logos
-│
-├── 📂 pkgbuilds/               # Custom Packages
-│   ├── sanchala-filesystem/    # Core identity package
-│   ├── sanchala-settings/      # Desktop configuration
-│   ├── sanchala-guardian/      # Security center
-│   └── ...                     # More packages
-│
-├── 📂 security/                # Security Configurations
-│   ├── kernel/                 # Kernel hardening
-│   ├── apparmor/               # AppArmor profiles
-│   ├── firewall/               # Firewall rules
-│   └── sandbox/                # Sandbox profiles
-│
-├── 📂 settings/                # Default User Settings
-│   └── etc/skel/               # Skeleton home directory
-│
-├── 📂 branding/                # Visual Assets
-│   ├── logos/                  # Logos (SVG, PNG)
-│   ├── wallpapers/             # Default wallpapers
-│   └── mockups/                # UI mockups
-│
-├── 📂 tools/                   # Custom Applications
-│   ├── sanchala-guardian/      # Security daemon
-│   ├── sanchala-store/         # App store
-│   └── sanchala-welcome/       # Welcome app
-│
-├── 📂 installer/               # Calamares Installer
-│   ├── branding/               # Installer branding
-│   └── modules/                # Installer modules
-│
-└── 📂 docs/                    # Documentation
-    ├── user-guide/             # User documentation
-    ├── developer/              # Developer docs
-    └── security/               # Security docs
-```
+<div align="center">
+
+<img src="branding/project-structure.svg" alt="Project Structure" width="100%"/>
+
+</div>
 
 ---
 

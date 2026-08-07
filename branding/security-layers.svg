@@ -1,0 +1,129 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+  <defs>
+    <linearGradient id="bgSec" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0D1117"/>
+      <stop offset="100%" style="stop-color:#161b22"/>
+    </linearGradient>
+    <linearGradient id="layer8" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00d4ff"/>
+      <stop offset="100%" style="stop-color:#0891b2"/>
+    </linearGradient>
+    <linearGradient id="layer7" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#06b6d4"/>
+      <stop offset="100%" style="stop-color:#0e7490"/>
+    </linearGradient>
+    <linearGradient id="layer6" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#22c55e"/>
+      <stop offset="100%" style="stop-color:#16a34a"/>
+    </linearGradient>
+    <linearGradient id="layer5" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#84cc16"/>
+      <stop offset="100%" style="stop-color:#65a30d"/>
+    </linearGradient>
+    <linearGradient id="layer4" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#eab308"/>
+      <stop offset="100%" style="stop-color:#ca8a04"/>
+    </linearGradient>
+    <linearGradient id="layer3" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#f97316"/>
+      <stop offset="100%" style="stop-color:#ea580c"/>
+    </linearGradient>
+    <linearGradient id="layer2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#ef4444"/>
+      <stop offset="100%" style="stop-color:#dc2626"/>
+    </linearGradient>
+    <linearGradient id="layer1" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#ec4899"/>
+      <stop offset="100%" style="stop-color:#db2777"/>
+    </linearGradient>
+    <linearGradient id="layer0" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#a855f7"/>
+      <stop offset="100%" style="stop-color:#9333ea"/>
+    </linearGradient>
+    <filter id="glowSec">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="800" height="450" fill="url(#bgSec)" rx="20"/>
+  
+  <!-- Title -->
+  <text x="400" y="40" text-anchor="middle" fill="#fff" font-family="Arial, sans-serif" font-size="22" font-weight="bold">🛡️ SANCHALA 8-LAYER SECURITY ARCHITECTURE</text>
+  
+  <!-- Shield Icon -->
+  <text x="400" y="85" text-anchor="middle" font-size="35" filter="url(#glowSec)">🔒</text>
+  
+  <!-- Layer 8 -->
+  <rect x="50" y="110" width="700" height="35" rx="8" fill="url(#layer8)" opacity="0.9">
+    <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite"/>
+  </rect>
+  <text x="80" y="133" fill="#000" font-family="monospace" font-size="12" font-weight="bold">L8</text>
+  <text x="120" y="133" fill="#000" font-family="Arial" font-size="13" font-weight="bold">Zero Trust Network</text>
+  <text x="450" y="133" fill="#000" font-family="Arial" font-size="12">WireGuard • mTLS • DoH/DoT • Network Isolation</text>
+  
+  <!-- Layer 7 -->
+  <rect x="50" y="150" width="700" height="35" rx="8" fill="url(#layer7)" opacity="0.9">
+    <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite" begin="0.2s"/>
+  </rect>
+  <text x="80" y="173" fill="#000" font-family="monospace" font-size="12" font-weight="bold">L7</text>
+  <text x="120" y="173" fill="#000" font-family="Arial" font-size="13" font-weight="bold">Application Security</text>
+  <text x="450" y="173" fill="#000" font-family="Arial" font-size="12">Sandbox • TCC Permissions • Portals • Flatpak</text>
+  
+  <!-- Layer 6 -->
+  <rect x="50" y="190" width="700" height="35" rx="8" fill="url(#layer6)" opacity="0.9">
+    <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite" begin="0.4s"/>
+  </rect>
+  <text x="80" y="213" fill="#000" font-family="monospace" font-size="12" font-weight="bold">L6</text>
+  <text x="120" y="213" fill="#000" font-family="Arial" font-size="13" font-weight="bold">Code Integrity</text>
+  <text x="450" y="213" fill="#000" font-family="Arial" font-size="12">Binary Signing • Verification • Notarization</text>
+  
+  <!-- Layer 5 -->
+  <rect x="50" y="230" width="700" height="35" rx="8" fill="url(#layer5)" opacity="0.9">
+    <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite" begin="0.6s"/>
+  </rect>
+  <text x="80" y="253" fill="#000" font-family="monospace" font-size="12" font-weight="bold">L5</text>
+  <text x="120" y="253" fill="#000" font-family="Arial" font-size="13" font-weight="bold">Memory Protection</text>
+  <text x="450" y="253" fill="#000" font-family="Arial" font-size="12">CFI • ASLR • Stack Canary • NX • PIE</text>
+  
+  <!-- Layer 4 -->
+  <rect x="50" y="270" width="700" height="35" rx="8" fill="url(#layer4)" opacity="0.9">
+    <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite" begin="0.8s"/>
+  </rect>
+  <text x="80" y="293" fill="#000" font-family="monospace" font-size="12" font-weight="bold">L4</text>
+  <text x="120" y="293" fill="#000" font-family="Arial" font-size="13" font-weight="bold">Kernel Fortress</text>
+  <text x="450" y="293" fill="#000" font-family="Arial" font-size="12">Hardened Kernel • LKRG • Lockdown Mode</text>
+  
+  <!-- Layer 3 -->
+  <rect x="50" y="310" width="700" height="35" rx="8" fill="url(#layer3)" opacity="0.9">
+    <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite" begin="1s"/>
+  </rect>
+  <text x="80" y="333" fill="#000" font-family="monospace" font-size="12" font-weight="bold">L3</text>
+  <text x="120" y="333" fill="#000" font-family="Arial" font-size="13" font-weight="bold">System Integrity</text>
+  <text x="450" y="333" fill="#000" font-family="Arial" font-size="12">Immutable Root • IMA/EVM • dm-verity</text>
+  
+  <!-- Layer 2 -->
+  <rect x="50" y="350" width="700" height="35" rx="8" fill="url(#layer2)" opacity="0.9">
+    <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite" begin="1.2s"/>
+  </rect>
+  <text x="80" y="373" fill="#fff" font-family="monospace" font-size="12" font-weight="bold">L2</text>
+  <text x="120" y="373" fill="#fff" font-family="Arial" font-size="13" font-weight="bold">Data Protection</text>
+  <text x="450" y="373" fill="#fff" font-family="Arial" font-size="12">LUKS2 AES-256 • TPM Binding • fscrypt</text>
+  
+  <!-- Layer 1 -->
+  <rect x="50" y="390" width="700" height="35" rx="8" fill="url(#layer1)" opacity="0.9">
+    <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite" begin="1.4s"/>
+  </rect>
+  <text x="80" y="413" fill="#fff" font-family="monospace" font-size="12" font-weight="bold">L1</text>
+  <text x="120" y="413" fill="#fff" font-family="Arial" font-size="13" font-weight="bold">Secure Boot</text>
+  <text x="450" y="413" fill="#fff" font-family="Arial" font-size="12">UEFI Secure Boot • Measured Boot • UKI</text>
+  
+  <!-- Layer 0 -->
+  <rect x="50" y="430" width="700" height="35" rx="8" fill="url(#layer0)" opacity="0.9">
+    <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite" begin="1.6s"/>
+  </rect>
+  <text x="80" y="453" fill="#fff" font-family="monospace" font-size="12" font-weight="bold">L0</text>
+  <text x="120" y="453" fill="#fff" font-family="Arial" font-size="13" font-weight="bold">Hardware Security</text>
+  <text x="450" y="453" fill="#fff" font-family="Arial" font-size="12">TPM 2.0 • IOMMU • Intel TXT/AMD PSP • HSM</text>
+</svg>
