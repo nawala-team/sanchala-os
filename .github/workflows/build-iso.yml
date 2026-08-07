@@ -175,33 +175,7 @@ jobs:
         run: |
           AIROOTFS=/tmp/sanchala-profile/airootfs
           
-          # Create os-release
-          mkdir -p $AIROOTFS/etc
-          cat > $AIROOTFS/etc/os-release << 'OSRELEASE'
-          NAME="Sanchala OS"
-          PRETTY_NAME="Sanchala OS ${{ env.ISO_VERSION }} (${{ env.ISO_CODENAME }})"
-          ID=sanchala
-          ID_LIKE=arch
-          VERSION="${{ env.ISO_VERSION }}"
-          VERSION_ID="${{ env.ISO_VERSION }}"
-          VERSION_CODENAME=${{ env.ISO_CODENAME }}
-          BUILD_ID=rolling
-          HOME_URL="https://github.com/nawala-team/sanchala-os"
-          DOCUMENTATION_URL="https://github.com/nawala-team/sanchala-os/wiki"
-          SUPPORT_URL="https://github.com/nawala-team/sanchala-os/issues"
-          BUG_REPORT_URL="https://github.com/nawala-team/sanchala-os/issues"
-          LOGO=sanchala
-          OSRELEASE
-          
-          # Create lsb-release
-          cat > $AIROOTFS/etc/lsb-release << 'LSBRELEASE'
-          DISTRIB_ID=Sanchala
-          DISTRIB_RELEASE=${{ env.ISO_VERSION }}
-          DISTRIB_CODENAME=${{ env.ISO_CODENAME }}
-          DISTRIB_DESCRIPTION="Sanchala OS ${{ env.ISO_VERSION }} (${{ env.ISO_CODENAME }})"
-          LSBRELEASE
-          
-          # Enable services
+          # Enable services (symlinks only, no file conflicts)
           mkdir -p $AIROOTFS/etc/systemd/system/multi-user.target.wants
           mkdir -p $AIROOTFS/etc/systemd/system/graphical.target.wants
           
@@ -229,6 +203,31 @@ jobs:
           cat > $AIROOTFS/root/customize_airootfs.sh << 'CUSTOMIZE'
           #!/bin/bash
           set -e
+          
+          # Create os-release (after packages installed)
+          cat > /etc/os-release << 'OSRELEASE'
+NAME="Sanchala OS"
+PRETTY_NAME="Sanchala OS 1.0.0 (Astra)"
+ID=sanchala
+ID_LIKE=arch
+VERSION="1.0.0"
+VERSION_ID="1.0.0"
+VERSION_CODENAME=Astra
+BUILD_ID=rolling
+HOME_URL="https://github.com/nawala-team/sanchala-os"
+DOCUMENTATION_URL="https://github.com/nawala-team/sanchala-os/wiki"
+SUPPORT_URL="https://github.com/nawala-team/sanchala-os/issues"
+BUG_REPORT_URL="https://github.com/nawala-team/sanchala-os/issues"
+LOGO=sanchala
+OSRELEASE
+          
+          # Create lsb-release
+          cat > /etc/lsb-release << 'LSBRELEASE'
+DISTRIB_ID=Sanchala
+DISTRIB_RELEASE=1.0.0
+DISTRIB_CODENAME=Astra
+DISTRIB_DESCRIPTION="Sanchala OS 1.0.0 (Astra)"
+LSBRELEASE
           
           # Create live user
           useradd -m -G wheel,audio,video,network,storage -s /bin/bash sanchala
