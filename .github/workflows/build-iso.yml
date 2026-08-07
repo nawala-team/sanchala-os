@@ -100,66 +100,60 @@ jobs:
           
           # Add KDE Plasma and Sanchala packages
           cat >> $PROFILE/packages.x86_64 << 'PACKAGES'
-# Desktop Environment - KDE Plasma 6
-plasma-meta
-plasma-workspace
-plasma-desktop
-plasma-nm
-plasma-pa
-plasma-systemmonitor
-konsole
-dolphin
-kate
-ark
-spectacle
-gwenview
-okular
-# Display Manager
-sddm
-sddm-kcm
-# Themes & Appearance
-breeze
-breeze-gtk
-kvantum
-papirus-icon-theme
-# Fonts
-noto-fonts
-noto-fonts-cjk
-noto-fonts-emoji
-ttf-jetbrains-mono
-ttf-fira-code
-# Browser
-firefox
-# System Tools
-networkmanager
-network-manager-applet
-bluez
-bluez-utils
-pipewire
-pipewire-alsa
-pipewire-pulse
-pipewire-jack
-wireplumber
-# Security
-firewalld
-apparmor
-firejail
-clamav
-# Filesystem
-btrfs-progs
-snapper
-grub-btrfs
-# Utilities
-flatpak
-git
-wget
-curl
-vim
-nano
-htop
-fastfetch
-base-devel
-PACKAGES
+          plasma-meta
+          plasma-workspace
+          plasma-desktop
+          plasma-nm
+          plasma-pa
+          plasma-systemmonitor
+          konsole
+          dolphin
+          kate
+          ark
+          spectacle
+          gwenview
+          okular
+          sddm
+          sddm-kcm
+          breeze
+          breeze-gtk
+          kvantum
+          papirus-icon-theme
+          noto-fonts
+          noto-fonts-cjk
+          noto-fonts-emoji
+          ttf-jetbrains-mono
+          ttf-fira-code
+          firefox
+          networkmanager
+          network-manager-applet
+          bluez
+          bluez-utils
+          pipewire
+          pipewire-alsa
+          pipewire-pulse
+          pipewire-jack
+          wireplumber
+          firewalld
+          apparmor
+          firejail
+          clamav
+          btrfs-progs
+          snapper
+          grub-btrfs
+          flatpak
+          git
+          wget
+          curl
+          vim
+          nano
+          htop
+          fastfetch
+          base-devel
+          PACKAGES
+          
+          # Remove leading spaces from packages file
+          sed -i 's/^[[:space:]]*//' $PROFILE/packages.x86_64
 
       - name: Configure system files
         run: |
