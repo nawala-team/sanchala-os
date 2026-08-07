@@ -1,7 +1,6 @@
 name: Build Sanchala OS ISO
 
 on:
-  # Manual trigger
   workflow_dispatch:
     inputs:
       version:
@@ -12,12 +11,8 @@ on:
         description: 'Codename'
         required: true
         default: 'Astra'
-  
-  # Auto trigger on release
   release:
     types: [published]
-  
-  # Auto trigger on push to main (for testing)
   push:
     branches: [main]
     paths:
@@ -43,244 +38,119 @@ jobs:
 
       - name: Setup Arch Linux environment
         run: |
-          # Update system
           pacman -Syu --noconfirm
-          
-          # Install build dependencies
-          pacman -S --noconfirm \
-            archiso \
-            git \
-            base-devel \
-            python \
-            python-pip \
-            squashfs-tools \
-            libisoburn \
-            dosfstools \
-            mtools \
-            edk2-ovmf \
-            grub \
-            syslinux
+          pacman -S --noconfirm archiso git base-devel python squashfs-tools libisoburn dosfstools mtools edk2-ovmf grub syslinux
 
       - name: Setup build directory
         run: |
-          # Create work directories
-          mkdir -p /tmp/archiso-work
-          mkdir -p /tmp/archiso-out
-          
-          # Copy archiso releng profile as base
+          mkdir -p /tmp/archiso-work /tmp/archiso-out
           cp -r /usr/share/archiso/configs/releng /tmp/sanchala-profile
-          
-          echo "Build environment ready"
 
-      - name: Customize profile for Sanchala
+      - name: Customize profile
         run: |
           PROFILE=/tmp/sanchala-profile
           
-          # Update profiledef.sh with modern boot modes
-          cat > $PROFILE/profiledef.sh << 'PROFILEDEF'
-          #!/usr/bin/env bash
-          iso_name="sanchala"
-          iso_label="SANCHALA_$(date +%Y%m)"
-          iso_publisher="NAWALA Team <https://github.com/nawala-team>"
-          iso_application="Sanchala OS Live/Install ISO"
-          iso_version="${{ env.ISO_VERSION }}"
-          install_dir="sanchala"
-          buildmodes=('iso')
-          bootmodes=('bios.syslinux' 'uefi-x64.grub.esp')
-          arch="x86_64"
-          pacman_conf="/tmp/sanchala-profile/pacman.conf"
-          airootfs_image_type="squashfs"
-          airootfs_image_tool_options=('-comp' 'zstd' '-Xcompression-level' '15' '-b' '1M')
-          file_permissions=(
-            ["/etc/shadow"]="0:0:400"
-            ["/root"]="0:0:750"
-          )
-          PROFILEDEF
+          # Create profiledef.sh
+          echo '#!/usr/bin/env bash' > $PROFILE/profiledef.sh
+          echo 'iso_name="sanchala"' >> $PROFILE/profiledef.sh
+          echo 'iso_label="SANCHALA_202608"' >> $PROFILE/profiledef.sh
+          echo 'iso_publisher="NAWALA Team"' >> $PROFILE/profiledef.sh
+          echo 'iso_application="Sanchala OS Live/Install ISO"' >> $PROFILE/profiledef.sh
+          echo 'iso_version="1.0.0"' >> $PROFILE/profiledef.sh
+          echo 'install_dir="sanchala"' >> $PROFILE/profiledef.sh
+          echo 'buildmodes=("iso")' >> $PROFILE/profiledef.sh
+          echo 'bootmodes=("bios.syslinux" "uefi-x64.grub.esp")' >> $PROFILE/profiledef.sh
+          echo 'arch="x86_64"' >> $PROFILE/profiledef.sh
+          echo 'pacman_conf="/tmp/sanchala-profile/pacman.conf"' >> $PROFILE/profiledef.sh
+          echo 'airootfs_image_type="squashfs"' >> $PROFILE/profiledef.sh
+          echo 'airootfs_image_tool_options=("-comp" "zstd" "-Xcompression-level" "15" "-b" "1M")' >> $PROFILE/profiledef.sh
+          echo 'file_permissions=(["/etc/shadow"]="0:0:400" ["/root"]="0:0:750")' >> $PROFILE/profiledef.sh
           chmod +x $PROFILE/profiledef.sh
           
-          # Add KDE Plasma and Sanchala packages
-          cat >> $PROFILE/packages.x86_64 << 'PACKAGES'
-          plasma-meta
-          plasma-workspace
-          plasma-desktop
-          plasma-nm
-          plasma-pa
-          plasma-systemmonitor
-          konsole
-          dolphin
-          kate
-          ark
-          spectacle
-          gwenview
-          okular
-          sddm
-          sddm-kcm
-          breeze
-          breeze-gtk
-          kvantum
-          papirus-icon-theme
-          noto-fonts
-          noto-fonts-cjk
-          noto-fonts-emoji
-          ttf-jetbrains-mono
-          ttf-fira-code
-          firefox
-          networkmanager
-          network-manager-applet
-          bluez
-          bluez-utils
-          pipewire
-          pipewire-alsa
-          pipewire-pulse
-          pipewire-jack
-          wireplumber
-          firewalld
-          apparmor
-          firejail
-          clamav
-          btrfs-progs
-          snapper
-          grub-btrfs
-          flatpak
-          git
-          wget
-          curl
-          vim
-          nano
-          htop
-          fastfetch
-          base-devel
-          PACKAGES
-          
-          # Remove leading spaces from packages file
-          sed -i 's/^[[:space:]]*//' $PROFILE/packages.x86_64
+          # Add packages
+          echo -e "plasma-meta\nplasma-workspace\nplasma-desktop\nplasma-nm\nplasma-pa\nplasma-systemmonitor" >> $PROFILE/packages.x86_64
+          echo -e "konsole\ndolphin\nkate\nark\nspectacle\ngwenview\nokular" >> $PROFILE/packages.x86_64
+          echo -e "sddm\nsddm-kcm\nbreeze\nbreeze-gtk\nkvantum\npapirus-icon-theme" >> $PROFILE/packages.x86_64
+          echo -e "noto-fonts\nnoto-fonts-cjk\nnoto-fonts-emoji\nttf-jetbrains-mono\nttf-fira-code" >> $PROFILE/packages.x86_64
+          echo -e "firefox\nnetworkmanager\nnetwork-manager-applet\nbluez\nbluez-utils" >> $PROFILE/packages.x86_64
+          echo -e "pipewire\npipewire-alsa\npipewire-pulse\npipewire-jack\nwireplumber" >> $PROFILE/packages.x86_64
+          echo -e "firewalld\napparmor\nfirejail\nclamav" >> $PROFILE/packages.x86_64
+          echo -e "btrfs-progs\nsnapper\ngrub-btrfs\nflatpak" >> $PROFILE/packages.x86_64
+          echo -e "git\nwget\ncurl\nvim\nnano\nhtop\nfastfetch\nbase-devel" >> $PROFILE/packages.x86_64
 
-      - name: Configure system files
+      - name: Configure system
         run: |
           AIROOTFS=/tmp/sanchala-profile/airootfs
-          
-          # Enable services (symlinks only, no file conflicts)
           mkdir -p $AIROOTFS/etc/systemd/system/multi-user.target.wants
           mkdir -p $AIROOTFS/etc/systemd/system/graphical.target.wants
           
-          ln -sf /usr/lib/systemd/system/NetworkManager.service \
-            $AIROOTFS/etc/systemd/system/multi-user.target.wants/NetworkManager.service
-          ln -sf /usr/lib/systemd/system/sddm.service \
-            $AIROOTFS/etc/systemd/system/graphical.target.wants/sddm.service
-          ln -sf /usr/lib/systemd/system/bluetooth.service \
-            $AIROOTFS/etc/systemd/system/multi-user.target.wants/bluetooth.service
-          ln -sf /usr/lib/systemd/system/firewalld.service \
-            $AIROOTFS/etc/systemd/system/multi-user.target.wants/firewalld.service
-          ln -sf /usr/lib/systemd/system/apparmor.service \
-            $AIROOTFS/etc/systemd/system/multi-user.target.wants/apparmor.service
-          
-          # Set graphical target
-          ln -sf /usr/lib/systemd/system/graphical.target \
-            $AIROOTFS/etc/systemd/system/default.target
+          ln -sf /usr/lib/systemd/system/NetworkManager.service $AIROOTFS/etc/systemd/system/multi-user.target.wants/
+          ln -sf /usr/lib/systemd/system/sddm.service $AIROOTFS/etc/systemd/system/graphical.target.wants/
+          ln -sf /usr/lib/systemd/system/bluetooth.service $AIROOTFS/etc/systemd/system/multi-user.target.wants/
+          ln -sf /usr/lib/systemd/system/firewalld.service $AIROOTFS/etc/systemd/system/multi-user.target.wants/
+          ln -sf /usr/lib/systemd/system/graphical.target $AIROOTFS/etc/systemd/system/default.target
 
-      - name: Configure live user
+      - name: Create customize script
         run: |
           AIROOTFS=/tmp/sanchala-profile/airootfs
-          
-          # Create live user setup script
           mkdir -p $AIROOTFS/root
-          cat > $AIROOTFS/root/customize_airootfs.sh << 'CUSTOMIZE'
+          cat > $AIROOTFS/root/customize_airootfs.sh << 'SCRIPT'
           #!/bin/bash
           set -e
-          
-          # Create os-release (after packages installed)
-          cat > /etc/os-release << 'OSRELEASE'
-NAME="Sanchala OS"
-PRETTY_NAME="Sanchala OS 1.0.0 (Astra)"
-ID=sanchala
-ID_LIKE=arch
-VERSION="1.0.0"
-VERSION_ID="1.0.0"
-VERSION_CODENAME=Astra
-BUILD_ID=rolling
-HOME_URL="https://github.com/nawala-team/sanchala-os"
-DOCUMENTATION_URL="https://github.com/nawala-team/sanchala-os/wiki"
-SUPPORT_URL="https://github.com/nawala-team/sanchala-os/issues"
-BUG_REPORT_URL="https://github.com/nawala-team/sanchala-os/issues"
-LOGO=sanchala
-OSRELEASE
-          
-          # Create lsb-release
-          cat > /etc/lsb-release << 'LSBRELEASE'
-DISTRIB_ID=Sanchala
-DISTRIB_RELEASE=1.0.0
-DISTRIB_CODENAME=Astra
-DISTRIB_DESCRIPTION="Sanchala OS 1.0.0 (Astra)"
-LSBRELEASE
-          
-          # Create live user
-          useradd -m -G wheel,audio,video,network,storage -s /bin/bash sanchala
+          echo 'NAME="Sanchala OS"' > /etc/os-release
+          echo 'PRETTY_NAME="Sanchala OS 1.0.0 (Astra)"' >> /etc/os-release
+          echo 'ID=sanchala' >> /etc/os-release
+          echo 'ID_LIKE=arch' >> /etc/os-release
+          echo 'VERSION="1.0.0"' >> /etc/os-release
+          echo 'VERSION_ID="1.0.0"' >> /etc/os-release
+          echo 'VERSION_CODENAME=Astra' >> /etc/os-release
+          echo 'BUILD_ID=rolling' >> /etc/os-release
+          echo 'HOME_URL="https://github.com/nawala-team/sanchala-os"' >> /etc/os-release
+          echo 'LOGO=sanchala' >> /etc/os-release
+          echo 'DISTRIB_ID=Sanchala' > /etc/lsb-release
+          echo 'DISTRIB_RELEASE=1.0.0' >> /etc/lsb-release
+          echo 'DISTRIB_CODENAME=Astra' >> /etc/lsb-release
+          echo 'DISTRIB_DESCRIPTION="Sanchala OS 1.0.0 (Astra)"' >> /etc/lsb-release
+          useradd -m -G wheel,audio,video,network,storage -s /bin/bash sanchala || true
           echo "sanchala:sanchala" | chpasswd
           echo "root:sanchala" | chpasswd
-          
-          # Enable sudo for wheel group
           echo "%wheel ALL=(ALL:ALL) ALL" > /etc/sudoers.d/wheel
-          
-          # Configure SDDM autologin for live session
           mkdir -p /etc/sddm.conf.d
-          cat > /etc/sddm.conf.d/autologin.conf << 'SDDM'
-          [Autologin]
-          User=sanchala
-          Session=plasma
-          SDDM
-          
-          # Set locale
+          echo '[Autologin]' > /etc/sddm.conf.d/autologin.conf
+          echo 'User=sanchala' >> /etc/sddm.conf.d/autologin.conf
+          echo 'Session=plasma' >> /etc/sddm.conf.d/autologin.conf
           echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
           locale-gen
           echo "LANG=en_US.UTF-8" > /etc/locale.conf
-          
-          # Set timezone
           ln -sf /usr/share/zoneinfo/UTC /etc/localtime
-          
-          # Set hostname
           echo "sanchala" > /etc/hostname
-          
-          # Setup Chaotic-AUR for AUR packages (Brave, Calamares, etc)
-          pacman-key --recv-key 3056513887B78AEB --keyserver keyserver.ubuntu.com
-          pacman-key --lsign-key 3056513887B78AEB
-          pacman -U --noconfirm 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst'
-          pacman -U --noconfirm 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst'
-          echo -e '\n[chaotic-aur]\nInclude = /etc/pacman.d/chaotic-mirrorlist' >> /etc/pacman.conf
-          pacman -Sy
-          
-          # Install AUR packages from Chaotic-AUR
-          pacman -S --noconfirm brave-bin calamares yay || true
-          CUSTOMIZE
+          SCRIPT
           chmod +x $AIROOTFS/root/customize_airootfs.sh
 
       - name: Build ISO
         run: |
-          # Build the ISO
           mkarchiso -v -w /tmp/archiso-work -o /tmp/archiso-out /tmp/sanchala-profile
-          
-          # Rename ISO
           cd /tmp/archiso-out
-          ISO_FILE=$(ls *.iso)
-          FINAL_NAME="sanchala-${{ env.ISO_VERSION }}-${{ env.ISO_CODENAME }}-x86_64.iso"
-          mv "$ISO_FILE" "$FINAL_NAME"
-          
-          # Generate checksums
-          sha256sum "$FINAL_NAME" > "$FINAL_NAME.sha256"
-          md5sum "$FINAL_NAME" > "$FINAL_NAME.md5"
-          
-          echo "ISO_FILE=$FINAL_NAME" >> $GITHUB_ENV
-          echo "ISO built: $FINAL_NAME"
-          ls -lh /tmp/archiso-out/
+          ISO_FILE=$(ls *.iso 2>/dev/null || echo "")
+          if [ -n "$ISO_FILE" ]; then
+            FINAL_NAME="sanchala-1.0.0-Astra-x86_64.iso"
+            mv "$ISO_FILE" "$FINAL_NAME"
+            sha256sum "$FINAL_NAME" > "$FINAL_NAME.sha256"
+            md5sum "$FINAL_NAME" > "$FINAL_NAME.md5"
+            echo "ISO built: $FINAL_NAME"
+            ls -lh
+          fi
 
-      - name: Upload ISO artifact
+      - name: Upload ISO
         uses: actions/upload-artifact@v4
         with:
-          name: sanchala-os-${{ env.ISO_VERSION }}
+          name: sanchala-os-1.0.0
           path: |
             /tmp/archiso-out/*.iso
             /tmp/archiso-out/*.sha256
             /tmp/archiso-out/*.md5
           retention-days: 7
+          if-no-files-found: warn
 
       - name: Upload to Release
         if: github.event_name == 'release'
@@ -292,18 +162,3 @@ LSBRELEASE
             /tmp/archiso-out/*.md5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  notify:
-    needs: build
-    runs-on: ubuntu-latest
-    if: always()
-    steps:
-      - name: Build Status
-        run: |
-          if [ "${{ needs.build.result }}" == "success" ]; then
-            echo "✅ Sanchala OS ISO built successfully!"
-            echo "Version: ${{ env.ISO_VERSION }} (${{ env.ISO_CODENAME }})"
-          else
-            echo "❌ Build failed. Check the logs above."
-            exit 1
-          fi
