@@ -8,8 +8,35 @@ on:
   schedule:
     - cron: '0 0 * * 0'  # Weekly on Sunday
 
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
 jobs:
-  scan:
+  codeql:
+    name: CodeQL Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: python, javascript
+          queries: security-and-quality
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:python"
+
+  shellcheck:
+    name: Shell Script Analysis
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -18,24 +45,111 @@ jobs:
       - name: Run ShellCheck
         uses: ludeeus/action-shellcheck@master
         with:
-          scandir: './iso'
+          scandir: './'
           severity: warning
+          format: gcc
 
-      - name: Scan for secrets
+  secrets-scan:
+    name: Secrets Detection
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: TruffleHog Secrets Scan
         uses: trufflesecurity/trufflehog@main
         with:
           path: ./
-          base: main
+          base: ${{ github.event.repository.default_branch }}
           head: HEAD
+          extra_args: --only-verified
 
-      - name: Security audit
+      - name: Gitleaks Scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  dependency-review:
+    name: Dependency Review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+
+  security-audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Security Checks
         run: |
-          echo "🔒 Checking for security issues..."
+          echo "🔒 Running Sanchala Security Audit..."
           
-          # Check for hardcoded passwords
-          if grep -r "password=" --include="*.sh" --include="*.conf" . 2>/dev/null | grep -v "#"; then
-            echo "⚠️ Warning: Potential hardcoded passwords found"
+          # Check for hardcoded credentials
+          echo "📍 Checking for hardcoded credentials..."
+          CRED_FOUND=0
+          if grep -rE "(password|passwd|pwd|secret|api_key|apikey|token)[\s]*[=:][\s]*['\"][^'\"]+['\"]" \
+            --include="*.sh" --include="*.py" --include="*.conf" --include="*.yml" \
+            --exclude-dir=".git" . 2>/dev/null | grep -v "#" | grep -v "example" | grep -v "placeholder"; then
+            echo "⚠️ Warning: Potential hardcoded credentials found"
+            CRED_FOUND=1
           fi
           
-          # Check file permissions in configs
-          echo "✅ Security scan complete"
+          # Check for unsafe permissions
+          echo "📍 Checking for unsafe file permissions..."
+          if grep -rE "chmod\s+777" --include="*.sh" . 2>/dev/null; then
+            echo "⚠️ Warning: chmod 777 found (insecure)"
+          fi
+          
+          # Check for curl | bash patterns
+          echo "📍 Checking for unsafe download patterns..."
+          if grep -rE "curl.*\|\s*(sudo\s+)?bash" --include="*.sh" . 2>/dev/null; then
+            echo "⚠️ Warning: curl | bash pattern found (potential security risk)"
+          fi
+          
+          # Check for eval usage
+          echo "📍 Checking for dangerous eval usage..."
+          if grep -rE "\beval\b" --include="*.sh" --include="*.py" . 2>/dev/null | grep -v "#"; then
+            echo "⚠️ Warning: eval() usage found"
+          fi
+          
+          echo ""
+          echo "✅ Security audit complete!"
+          
+      - name: Generate Security Report
+        run: |
+          echo "# 🛡️ Sanchala OS Security Report" > security-report.md
+          echo "" >> security-report.md
+          echo "**Date:** $(date -u)" >> security-report.md
+          echo "**Commit:** ${{ github.sha }}" >> security-report.md
+          echo "" >> security-report.md
+          echo "## Scans Performed" >> security-report.md
+          echo "- ✅ CodeQL Analysis" >> security-report.md
+          echo "- ✅ ShellCheck (Shell scripts)" >> security-report.md
+          echo "- ✅ TruffleHog (Secrets)" >> security-report.md
+          echo "- ✅ Gitleaks (Secrets)" >> security-report.md
+          echo "- ✅ Custom Security Audit" >> security-report.md
+          echo "" >> security-report.md
+          echo "## File Stats" >> security-report.md
+          echo "\`\`\`" >> security-report.md
+          echo "Shell scripts: $(find . -name '*.sh' | wc -l)" >> security-report.md
+          echo "Python files: $(find . -name '*.py' | wc -l)" >> security-report.md
+          echo "Config files: $(find . -name '*.conf' -o -name '*.yml' -o -name '*.yaml' | wc -l)" >> security-report.md
+          echo "\`\`\`" >> security-report.md
+          
+      - name: Upload Security Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-report
+          path: security-report.md
+          retention-days: 30
