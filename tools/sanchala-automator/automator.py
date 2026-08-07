@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Sanchala Automator - Task Automation & Workflow Engine"""
 
-import os, sys, json, subprocess, time
+import os, sys, json, subprocess, time, shlex
 from datetime import datetime
 from pathlib import Path
 
@@ -15,6 +15,12 @@ class Automator:
             d.mkdir(parents=True, exist_ok=True)
         self.config_file = self.config_dir / "automator.json"
         self.config = self._load()
+        # Allowed commands for security
+        self._allowed_commands = [
+            'echo', 'notify-send', 'xdg-open', 'cp', 'mv', 'mkdir', 'rm',
+            'systemctl', 'pacman', 'flatpak', 'snap', 'yay',
+            'rsync', 'tar', 'gzip', 'zip', 'unzip', 'sleep'
+        ]
         
     def _load(self):
         if self.config_file.exists():
@@ -25,6 +31,18 @@ class Automator:
         
     def _save(self):
         with open(self.config_file, 'w') as f: json.dump(self.config, f, indent=2)
+    
+    def _validate_command(self, cmd):
+        """Validate command is in allowed list"""
+        try:
+            parts = shlex.split(cmd)
+            if not parts:
+                return False
+            if parts[0] == 'sudo' and len(parts) > 1:
+                return parts[1] in self._allowed_commands
+            return parts[0] in self._allowed_commands
+        except:
+            return False
             
     def create_workflow(self, name):
         wf = {"name": name, "steps": [], "created": datetime.now().isoformat(), "enabled": True}
@@ -53,7 +71,11 @@ class Automator:
             print(f"  Command: {step['command']}")
             try:
                 if step["type"] == "shell":
-                    result = subprocess.run(step["command"], shell=True, capture_output=True, text=True)
+                    if not self._validate_command(step["command"]):
+                        print(f"  ❌ Command not allowed: {step['command']}")
+                        continue
+                    cmd_parts = shlex.split(step["command"])
+                    result = subprocess.run(cmd_parts, capture_output=True, text=True)
                     if result.stdout: print(f"  Output: {result.stdout.strip()[:100]}")
                     if result.returncode != 0: 
                         print(f"  ⚠️  Warning: Exit code {result.returncode}")

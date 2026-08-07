@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Sanchala Backup - System Backup Tool"""
-import sys, os, subprocess, json
+import sys, os, subprocess, json, shlex
 from datetime import datetime
 
 class Backup:
@@ -18,10 +18,14 @@ class Backup:
     
     def backup_system(self, dest=None):
         dest = dest or self.default_dest
+        # Validate dest path to prevent injection
+        if not os.path.isabs(dest) or '..' in dest:
+            return False, "Invalid destination path"
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         backup_path = os.path.join(dest, f"system_backup_{timestamp}")
-        excludes = '--exclude=/dev --exclude=/proc --exclude=/sys --exclude=/tmp --exclude=/run --exclude=/mnt'
-        result = subprocess.run(f'sudo rsync -av {excludes} / {backup_path}', shell=True)
+        excludes = ['--exclude=/dev', '--exclude=/proc', '--exclude=/sys', '--exclude=/tmp', '--exclude=/run', '--exclude=/mnt']
+        cmd = ['sudo', 'rsync', '-av'] + excludes + ['/', backup_path]
+        result = subprocess.run(cmd, capture_output=True, text=True)
         return result.returncode == 0, backup_path
     
     def list_backups(self, dest=None):
@@ -31,6 +35,9 @@ class Backup:
         return []
     
     def restore(self, backup_path, target):
+        # Validate paths
+        if not os.path.isabs(backup_path) or not os.path.isabs(target):
+            return False
         result = subprocess.run(['rsync', '-av', '--progress', backup_path + '/', target], capture_output=True)
         return result.returncode == 0
 

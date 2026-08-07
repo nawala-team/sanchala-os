@@ -11,7 +11,8 @@ class DevConsole:
         self.config_dir = self.base_dir / "config"
         self.history_dir = self.base_dir / "history"
         self.plugins_dir = self.base_dir / "plugins"
-        for d in [self.config_dir, self.history_dir, self.plugins_dir]:
+        self.allowed_scripts_dir = self.base_dir / "scripts"
+        for d in [self.config_dir, self.history_dir, self.plugins_dir, self.allowed_scripts_dir]:
             d.mkdir(parents=True, exist_ok=True)
         self.history_file = self.history_dir / "console_history"
         self.config = self._load_config()
@@ -51,10 +52,25 @@ class DevConsole:
             self._save_history()
             
     def run_script(self, script_file):
-        if not Path(script_file).exists():
+        script_path = Path(script_file).resolve()
+        # Security: Only allow scripts from allowed directory
+        if not script_path.exists():
             return print(f"❌ File not found: {script_file}")
+        
+        # Validate script is in allowed directory or is explicitly trusted
+        allowed_dir = self.allowed_scripts_dir.resolve()
+        try:
+            script_path.relative_to(allowed_dir)
+        except ValueError:
+            return print(f"❌ Security: Script must be in {allowed_dir}")
+        
         print(f"▶️  Running: {script_file}")
-        exec(open(script_file).read())
+        # Use compile + exec with restricted globals for safer execution
+        with open(script_path) as f:
+            script_content = f.read()
+        compiled = compile(script_content, script_path, 'exec')
+        safe_globals = {"__builtins__": {"print": print, "range": range, "len": len, "str": str, "int": int, "float": float}}
+        exec(compiled, safe_globals)
         
     def clear_history(self):
         if self.history_file.exists():

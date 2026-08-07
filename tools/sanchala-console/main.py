@@ -1,14 +1,25 @@
 #!/usr/bin/env python3
 """Sanchala Console - System Console"""
-import sys, os, subprocess
+import sys, os, subprocess, shlex
 
 class Console:
     def run_command(self, cmd):
-        return subprocess.run(cmd, shell=True, capture_output=True, text=True)
+        """Run command safely - only allow specific safe commands"""
+        allowed_prefixes = ['systemctl', 'journalctl', 'ls', 'cat', 'grep', 'df', 'free', 'ps', 'top', 'htop', 'neofetch', 'fastfetch']
+        cmd_parts = shlex.split(cmd)
+        if not cmd_parts:
+            return subprocess.CompletedProcess(args=cmd, returncode=1, stdout='', stderr='Empty command')
+        if cmd_parts[0] not in allowed_prefixes:
+            return subprocess.CompletedProcess(args=cmd, returncode=1, stdout='', stderr=f'Command not allowed: {cmd_parts[0]}')
+        return subprocess.run(cmd_parts, capture_output=True, text=True)
     
     def get_logs(self, service=None, lines=50):
-        cmd = ['journalctl', '-n', str(lines), '--no-pager']
-        if service: cmd.extend(['-u', service])
+        cmd = ['journalctl', '-n', str(int(lines)), '--no-pager']
+        if service: 
+            # Validate service name
+            if not service.replace('-', '').replace('_', '').replace('.', '').isalnum():
+                return "Invalid service name"
+            cmd.extend(['-u', service])
         result = subprocess.run(cmd, capture_output=True, text=True)
         return result.stdout
     
@@ -17,6 +28,9 @@ class Console:
         return result.stdout
     
     def service_status(self, service):
+        # Validate service name
+        if not service.replace('-', '').replace('_', '').replace('.', '').isalnum():
+            return "Invalid service name"
         result = subprocess.run(['systemctl', 'status', service, '--no-pager'], capture_output=True, text=True)
         return result.stdout
 

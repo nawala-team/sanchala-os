@@ -1,18 +1,66 @@
 #!/usr/bin/env python3
 """Sanchala Calculator - Advanced Calculator"""
-import sys, os, math, json
+import sys, os, math, json, ast, operator
 
 class Calculator:
     def __init__(self):
         self.history = []
         self.memory = 0
+        # Safe operators for expression evaluation
+        self._operators = {
+            ast.Add: operator.add,
+            ast.Sub: operator.sub,
+            ast.Mult: operator.mul,
+            ast.Div: operator.truediv,
+            ast.Pow: operator.pow,
+            ast.USub: operator.neg,
+            ast.UAdd: operator.pos,
+        }
+        # Safe math functions
+        self._functions = {
+            'sin': math.sin, 'cos': math.cos, 'tan': math.tan,
+            'sqrt': math.sqrt, 'log': math.log, 'log10': math.log10,
+            'exp': math.exp, 'abs': abs, 'round': round, 'pow': pow,
+            'pi': math.pi, 'e': math.e,
+            'asin': math.asin, 'acos': math.acos, 'atan': math.atan,
+            'sinh': math.sinh, 'cosh': math.cosh, 'tanh': math.tanh,
+            'degrees': math.degrees, 'radians': math.radians,
+            'floor': math.floor, 'ceil': math.ceil,
+        }
+    
+    def _safe_eval(self, node):
+        """Safely evaluate an AST node"""
+        if isinstance(node, ast.Num):  # Python 3.7
+            return node.n
+        elif isinstance(node, ast.Constant):  # Python 3.8+
+            return node.value
+        elif isinstance(node, ast.BinOp):
+            left = self._safe_eval(node.left)
+            right = self._safe_eval(node.right)
+            return self._operators[type(node.op)](left, right)
+        elif isinstance(node, ast.UnaryOp):
+            operand = self._safe_eval(node.operand)
+            return self._operators[type(node.op)](operand)
+        elif isinstance(node, ast.Call):
+            if isinstance(node.func, ast.Name) and node.func.id in self._functions:
+                args = [self._safe_eval(arg) for arg in node.args]
+                func = self._functions[node.func.id]
+                if callable(func):
+                    return func(*args)
+                return func  # For constants like pi, e
+            raise ValueError(f"Unknown function: {node.func.id if isinstance(node.func, ast.Name) else 'unknown'}")
+        elif isinstance(node, ast.Name):
+            if node.id in self._functions:
+                return self._functions[node.id]
+            raise ValueError(f"Unknown variable: {node.id}")
+        else:
+            raise ValueError(f"Unsupported expression type: {type(node)}")
     
     def calculate(self, expr):
         try:
-            # Safe eval with math functions
-            allowed = {k: v for k, v in math.__dict__.items() if not k.startswith('_')}
-            allowed.update({'abs': abs, 'round': round, 'pow': pow})
-            result = eval(expr, {"__builtins__": {}}, allowed)
+            # Parse and safely evaluate expression
+            tree = ast.parse(expr, mode='eval')
+            result = self._safe_eval(tree.body)
             self.history.append({"expr": expr, "result": result})
             return result
         except Exception as e:
