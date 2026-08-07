@@ -1,231 +1,321 @@
-# ══════════════════════════════════════════════════════════════════════════════
-# SANCHALA OS - Production ISO Build Pipeline
-# ══════════════════════════════════════════════════════════════════════════════
-
 name: Build Sanchala OS ISO
 
 on:
-  push:
-    branches: [main, develop]
-    tags: ['v*']
-    paths:
-      - 'iso/**'
-      - 'filesystem/**'
-      - 'pkgbuilds/**'
-      - 'security/**'
-      - '.github/workflows/build-iso.yml'
-  pull_request:
-    branches: [main]
-    paths:
-      - 'iso/**'
-      - 'filesystem/**'
-      - 'pkgbuilds/**'
-      - 'security/**'
+  # Manual trigger
   workflow_dispatch:
     inputs:
       version:
-        description: 'ISO version (e.g., 1.0.0)'
-        required: false
-        default: 'rolling'
-      edition:
-        description: 'Edition to build'
-        required: false
-        default: 'full'
-        type: choice
-        options: [full, minimal]
-      debug:
-        description: 'Enable debug mode'
-        required: false
-        default: false
-        type: boolean
-
-concurrency:
-  group: iso-build-${{ github.ref }}
-  cancel-in-progress: true
+        description: 'Version (e.g., 1.0.0)'
+        required: true
+        default: '1.0.0'
+      codename:
+        description: 'Codename'
+        required: true
+        default: 'Astra'
+  
+  # Auto trigger on release
+  release:
+    types: [published]
+  
+  # Auto trigger on push to main (for testing)
+  push:
+    branches: [main]
+    paths:
+      - 'iso/**'
+      - 'pkgbuilds/**'
+      - '.github/workflows/build-iso.yml'
 
 env:
-  SANCHALA_REPO_URL: ${{ secrets.SANCHALA_REPO_URL }}
+  ISO_NAME: sanchala
+  ISO_VERSION: ${{ github.event.inputs.version || '1.0.0' }}
+  ISO_CODENAME: ${{ github.event.inputs.codename || 'Astra' }}
 
 jobs:
-  # ════════════════════════════════════════════════════════════════════════════
-  # VALIDATE
-  # ════════════════════════════════════════════════════════════════════════════
-  validate:
-    name: Validate Build Config
-    runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.version.outputs.version }}
-      should_release: ${{ steps.check.outputs.should_release }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Determine version
-        id: version
-        run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            VERSION="${{ github.event.inputs.version }}"
-          elif [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-            VERSION="${GITHUB_REF#refs/tags/v}"
-          else
-            VERSION="$(date +%Y.%m.%d)-$(git rev-parse --short HEAD)"
-          fi
-          echo "version=${VERSION}" >> $GITHUB_OUTPUT
-
-      - name: Check release conditions
-        id: check
-        run: |
-          [[ "${{ github.ref }}" == refs/tags/v* ]] && echo "should_release=true" >> $GITHUB_OUTPUT || echo "should_release=false" >> $GITHUB_OUTPUT
-
-      - name: Validate build script
-        run: bash -n iso/build-binary
-
-  # ════════════════════════════════════════════════════════════════════════════
-  # BUILD
-  # ════════════════════════════════════════════════════════════════════════════
   build:
-    name: Build ISO
-    needs: validate
-    runs-on: ${{ vars.USE_SELF_HOSTED == 'true' && 'self-hosted' || 'ubuntu-latest' }}
-    timeout-minutes: 180
+    runs-on: ubuntu-latest
     container:
       image: archlinux:latest
-      options: --privileged -v /dev:/dev
-    env:
-      ISO_VERSION: ${{ needs.validate.outputs.version }}
-
+      options: --privileged
+    
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Setup build environment
+      - name: Setup Arch Linux environment
         run: |
-          pacman-key --init && pacman-key --populate archlinux
+          # Update system
           pacman -Syu --noconfirm
-          pacman -S --noconfirm --needed \
-            arch-install-scripts archiso base-devel ccache dosfstools \
-            e2fsprogs git grub libisoburn mtools pv squashfs-tools xorriso zstd
+          
+          # Install build dependencies
+          pacman -S --noconfirm \
+            archiso \
+            git \
+            base-devel \
+            python \
+            python-pip \
+            squashfs-tools \
+            libisoburn \
+            dosfstools \
+            mtools \
+            edk2-ovmf
 
-      - name: Restore package cache
-        uses: actions/cache@v4
-        with:
-          path: /var/cache/pacman/pkg
-          key: pacman-${{ hashFiles('iso/packages/*.list') }}
-          restore-keys: pacman-
+      - name: Setup build directory
+        run: |
+          # Create work directories
+          mkdir -p /tmp/archiso-work
+          mkdir -p /tmp/archiso-out
+          
+          # Copy archiso releng profile as base
+          cp -r /usr/share/archiso/configs/releng /tmp/sanchala-profile
+          
+          echo "Build environment ready"
+
+      - name: Customize profile for Sanchala
+        run: |
+          PROFILE=/tmp/sanchala-profile
+          
+          # Update profiledef.sh
+          cat > $PROFILE/profiledef.sh << 'PROFILEDEF'
+          #!/usr/bin/env bash
+          iso_name="sanchala"
+          iso_label="SANCHALA_$(date +%Y%m)"
+          iso_publisher="NAWALA Team <https://github.com/nawala-team>"
+          iso_application="Sanchala OS Live/Install ISO"
+          iso_version="${{ env.ISO_VERSION }}"
+          install_dir="sanchala"
+          buildmodes=('iso')
+          bootmodes=('bios.syslinux.mbr' 'bios.syslinux.eltorito'
+                     'uefi-ia32.grub.esp' 'uefi-x64.grub.esp'
+                     'uefi-ia32.grub.eltorito' 'uefi-x64.grub.eltorito')
+          arch="x86_64"
+          pacman_conf="/tmp/sanchala-profile/pacman.conf"
+          airootfs_image_type="squashfs"
+          airootfs_image_tool_options=('-comp' 'zstd' '-Xcompression-level' '15' '-b' '1M')
+          file_permissions=(
+            ["/etc/shadow"]="0:0:400"
+            ["/root"]="0:0:750"
+          )
+          PROFILEDEF
+          chmod +x $PROFILE/profiledef.sh
+          
+          # Add KDE Plasma and Sanchala packages
+          cat >> $PROFILE/packages.x86_64 << 'PACKAGES'
+          
+          # Desktop Environment - KDE Plasma 6
+          plasma-meta
+          plasma-workspace
+          plasma-desktop
+          plasma-nm
+          plasma-pa
+          plasma-systemmonitor
+          konsole
+          dolphin
+          kate
+          ark
+          spectacle
+          gwenview
+          okular
+          
+          # Display Manager
+          sddm
+          sddm-kcm
+          
+          # Themes & Appearance
+          breeze
+          breeze-gtk
+          kvantum
+          papirus-icon-theme
+          
+          # Fonts
+          noto-fonts
+          noto-fonts-cjk
+          noto-fonts-emoji
+          ttf-jetbrains-mono
+          ttf-fira-code
+          
+          # Browser - Brave
+          brave-browser
+          
+          # System Tools
+          networkmanager
+          network-manager-applet
+          bluez
+          bluez-utils
+          pulseaudio
+          pulseaudio-bluetooth
+          pipewire
+          pipewire-pulse
+          wireplumber
+          
+          # Security
+          firewalld
+          apparmor
+          firejail
+          clamav
+          
+          # Filesystem
+          btrfs-progs
+          snapper
+          grub-btrfs
+          
+          # Utilities
+          flatpak
+          git
+          wget
+          curl
+          vim
+          nano
+          htop
+          neofetch
+          fastfetch
+          
+          # Installer
+          calamares
+          calamares-extensions
+          
+          # AUR Helper
+          yay
+          PACKAGES
+
+      - name: Configure system files
+        run: |
+          AIROOTFS=/tmp/sanchala-profile/airootfs
+          
+          # Create os-release
+          mkdir -p $AIROOTFS/etc
+          cat > $AIROOTFS/etc/os-release << 'OSRELEASE'
+          NAME="Sanchala OS"
+          PRETTY_NAME="Sanchala OS ${{ env.ISO_VERSION }} (${{ env.ISO_CODENAME }})"
+          ID=sanchala
+          ID_LIKE=arch
+          VERSION="${{ env.ISO_VERSION }}"
+          VERSION_ID="${{ env.ISO_VERSION }}"
+          VERSION_CODENAME=${{ env.ISO_CODENAME }}
+          BUILD_ID=rolling
+          HOME_URL="https://github.com/nawala-team/sanchala-os"
+          DOCUMENTATION_URL="https://github.com/nawala-team/sanchala-os/wiki"
+          SUPPORT_URL="https://github.com/nawala-team/sanchala-os/issues"
+          BUG_REPORT_URL="https://github.com/nawala-team/sanchala-os/issues"
+          LOGO=sanchala
+          OSRELEASE
+          
+          # Create lsb-release
+          cat > $AIROOTFS/etc/lsb-release << 'LSBRELEASE'
+          DISTRIB_ID=Sanchala
+          DISTRIB_RELEASE=${{ env.ISO_VERSION }}
+          DISTRIB_CODENAME=${{ env.ISO_CODENAME }}
+          DISTRIB_DESCRIPTION="Sanchala OS ${{ env.ISO_VERSION }} (${{ env.ISO_CODENAME }})"
+          LSBRELEASE
+          
+          # Enable services
+          mkdir -p $AIROOTFS/etc/systemd/system/multi-user.target.wants
+          mkdir -p $AIROOTFS/etc/systemd/system/graphical.target.wants
+          
+          ln -sf /usr/lib/systemd/system/NetworkManager.service \
+            $AIROOTFS/etc/systemd/system/multi-user.target.wants/NetworkManager.service
+          ln -sf /usr/lib/systemd/system/sddm.service \
+            $AIROOTFS/etc/systemd/system/graphical.target.wants/sddm.service
+          ln -sf /usr/lib/systemd/system/bluetooth.service \
+            $AIROOTFS/etc/systemd/system/multi-user.target.wants/bluetooth.service
+          ln -sf /usr/lib/systemd/system/firewalld.service \
+            $AIROOTFS/etc/systemd/system/multi-user.target.wants/firewalld.service
+          ln -sf /usr/lib/systemd/system/apparmor.service \
+            $AIROOTFS/etc/systemd/system/multi-user.target.wants/apparmor.service
+          
+          # Set graphical target
+          ln -sf /usr/lib/systemd/system/graphical.target \
+            $AIROOTFS/etc/systemd/system/default.target
+
+      - name: Configure live user
+        run: |
+          AIROOTFS=/tmp/sanchala-profile/airootfs
+          
+          # Create live user setup script
+          mkdir -p $AIROOTFS/root
+          cat > $AIROOTFS/root/customize_airootfs.sh << 'CUSTOMIZE'
+          #!/bin/bash
+          set -e
+          
+          # Create live user
+          useradd -m -G wheel,audio,video,network,storage -s /bin/bash sanchala
+          echo "sanchala:sanchala" | chpasswd
+          echo "root:sanchala" | chpasswd
+          
+          # Enable sudo for wheel group
+          echo "%wheel ALL=(ALL:ALL) ALL" > /etc/sudoers.d/wheel
+          
+          # Configure SDDM autologin for live session
+          mkdir -p /etc/sddm.conf.d
+          cat > /etc/sddm.conf.d/autologin.conf << 'SDDM'
+          [Autologin]
+          User=sanchala
+          Session=plasma
+          SDDM
+          
+          # Set locale
+          echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
+          locale-gen
+          echo "LANG=en_US.UTF-8" > /etc/locale.conf
+          
+          # Set timezone
+          ln -sf /usr/share/zoneinfo/UTC /etc/localtime
+          
+          # Set hostname
+          echo "sanchala" > /etc/hostname
+          CUSTOMIZE
+          chmod +x $AIROOTFS/root/customize_airootfs.sh
 
       - name: Build ISO
-        id: build
         run: |
-          chmod +x iso/build-binary
-          ./iso/build-binary -v "${ISO_VERSION}"
-          ISO_FILE=$(find out/ -name "*.iso" | head -1)
-          echo "iso_name=$(basename $ISO_FILE)" >> $GITHUB_OUTPUT
-
-      - name: Generate checksums
-        run: |
-          cd out
-          for iso in *.iso; do
-            sha256sum "$iso" > "${iso}.sha256"
-            sha512sum "$iso" > "${iso}.sha512"
-            b2sum "$iso" > "${iso}.b2sum"
-          done
+          # Build the ISO
+          mkarchiso -v -w /tmp/archiso-work -o /tmp/archiso-out /tmp/sanchala-profile
+          
+          # Rename ISO
+          cd /tmp/archiso-out
+          ISO_FILE=$(ls *.iso)
+          FINAL_NAME="sanchala-${{ env.ISO_VERSION }}-${{ env.ISO_CODENAME }}-x86_64.iso"
+          mv "$ISO_FILE" "$FINAL_NAME"
+          
+          # Generate checksums
+          sha256sum "$FINAL_NAME" > "$FINAL_NAME.sha256"
+          md5sum "$FINAL_NAME" > "$FINAL_NAME.md5"
+          
+          echo "ISO_FILE=$FINAL_NAME" >> $GITHUB_ENV
+          echo "ISO built: $FINAL_NAME"
+          ls -lh /tmp/archiso-out/
 
       - name: Upload ISO artifact
         uses: actions/upload-artifact@v4
         with:
-          name: sanchala-iso-${{ needs.validate.outputs.version }}
+          name: sanchala-os-${{ env.ISO_VERSION }}
           path: |
-            out/*.iso
-            out/*.sha256
-            out/*.sha512
-            out/*.b2sum
-          retention-days: 30
-          compression-level: 0
+            /tmp/archiso-out/*.iso
+            /tmp/archiso-out/*.sha256
+            /tmp/archiso-out/*.md5
+          retention-days: 7
 
-  # ════════════════════════════════════════════════════════════════════════════
-  # TEST ISO
-  # ════════════════════════════════════════════════════════════════════════════
-  test:
-    name: Test ISO Boot
-    needs: [validate, build]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download ISO
-        uses: actions/download-artifact@v4
-        with:
-          name: sanchala-iso-${{ needs.validate.outputs.version }}
-          path: iso/
-
-      - name: Verify checksums
-        run: cd iso && sha256sum -c *.sha256
-
-      - name: Install QEMU
-        run: sudo apt-get update && sudo apt-get install -y qemu-system-x86 ovmf
-
-      - name: Boot test (UEFI)
-        timeout-minutes: 5
-        run: |
-          ISO=$(find iso/ -name "*.iso" | head -1)
-          timeout 90 qemu-system-x86_64 -m 2048 -cdrom "$ISO" -boot d \
-            -bios /usr/share/ovmf/OVMF.fd -nographic -no-reboot 2>&1 | tee boot.log &
-          sleep 60 && pkill -f qemu || true
-          grep -qi "sanchala\|grub\|linux" boot.log && echo "✅ Boot test passed"
-
-  # ════════════════════════════════════════════════════════════════════════════
-  # RELEASE
-  # ════════════════════════════════════════════════════════════════════════════
-  release:
-    name: Create Release
-    needs: [validate, build, test]
-    runs-on: ubuntu-latest
-    if: needs.validate.outputs.should_release == 'true'
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Download ISO
-        uses: actions/download-artifact@v4
-        with:
-          name: sanchala-iso-${{ needs.validate.outputs.version }}
-          path: release/
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          name: Sanchala OS ${{ needs.validate.outputs.version }}
-          files: release/*
-          generate_release_notes: true
-          draft: false
-          prerelease: ${{ contains(needs.validate.outputs.version, 'alpha') || contains(needs.validate.outputs.version, 'beta') }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  release:
-    needs: build
-    runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
-
-    steps:
-      - name: Download ISO
-        uses: actions/download-artifact@v4
-        with:
-          name: sanchala-iso
-
-      - name: Download checksums
-        uses: actions/download-artifact@v4
-        with:
-          name: checksums
-
-      - name: Create Release
+      - name: Upload to Release
+        if: github.event_name == 'release'
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            *.iso
-            *.sha256
-            *.sha512
-          draft: false
-          prerelease: false
-          generate_release_notes: true
+            /tmp/archiso-out/*.iso
+            /tmp/archiso-out/*.sha256
+            /tmp/archiso-out/*.md5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  notify:
+    needs: build
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Build Status
+        run: |
+          if [ "${{ needs.build.result }}" == "success" ]; then
+            echo "✅ Sanchala OS ISO built successfully!"
+            echo "Version: ${{ env.ISO_VERSION }} (${{ env.ISO_CODENAME }})"
+          else
+            echo "❌ Build failed. Check the logs above."
+            exit 1
+          fi
