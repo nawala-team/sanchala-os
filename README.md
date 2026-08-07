@@ -293,12 +293,12 @@ sanchala-os/
 
 | Color | Hex | Preview | Usage |
 |-------|-----|---------|-------|
-| Sanchala Indigo | `#3949AB` | ![#3949AB](https://via.placeholder.com/20/3949AB/3949AB) | Primary |
-| Deep Navy | `#1A237E` | ![#1A237E](https://via.placeholder.com/20/1A237E/1A237E) | Dark/Headers |
-| Electric Blue | `#536DFE` | ![#536DFE](https://via.placeholder.com/20/536DFE/536DFE) | Accent/Links |
-| Golden Amber | `#FFB300` | ![#FFB300](https://via.placeholder.com/20/FFB300/FFB300) | Highlights |
-| Success Green | `#00C853` | ![#00C853](https://via.placeholder.com/20/00C853/00C853) | Success |
-| Alert Red | `#FF1744` | ![#FF1744](https://via.placeholder.com/20/FF1744/FF1744) | Errors |
+| Sanchala Indigo | `#3949AB` | ![#3949AB](https://img.shields.io/badge/-%20-3949AB?style=flat-square) | Primary |
+| Deep Navy | `#1A237E` | ![#1A237E](https://img.shields.io/badge/-%20-1A237E?style=flat-square) | Dark/Headers |
+| Electric Blue | `#536DFE` | ![#536DFE](https://img.shields.io/badge/-%20-536DFE?style=flat-square) | Accent/Links |
+| Golden Amber | `#FFB300` | ![#FFB300](https://img.shields.io/badge/-%20-FFB300?style=flat-square) | Highlights |
+| Success Green | `#00C853` | ![#00C853](https://img.shields.io/badge/-%20-00C853?style=flat-square) | Success |
+| Alert Red | `#FF1744` | ![#FF1744](https://img.shields.io/badge/-%20-FF1744?style=flat-square) | Errors |
 
 </div>
 
