@@ -377,6 +377,6 @@ Sanskrit-inspired tools for modern infrastructure
 
 ---
 
-<sub>© 2026 Sanchala OS</sub>
+<sub>© 2026 nawala-team</sub>
 
 </div>
