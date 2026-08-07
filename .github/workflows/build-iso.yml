@@ -57,7 +57,9 @@ jobs:
             libisoburn \
             dosfstools \
             mtools \
-            edk2-ovmf
+            edk2-ovmf \
+            grub \
+            syslinux
 
       - name: Setup build directory
         run: |
@@ -74,7 +76,7 @@ jobs:
         run: |
           PROFILE=/tmp/sanchala-profile
           
-          # Update profiledef.sh
+          # Update profiledef.sh with modern boot modes
           cat > $PROFILE/profiledef.sh << 'PROFILEDEF'
           #!/usr/bin/env bash
           iso_name="sanchala"
@@ -84,9 +86,7 @@ jobs:
           iso_version="${{ env.ISO_VERSION }}"
           install_dir="sanchala"
           buildmodes=('iso')
-          bootmodes=('bios.syslinux.mbr' 'bios.syslinux.eltorito'
-                     'uefi-ia32.grub.esp' 'uefi-x64.grub.esp'
-                     'uefi-ia32.grub.eltorito' 'uefi-x64.grub.eltorito')
+          bootmodes=('bios.syslinux' 'uefi-x64.grub.esp')
           arch="x86_64"
           pacman_conf="/tmp/sanchala-profile/pacman.conf"
           airootfs_image_type="squashfs"
