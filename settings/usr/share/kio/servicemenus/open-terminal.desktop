@@ -1,0 +1,23 @@
+[Desktop Entry]
+Type=Service
+ServiceTypes=KonqPopupMenu/Plugin
+MimeType=inode/directory;
+Actions=openTerminal;openTerminalRoot
+X-KDE-Priority=TopLevel
+X-KDE-StartupNotify=false
+
+[Desktop Action openTerminal]
+Name=Open Terminal Here
+Name[es]=Abrir terminal aquí
+Name[fr]=Ouvrir un terminal ici
+Name[de]=Terminal hier öffnen
+Icon=utilities-terminal
+Exec=konsole --workdir %f
+
+[Desktop Action openTerminalRoot]
+Name=Open Terminal Here as Root
+Name[es]=Abrir terminal aquí como root
+Name[fr]=Ouvrir un terminal ici en tant que root
+Name[de]=Terminal hier als Root öffnen
+Icon=utilities-terminal
+Exec=pkexec konsole --workdir %f

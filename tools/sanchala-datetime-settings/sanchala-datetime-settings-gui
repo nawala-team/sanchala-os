@@ -1,0 +1,97 @@
+#!/usr/bin/env python3
+"""Sanchala Date & Time Settings GUI"""
+import sys, subprocess
+from datetime import datetime
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+
+class DateTimeSettings(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Sanchala Date & Time")
+        self.setMinimumSize(400, 350)
+        self.init_ui()
+        self.load_settings()
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.update_clock)
+        self.timer.start(1000)
+    
+    def init_ui(self):
+        w = QWidget()
+        self.setCentralWidget(w)
+        layout = QVBoxLayout(w)
+        
+        # Current time display
+        self.clock_lbl = QLabel()
+        self.clock_lbl.setStyleSheet("font-size: 28px; font-weight: bold;")
+        self.clock_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.clock_lbl)
+        
+        self.date_lbl = QLabel()
+        self.date_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.date_lbl)
+        
+        # Timezone
+        tz_grp = QGroupBox("Timezone")
+        tz_l = QVBoxLayout(tz_grp)
+        self.tz_combo = QComboBox()
+        self.load_timezones()
+        tz_l.addWidget(self.tz_combo)
+        layout.addWidget(tz_grp)
+        
+        # Options
+        self.auto_time = QCheckBox("Set time automatically (NTP)")
+        self.auto_time.setChecked(True)
+        layout.addWidget(self.auto_time)
+        
+        self.format_24h = QCheckBox("Use 24-hour format")
+        self.format_24h.setChecked(True)
+        layout.addWidget(self.format_24h)
+        
+        layout.addStretch()
+        
+        apply_btn = QPushButton("Apply")
+        apply_btn.clicked.connect(self.apply_settings)
+        layout.addWidget(apply_btn)
+        
+        self.update_clock()
+    
+    def load_timezones(self):
+        try:
+            out = subprocess.check_output(["timedatectl", "list-timezones"], text=True)
+            self.tz_combo.addItems(out.strip().split("\n"))
+        except:
+            self.tz_combo.addItems(["UTC", "America/New_York", "America/Los_Angeles", "Europe/London", "Asia/Tokyo"])
+    
+    def load_settings(self):
+        try:
+            out = subprocess.check_output(["timedatectl", "show"], text=True)
+            for line in out.split("\n"):
+                if line.startswith("Timezone="):
+                    tz = line.split("=")[1]
+                    idx = self.tz_combo.findText(tz)
+                    if idx >= 0:
+                        self.tz_combo.setCurrentIndex(idx)
+                elif line.startswith("NTP="):
+                    self.auto_time.setChecked(line.split("=")[1] == "yes")
+        except: pass
+    
+    def update_clock(self):
+        now = datetime.now()
+        fmt = "%H:%M:%S" if self.format_24h.isChecked() else "%I:%M:%S %p"
+        self.clock_lbl.setText(now.strftime(fmt))
+        self.date_lbl.setText(now.strftime("%A, %B %d, %Y"))
+    
+    def apply_settings(self):
+        tz = self.tz_combo.currentText()
+        subprocess.run(["timedatectl", "set-timezone", tz])
+        ntp = "true" if self.auto_time.isChecked() else "false"
+        subprocess.run(["timedatectl", "set-ntp", ntp])
+        QMessageBox.information(self, "Applied", f"Timezone set to {tz}")
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    w = DateTimeSettings()
+    w.show()
+    sys.exit(app.exec())

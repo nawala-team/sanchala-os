@@ -1,0 +1,42 @@
+#!/bin/bash
+# Sanchala Camera - Professional Camera App
+set -euo pipefail
+
+CAMERA_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/sanchala/camera"
+mkdir -p "$CAMERA_DIR"/{photos,videos}
+
+show_help() {
+    cat << 'EOF'
+Sanchala Camera - Professional Camera Application
+
+Usage: sanchala-camera [command] [options]
+
+Commands:
+    gui             Launch graphical interface (default)
+    capture         Capture a photo
+    record          Record video
+    list            List captured media
+    settings        Show camera settings
+
+Options:
+    --device=N      Use camera device N (default: 0)
+    --output=PATH   Output file path
+    --quality=N     Quality (1-100, default: 90)
+    --resolution=WxH Resolution (default: 1920x1080)
+
+Examples:
+    sanchala-camera
+    sanchala-camera capture --output=photo.jpg
+    sanchala-camera record --output=video.mp4
+EOF
+}
+
+case "${1:-gui}" in
+    gui) exec sanchala-camera-gui ;;
+    capture) shift; exec sanchala-camera-cli capture "$@" ;;
+    record) shift; exec sanchala-camera-cli record "$@" ;;
+    list) ls -la "$CAMERA_DIR"/{photos,videos} 2>/dev/null ;;
+    settings) cat "${CAMERA_DIR}/settings.json" 2>/dev/null || echo '{"quality":90,"resolution":"1920x1080"}' ;;
+    help|--help|-h) show_help ;;
+    *) show_help; exit 1 ;;
+esac

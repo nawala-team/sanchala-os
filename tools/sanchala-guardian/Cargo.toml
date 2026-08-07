@@ -1,0 +1,26 @@
+[package]
+name = "sanchala-guardian"
+version = "1.0.0"
+edition = "2021"
+authors = ["Sanchala Team <dev@sanchala.id>"]
+description = "Sanchala OS Security Center Daemon"
+license = "GPL-3.0"
+repository = "https://github.com/dansiapa/sanchala-os"
+keywords = ["security", "linux", "sanchala"]
+categories = ["command-line-utilities", "os"]
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+toml = "0.8"
+log = "0.4"
+env_logger = "0.10"
+clap = { version = "4.0", features = ["derive"] }
+nix = { version = "0.27", features = ["fs", "process"] }
+notify-rust = "4"
+dirs = "5.0"
+
+[profile.release]
+opt-level = 3
+lto = true
+strip = true

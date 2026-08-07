@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=Remote Desktop
+GenericName=Remote Desktop Client
+Comment=Connect to remote computers via RDP, VNC, or SPICE
+Exec=sanchala-remote-desktop
+Icon=preferences-desktop-remote-desktop
+Terminal=false
+Type=Application
+Categories=Network;RemoteAccess;
+Keywords=remote;desktop;rdp;vnc;spice;connection;
+StartupNotify=true
+MimeType=x-scheme-handler/rdp;x-scheme-handler/vnc;

@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Download Manager
+Comment=Manage downloads with pause, resume, and scheduling
+Exec=sanchala-download-manager %U
+Icon=folder-download
+Terminal=false
+Type=Application
+Categories=Network;FileTransfer;
+Keywords=download;manager;resume;accelerator;
+StartupNotify=true
+MimeType=x-scheme-handler/http;x-scheme-handler/https;x-scheme-handler/ftp;

@@ -1,0 +1,82 @@
+#!/usr/bin/env python3
+"""Sanchala Measure - Measurement Tool"""
+import sys
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+
+class MeasureApp(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Sanchala Measure")
+        self.setMinimumSize(450, 500)
+        self.init_ui()
+    
+    def init_ui(self):
+        self.setStyleSheet("QMainWindow{background:#1a1a2e;}QLabel{color:#fff;}QPushButton{background:#16213e;color:#fff;border:none;padding:10px;border-radius:6px;}QPushButton:hover{background:#1f4068;}QLineEdit,QComboBox{background:#16213e;color:#fff;border:none;border-radius:6px;padding:10px;}")
+        c = QWidget(); self.setCentralWidget(c); m = QVBoxLayout(c)
+        m.setContentsMargins(20,20,20,20)
+        
+        m.addWidget(QLabel("📏 Unit Converter"))
+        
+        # Category
+        self.cat = QComboBox()
+        self.cat.addItems(["Length", "Weight", "Temperature", "Volume", "Time"])
+        self.cat.currentIndexChanged.connect(self.update_units)
+        m.addWidget(self.cat)
+        
+        # From
+        m.addWidget(QLabel("From:"))
+        f = QHBoxLayout()
+        self.val1 = QLineEdit("1"); self.val1.textChanged.connect(self.convert)
+        self.unit1 = QComboBox(); self.unit1.currentIndexChanged.connect(self.convert)
+        f.addWidget(self.val1,2); f.addWidget(self.unit1,1)
+        m.addLayout(f)
+        
+        # To
+        m.addWidget(QLabel("To:"))
+        t = QHBoxLayout()
+        self.val2 = QLineEdit(); self.val2.setReadOnly(True)
+        self.unit2 = QComboBox(); self.unit2.currentIndexChanged.connect(self.convert)
+        t.addWidget(self.val2,2); t.addWidget(self.unit2,1)
+        m.addLayout(t)
+        
+        self.result = QLabel(""); self.result.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        m.addWidget(self.result)
+        m.addStretch()
+        
+        self.units = {
+            "Length": (["m","km","cm","mm","mi","ft","in"], [1,1000,0.01,0.001,1609.34,0.3048,0.0254]),
+            "Weight": (["kg","g","mg","lb","oz"], [1,0.001,0.000001,0.4536,0.0283]),
+            "Temperature": (["°C","°F","K"], None),
+            "Volume": (["L","mL","gal","qt"], [1,0.001,3.785,0.946]),
+            "Time": (["s","min","hr","day"], [1,60,3600,86400])
+        }
+        self.update_units()
+    
+    def update_units(self):
+        cat = self.cat.currentText()
+        u = self.units[cat][0]
+        self.unit1.clear(); self.unit2.clear()
+        self.unit1.addItems(u); self.unit2.addItems(u)
+        if len(u) > 1: self.unit2.setCurrentIndex(1)
+    
+    def convert(self):
+        try:
+            v = float(self.val1.text())
+            cat = self.cat.currentText()
+            u1, u2 = self.unit1.currentIndex(), self.unit2.currentIndex()
+            
+            if cat == "Temperature":
+                c = v if u1==0 else (v-32)*5/9 if u1==1 else v-273.15
+                r = c if u2==0 else c*9/5+32 if u2==1 else c+273.15
+            else:
+                f = self.units[cat][1]
+                r = v * f[u1] / f[u2]
+            
+            self.val2.setText(f"{r:.6g}")
+            self.result.setText(f"{v} {self.unit1.currentText()} = {r:.6g} {self.unit2.currentText()}")
+        except: self.val2.setText("")
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv); w = MeasureApp(); w.show(); sys.exit(app.exec())

@@ -1,0 +1,12 @@
+[Unit]
+Description=Sanchala OS Gaming Mode Service
+Documentation=man:sanchala-gaming(1)
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/sanchala-gaming start
+ExecStop=/usr/bin/sanchala-gaming stop
+
+[Install]
+WantedBy=default.target

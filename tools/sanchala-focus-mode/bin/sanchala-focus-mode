@@ -1,0 +1,151 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0
+# Sanchala Focus Mode - Distraction-free productivity mode
+"""Block distractions and enable Do Not Disturb for focused work"""
+
+import sys, json, argparse, subprocess, os
+from pathlib import Path
+from datetime import datetime, timedelta
+
+VERSION = "1.0.0"
+CONFIG_DIR = Path.home() / ".config" / "sanchala" / "focus"
+
+class FocusConfig:
+    def __init__(self):
+        CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+        self.file = CONFIG_DIR / "config.json"
+        self.data = self._load()
+    
+    def _load(self):
+        defaults = {"active": False, "mode": "work", "duration": 25, "break_duration": 5,
+                    "block_notifications": True, "block_apps": [], "sessions_today": 0,
+                    "modes": {
+                        "work": {"duration": 25, "block_notifications": True},
+                        "study": {"duration": 45, "block_notifications": True},
+                        "meeting": {"duration": 60, "block_notifications": False},
+                        "personal": {"duration": 0, "block_notifications": True}
+                    }}
+        if self.file.exists():
+            try: defaults.update(json.load(open(self.file)))
+            except: pass
+        return defaults
+    
+    def save(self):
+        with open(self.file, 'w') as f: json.dump(self.data, f, indent=2)
+
+def set_dnd(enabled: bool):
+    """Set Do Not Disturb mode"""
+    cmds = [
+        f"dbus-send --session --type=method_call --dest=org.freedesktop.Notifications /org/freedesktop/Notifications org.freedesktop.Notifications.SetDoNotDisturb boolean:{'true' if enabled else 'false'}",
+        f"qdbus org.kde.plasmashell /org/kde/osdService org.kde.osdService.showText 'notifications-disabled' '{'Focus Mode' if enabled else 'Focus Mode Ended'}'",
+    ]
+    for cmd in cmds:
+        subprocess.run(cmd, shell=True, capture_output=True)
+
+def cmd_start(args):
+    config = FocusConfig()
+    mode = args.mode or config.data["mode"]
+    duration = args.duration or config.data["modes"].get(mode, {}).get("duration", 25)
+    
+    config.data["active"] = True
+    config.data["mode"] = mode
+    config.data["start_time"] = datetime.now().isoformat()
+    config.data["end_time"] = (datetime.now() + timedelta(minutes=duration)).isoformat() if duration > 0 else None
+    config.data["sessions_today"] += 1
+    config.save()
+    
+    if config.data["block_notifications"]:
+        set_dnd(True)
+    
+    print(f"\n🎯 Focus Mode: {mode.title()}")
+    print("━" * 35)
+    if duration > 0:
+        print(f"  Duration: {duration} minutes")
+        print(f"  Ends at:  {config.data['end_time'][:16].replace('T', ' ')}")
+    else:
+        print("  Duration: Until manually stopped")
+    print(f"\n  Sessions today: {config.data['sessions_today']}")
+    print("\n  💡 Stay focused! Use 'sanchala-focus-mode stop' to end.\n")
+    return 0
+
+def cmd_stop(args):
+    config = FocusConfig()
+    if not config.data["active"]:
+        print("Focus mode is not active")
+        return 0
+    
+    config.data["active"] = False
+    config.save()
+    set_dnd(False)
+    
+    start = datetime.fromisoformat(config.data.get("start_time", datetime.now().isoformat()))
+    duration = (datetime.now() - start).seconds // 60
+    
+    print(f"\n✅ Focus session ended")
+    print(f"   Duration: {duration} minutes")
+    print(f"   Sessions today: {config.data['sessions_today']}\n")
+    return 0
+
+def cmd_status(args):
+    config = FocusConfig()
+    print(f"\n🎯 Focus Mode Status\n" + "━"*35)
+    
+    if config.data["active"]:
+        print(f"  Status:   🟢 Active ({config.data['mode'].title()})")
+        start = datetime.fromisoformat(config.data["start_time"])
+        elapsed = (datetime.now() - start).seconds // 60
+        print(f"  Elapsed:  {elapsed} minutes")
+        if config.data.get("end_time"):
+            end = datetime.fromisoformat(config.data["end_time"])
+            remaining = max(0, (end - datetime.now()).seconds // 60)
+            print(f"  Remaining: {remaining} minutes")
+    else:
+        print("  Status:   ⚪ Inactive")
+    
+    print(f"  Sessions: {config.data['sessions_today']} today")
+    print()
+    return 0
+
+def cmd_modes(args):
+    config = FocusConfig()
+    print("\n📋 Focus Modes:\n")
+    for name, settings in config.data["modes"].items():
+        dur = f"{settings['duration']}min" if settings['duration'] > 0 else "unlimited"
+        dnd = "🔕" if settings['block_notifications'] else "🔔"
+        print(f"  • {name:10} {dur:12} {dnd}")
+    print()
+    return 0
+
+def cmd_pomodoro(args):
+    """Start a Pomodoro session (25min work + 5min break)"""
+    config = FocusConfig()
+    print("\n🍅 Pomodoro Timer Started")
+    print("   Work: 25 minutes, then 5 minute break\n")
+    args.mode = "work"
+    args.duration = 25
+    return cmd_start(args)
+
+def main():
+    p = argparse.ArgumentParser(prog="sanchala-focus-mode", description="🎯 Focus Mode")
+    p.add_argument("--version", action="version", version=f"%(prog)s {VERSION}")
+    sub = p.add_subparsers(dest="cmd")
+    
+    s = sub.add_parser("start", help="Start focus")
+    s.add_argument("mode", nargs="?", choices=["work","study","meeting","personal"])
+    s.add_argument("-d", "--duration", type=int)
+    
+    sub.add_parser("stop", help="Stop focus")
+    sub.add_parser("status", help="Show status")
+    sub.add_parser("modes", help="List modes")
+    sub.add_parser("pomodoro", help="Start Pomodoro")
+    sub.add_parser("toggle", help="Toggle focus")
+    
+    args = p.parse_args()
+    cmds = {"start": cmd_start, "stop": cmd_stop, "status": cmd_status,
+            "modes": cmd_modes, "pomodoro": cmd_pomodoro,
+            "toggle": lambda a: cmd_stop(a) if FocusConfig().data["active"] else cmd_start(a)}
+    
+    if args.cmd in cmds: return cmds[args.cmd](args)
+    return cmd_status(args)
+
+if __name__ == "__main__": sys.exit(main())

@@ -1,0 +1,57 @@
+# ============================================================================
+# SANCHALA OS - KDE Touchpad KCM Settings
+# ============================================================================
+# Location: ~/.config/touchpadxlibinputrc
+# Applied by KDE's touchpad settings module
+# ============================================================================
+
+[Touchpad]
+# Enable touchpad
+Enabled=true
+
+# Natural scrolling (macOS-style)
+NaturalScroll=true
+
+# Tap to click
+TapToClick=true
+TapAndDrag=true
+TapDragLock=true
+
+# Two-finger tap = right click, three-finger = middle
+LmrTapButtonMap=false
+LrmTapButtonMap=true
+
+# Disable touchpad while typing
+DisableWhileTyping=true
+
+# Scrolling
+ScrollMethod=TwoFingers
+HorizontalScrolling=true
+
+# Click method (clickfinger = macOS-style)
+ClickMethod=Clickfinger
+
+# Pointer speed (0.0 = default, -1.0 to 1.0)
+PointerAcceleration=0.4
+PointerAccelerationProfile=Adaptive
+
+# Palm detection
+PalmDetection=true
+
+# Middle button emulation
+MiddleButtonEmulation=false
+
+[Mouse]
+# Standard mouse settings
+NaturalScroll=false
+PointerAcceleration=0
+PointerAccelerationProfile=Adaptive
+MiddleButtonEmulation=false
+
+[TrackPoint]
+# TrackPoint/PointingStick settings
+PointerAcceleration=0.6
+PointerAccelerationProfile=Flat
+MiddleButtonEmulation=false
+ScrollMethod=OnButtonDown
+ScrollButton=2

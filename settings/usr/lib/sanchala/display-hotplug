@@ -1,0 +1,143 @@
+#!/bin/bash
+# ============================================================================
+# SANCHALA OS - Display Hotplug Handler
+# ============================================================================
+# Location: /usr/lib/sanchala/display-hotplug
+# Purpose: Handle external display connect/disconnect events
+# ============================================================================
+
+set -euo pipefail
+
+LOG_TAG="sanchala-display"
+DISPLAY_CACHE="/var/cache/sanchala/display-state"
+
+log() {
+    logger -t "$LOG_TAG" "$1"
+}
+
+notify_user() {
+    local title="$1"
+    local message="$2"
+    
+    # Find active user session
+    local user
+    user=$(who | grep -E '\(:0\)|\(tty' | head -1 | awk '{print $1}')
+    
+    if [[ -n "$user" ]]; then
+        local uid
+        uid=$(id -u "$user")
+        sudo -u "$user" DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$uid/bus" \
+            notify-send -i video-display "$title" "$message" 2>/dev/null || true
+    fi
+}
+
+detect_displays() {
+    local displays=()
+    
+    # Check DRM cards for connected displays
+    for card in /sys/class/drm/card*; do
+        [[ -d "$card" ]] || continue
+        for connector in "$card"/card*-*; do
+            [[ -f "$connector/status" ]] || continue
+            local status
+            status=$(cat "$connector/status" 2>/dev/null || echo "unknown")
+            if [[ "$status" == "connected" ]]; then
+                local name
+                name=$(basename "$connector")
+                displays+=("$name")
+            fi
+        done
+    done
+    
+    echo "${displays[*]}"
+}
+
+get_display_info() {
+    local connector="$1"
+    local info=""
+    
+    # Try to get EDID info
+    local edid_path="/sys/class/drm/$connector/edid"
+    if [[ -f "$edid_path" ]]; then
+        # Parse EDID for monitor name (simplified)
+        info=$(cat "$edid_path" 2>/dev/null | strings | head -5 | tr '\n' ' ')
+    fi
+    
+    echo "$info"
+}
+
+handle_hotplug() {
+    log "Display hotplug event detected"
+    
+    # Get current display state
+    local current_displays
+    current_displays=$(detect_displays)
+    
+    # Load previous state
+    local previous_displays=""
+    if [[ -f "$DISPLAY_CACHE" ]]; then
+        previous_displays=$(cat "$DISPLAY_CACHE")
+    fi
+    
+    # Save current state
+    mkdir -p "$(dirname "$DISPLAY_CACHE")"
+    echo "$current_displays" > "$DISPLAY_CACHE"
+    
+    # Determine what changed
+    local new_displays=()
+    local removed_displays=()
+    
+    for display in $current_displays; do
+        if [[ ! " $previous_displays " =~ " $display " ]]; then
+            new_displays+=("$display")
+        fi
+    done
+    
+    for display in $previous_displays; do
+        if [[ ! " $current_displays " =~ " $display " ]]; then
+            removed_displays+=("$display")
+        fi
+    done
+    
+    # Notify about changes
+    if [[ ${#new_displays[@]} -gt 0 ]]; then
+        for display in "${new_displays[@]}"; do
+            log "Display connected: $display"
+            notify_user "Display Connected" "External display $display is now available"
+        done
+    fi
+    
+    if [[ ${#removed_displays[@]} -gt 0 ]]; then
+        for display in "${removed_displays[@]}"; do
+            log "Display disconnected: $display"
+            notify_user "Display Disconnected" "External display $display was removed"
+        done
+    fi
+    
+    # Trigger KDE/GNOME display reconfiguration
+    # KDE Plasma
+    if command -v kscreen-doctor &>/dev/null; then
+        # Let KDE handle it automatically via kscreen
+        log "KDE display management active"
+    fi
+    
+    # For autorandr users
+    if command -v autorandr &>/dev/null; then
+        autorandr --change --default default 2>/dev/null || true
+        log "autorandr profile applied"
+    fi
+}
+
+# Main
+case "${1:-hotplug}" in
+    hotplug)
+        handle_hotplug
+        ;;
+    status)
+        detect_displays
+        ;;
+    *)
+        echo "Usage: $0 {hotplug|status}"
+        exit 1
+        ;;
+esac

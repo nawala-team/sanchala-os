@@ -1,0 +1,101 @@
+#!/usr/bin/env python3
+"""Sanchala Energy Settings GUI"""
+import sys, subprocess
+from pathlib import Path
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+
+class EnergySettings(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Sanchala Energy Settings")
+        self.setMinimumSize(450, 400)
+        self.init_ui()
+        self.load_status()
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.load_status)
+        self.timer.start(5000)
+    
+    def init_ui(self):
+        w = QWidget()
+        self.setCentralWidget(w)
+        layout = QVBoxLayout(w)
+        
+        # Battery status
+        bat_grp = QGroupBox("Battery")
+        bat_l = QVBoxLayout(bat_grp)
+        self.bat_bar = QProgressBar()
+        self.bat_bar.setRange(0, 100)
+        self.bat_lbl = QLabel("Checking...")
+        bat_l.addWidget(self.bat_bar)
+        bat_l.addWidget(self.bat_lbl)
+        layout.addWidget(bat_grp)
+        
+        # Power profile
+        profile_grp = QGroupBox("Power Profile")
+        profile_l = QVBoxLayout(profile_grp)
+        self.profile_group = QButtonGroup()
+        for i, (name, desc) in enumerate([("power-saver", "Power Saver - Maximum battery life"),
+                                          ("balanced", "Balanced - Default settings"),
+                                          ("performance", "Performance - Maximum performance")]):
+            rb = QRadioButton(desc)
+            rb.setProperty("profile", name)
+            self.profile_group.addButton(rb, i)
+            profile_l.addWidget(rb)
+        layout.addWidget(profile_grp)
+        
+        # Sleep settings
+        sleep_grp = QGroupBox("When Inactive")
+        sleep_l = QFormLayout(sleep_grp)
+        self.screen_off = QComboBox()
+        self.screen_off.addItems(["Never", "5 minutes", "10 minutes", "15 minutes", "30 minutes"])
+        self.screen_off.setCurrentIndex(2)
+        sleep_l.addRow("Turn off screen:", self.screen_off)
+        self.suspend = QComboBox()
+        self.suspend.addItems(["Never", "15 minutes", "30 minutes", "1 hour", "2 hours"])
+        self.suspend.setCurrentIndex(2)
+        sleep_l.addRow("Suspend:", self.suspend)
+        layout.addWidget(sleep_grp)
+        
+        layout.addStretch()
+        
+        apply_btn = QPushButton("Apply")
+        apply_btn.clicked.connect(self.apply_settings)
+        layout.addWidget(apply_btn)
+    
+    def load_status(self):
+        # Battery
+        for bat in ["/sys/class/power_supply/BAT0", "/sys/class/power_supply/BAT1"]:
+            cap_file = Path(bat) / "capacity"
+            status_file = Path(bat) / "status"
+            if cap_file.exists():
+                cap = int(cap_file.read_text().strip())
+                status = status_file.read_text().strip() if status_file.exists() else "Unknown"
+                self.bat_bar.setValue(cap)
+                self.bat_lbl.setText(f"{cap}% - {status}")
+                break
+        else:
+            self.bat_lbl.setText("No battery")
+        
+        # Profile
+        try:
+            profile = subprocess.check_output(["powerprofilesctl", "get"], text=True).strip()
+            for btn in self.profile_group.buttons():
+                if btn.property("profile") == profile:
+                    btn.setChecked(True)
+                    break
+        except: pass
+    
+    def apply_settings(self):
+        btn = self.profile_group.checkedButton()
+        if btn:
+            profile = btn.property("profile")
+            subprocess.run(["powerprofilesctl", "set", profile])
+        QMessageBox.information(self, "Applied", "Energy settings applied.")
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    w = EnergySettings()
+    w.show()
+    sys.exit(app.exec())

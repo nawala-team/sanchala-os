@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Sanchala VPN
+Comment=Manage VPN connections
+Exec=sanchala-vpn --gui
+Icon=network-vpn
+Terminal=false
+Type=Application
+Categories=Network;Settings;
+Keywords=vpn;wireguard;openvpn;privacy;

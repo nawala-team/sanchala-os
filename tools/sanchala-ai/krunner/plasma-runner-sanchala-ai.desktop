@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Sanchala AI Search
+Comment=AI-powered search suggestions
+Icon=sanchala-ai
+Type=Service
+X-KDE-ServiceTypes=Plasma/Runner
+X-KDE-PluginInfo-Name=sanchala-ai-runner
+X-KDE-PluginInfo-Author=Sanchala Team
+X-KDE-PluginInfo-Version=1.0
+X-Plasma-API=DBus
+X-Plasma-Request-Exec=/usr/lib/sanchala-ai/sanchala-ai-runner.py

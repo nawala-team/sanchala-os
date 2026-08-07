@@ -1,0 +1,33 @@
+[Desktop Entry]
+Type=Service
+ServiceTypes=KonqPopupMenu/Plugin
+MimeType=all/allfiles;
+Actions=editWithKate;editWithVSCode;openWithDefault
+X-KDE-Priority=TopLevel
+X-KDE-StartupNotify=false
+X-KDE-Submenu=Open With Editor
+X-KDE-Submenu-Icon=accessories-text-editor
+
+[Desktop Action editWithKate]
+Name=Kate (Text Editor)
+Name[es]=Kate (Editor de texto)
+Name[fr]=Kate (Éditeur de texte)
+Name[de]=Kate (Texteditor)
+Icon=kate
+Exec=kate %F
+
+[Desktop Action editWithVSCode]
+Name=Visual Studio Code
+Name[es]=Visual Studio Code
+Name[fr]=Visual Studio Code
+Name[de]=Visual Studio Code
+Icon=visual-studio-code
+Exec=code %F
+
+[Desktop Action openWithDefault]
+Name=Default Application
+Name[es]=Aplicación predeterminada
+Name[fr]=Application par défaut
+Name[de]=Standardanwendung
+Icon=system-run
+Exec=xdg-open %f

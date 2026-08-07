@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: GPL-3.0
+# Sanchala Print Manager - CUPS Frontend
+
+set -euo pipefail
+VERSION="1.0.0"
+
+RED='\033[0;31m' GREEN='\033[0;32m' BLUE='\033[0;34m' NC='\033[0m'
+info() { echo -e "${BLUE}ℹ${NC} $1"; }
+ok() { echo -e "${GREEN}✓${NC} $1"; }
+err() { echo -e "${RED}✗${NC} $1" >&2; }
+
+show_help() {
+    cat << 'EOF'
+SANCHALA PRINT MANAGER
+
+USAGE: sanchala-print-manager <COMMAND> [ARGS]
+
+COMMANDS:
+    list                List printers
+    status [PRINTER]    Show printer status
+    add <URI> <NAME>    Add printer
+    remove <PRINTER>    Remove printer
+    default <PRINTER>   Set default printer
+    jobs [PRINTER]      List print jobs
+    cancel <JOB_ID>     Cancel print job
+    test <PRINTER>      Print test page
+    --gui               Launch GUI
+EOF
+}
+
+cmd_list() {
+    echo -e "${BLUE}═══ Printers ═══${NC}"
+    lpstat -p 2>/dev/null | while read -r line; do
+        if echo "$line" | grep -q "enabled"; then
+            echo -e "${GREEN}●${NC} $line"
+        else
+            echo -e "${RED}●${NC} $line"
+        fi
+    done
+    echo -e "\nDefault: $(lpstat -d 2>/dev/null | cut -d: -f2 || echo 'None')"
+}
+
+cmd_status() {
+    local p="${1:-}"
+    [[ -n "$p" ]] && lpstat -p "$p" -l 2>/dev/null || lpstat -p -l 2>/dev/null
+}
+
+cmd_add() {
+    local uri="$1" name="$2"
+    lpadmin -p "$name" -v "$uri" -E && ok "Added $name"
+}
+
+cmd_remove() {
+    lpadmin -x "$1" && ok "Removed $1"
+}
+
+cmd_default() {
+    lpadmin -d "$1" && ok "Default set to $1"
+}
+
+cmd_jobs() {
+    local p="${1:-}"
+    echo -e "${BLUE}═══ Print Jobs ═══${NC}"
+    [[ -n "$p" ]] && lpq -P "$p" 2>/dev/null || lpq -a 2>/dev/null
+}
+
+cmd_cancel() {
+    cancel "$1" && ok "Cancelled job $1"
+}
+
+cmd_test() {
+    local p="$1"
+    echo "Test page from Sanchala Print Manager" | lp -d "$p" && ok "Test page sent to $p"
+}
+
+case "${1:-list}" in
+    list|ls) cmd_list ;; status) cmd_status "${2:-}" ;;
+    add) cmd_add "${2:?URI required}" "${3:?Name required}" ;;
+    remove|rm) cmd_remove "${2:?Printer required}" ;;
+    default) cmd_default "${2:?Printer required}" ;;
+    jobs) cmd_jobs "${2:-}" ;; cancel) cmd_cancel "${2:?Job ID required}" ;;
+    test) cmd_test "${2:?Printer required}" ;;
+    --gui) exec "$(dirname "$0")/sanchala-print-manager-gui" ;;
+    -h|--help) show_help ;; *) err "Unknown: $1"; exit 1 ;;
+esac

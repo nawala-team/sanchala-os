@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Lock Screen Settings
+Comment=Customize lock screen appearance and behavior
+GenericName=Lock Screen Configuration
+Exec=sanchala-lockscreen-settings
+Icon=system-lock-screen
+Type=Application
+Categories=Settings;DesktopSettings;Security;
+Keywords=lock;screen;security;wallpaper;timeout;
+StartupNotify=true

@@ -1,0 +1,16 @@
+{
+    "name": "Sanchala Meetings",
+    "version": "2.0.0",
+    "description": "Video conference and meeting manager",
+    "category": "Productivity",
+    "icon": "📹",
+    "launch": "./meetings.sh",
+    "author": "Sanchala OS",
+    "features": [
+        "Schedule meetings",
+        "Multi-platform support",
+        "Quick meet creation",
+        "Meeting reminders",
+        "Join meeting links"
+    ]
+}

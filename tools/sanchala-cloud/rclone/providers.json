@@ -1,0 +1,109 @@
+{
+  "providers": {
+    "gdrive": {
+      "name": "Google Drive",
+      "rclone_type": "drive",
+      "icon": "google-drive",
+      "oauth_url": "https://accounts.google.com/o/oauth2/auth",
+      "token_url": "https://oauth2.googleapis.com/token",
+      "scopes": ["https://www.googleapis.com/auth/drive"],
+      "features": {
+        "sync": true,
+        "stream": true,
+        "share": true,
+        "team_drives": true,
+        "trash": true
+      },
+      "limits": {
+        "max_file_size": "5TB",
+        "api_calls_per_100s": 12000
+      }
+    },
+    "dropbox": {
+      "name": "Dropbox",
+      "rclone_type": "dropbox",
+      "icon": "dropbox",
+      "oauth_url": "https://www.dropbox.com/oauth2/authorize",
+      "features": {
+        "sync": true,
+        "stream": true,
+        "share": true,
+        "versioning": true
+      },
+      "limits": {
+        "max_file_size": "350GB",
+        "batch_operations": true
+      }
+    },
+    "onedrive": {
+      "name": "Microsoft OneDrive",
+      "rclone_type": "onedrive",
+      "icon": "onedrive",
+      "oauth_url": "https://login.microsoftonline.com/common/oauth2/v2.0/authorize",
+      "features": {
+        "sync": true,
+        "stream": true,
+        "share": true,
+        "sharepoint": true,
+        "versioning": true
+      },
+      "limits": {
+        "max_file_size": "250GB"
+      }
+    },
+    "nextcloud": {
+      "name": "Nextcloud",
+      "rclone_type": "webdav",
+      "icon": "nextcloud",
+      "requires_url": true,
+      "features": {
+        "sync": true,
+        "share": true,
+        "webdav": true
+      }
+    },
+    "mega": {
+      "name": "MEGA",
+      "rclone_type": "mega",
+      "icon": "mega",
+      "features": {
+        "sync": true,
+        "e2e_encryption": true
+      },
+      "limits": {
+        "max_file_size": "unlimited",
+        "bandwidth_quota": true
+      }
+    },
+    "s3": {
+      "name": "Amazon S3",
+      "rclone_type": "s3",
+      "icon": "amazon",
+      "requires_credentials": true,
+      "features": {
+        "sync": true,
+        "versioning": true,
+        "lifecycle": true
+      }
+    },
+    "webdav": {
+      "name": "WebDAV",
+      "rclone_type": "webdav",
+      "icon": "folder-remote",
+      "requires_url": true,
+      "features": {
+        "sync": true
+      }
+    },
+    "sftp": {
+      "name": "SFTP",
+      "rclone_type": "sftp",
+      "icon": "folder-remote-symbolic",
+      "requires_host": true,
+      "features": {
+        "sync": true,
+        "key_auth": true
+      }
+    }
+  }
+}

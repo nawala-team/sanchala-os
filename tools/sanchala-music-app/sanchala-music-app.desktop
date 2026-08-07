@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Sanchala Music
+Comment=Music Player
+Exec=sanchala-music-app
+Icon=rhythmbox
+Terminal=false
+Type=Application
+Categories=AudioVideo;Audio;Music;Player;

@@ -1,0 +1,133 @@
+#!/usr/bin/env python3
+"""Sanchala Flatpak Manager GUI"""
+import sys, subprocess
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+
+class FlatpakManager(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Sanchala Flatpak Manager")
+        self.setMinimumSize(650, 500)
+        self.init_ui()
+        self.load_installed()
+    
+    def init_ui(self):
+        w = QWidget()
+        self.setCentralWidget(w)
+        layout = QVBoxLayout(w)
+        
+        tabs = QTabWidget()
+        
+        # Installed tab
+        installed_w = QWidget()
+        installed_l = QVBoxLayout(installed_w)
+        self.installed_list = QTreeWidget()
+        self.installed_list.setHeaderLabels(["Application ID", "Name", "Version"])
+        self.installed_list.setAlternatingRowColors(True)
+        installed_l.addWidget(self.installed_list)
+        btn_row = QHBoxLayout()
+        run_btn = QPushButton("Run")
+        run_btn.clicked.connect(self.run_app)
+        btn_row.addWidget(run_btn)
+        remove_btn = QPushButton("Uninstall")
+        remove_btn.clicked.connect(self.remove_app)
+        btn_row.addWidget(remove_btn)
+        update_btn = QPushButton("Update All")
+        update_btn.clicked.connect(self.update_all)
+        btn_row.addWidget(update_btn)
+        btn_row.addStretch()
+        installed_l.addLayout(btn_row)
+        tabs.addTab(installed_w, "Installed")
+        
+        # Search tab
+        search_w = QWidget()
+        search_l = QVBoxLayout(search_w)
+        search_row = QHBoxLayout()
+        self.search_input = QLineEdit()
+        self.search_input.setPlaceholderText("Search Flathub...")
+        self.search_input.returnPressed.connect(self.search_apps)
+        search_row.addWidget(self.search_input)
+        search_btn = QPushButton("Search")
+        search_btn.clicked.connect(self.search_apps)
+        search_row.addWidget(search_btn)
+        search_l.addLayout(search_row)
+        self.search_list = QTreeWidget()
+        self.search_list.setHeaderLabels(["Application ID", "Name", "Description"])
+        search_l.addWidget(self.search_list)
+        install_btn = QPushButton("Install Selected")
+        install_btn.clicked.connect(self.install_app)
+        search_l.addWidget(install_btn)
+        tabs.addTab(search_w, "Search")
+        
+        layout.addWidget(tabs)
+        
+        # Status
+        self.status = QLabel("Ready")
+        layout.addWidget(self.status)
+    
+    def load_installed(self):
+        self.installed_list.clear()
+        try:
+            out = subprocess.check_output(
+                ["flatpak", "list", "--app", "--columns=application,name,version"],
+                text=True
+            )
+            for line in out.strip().split("\n"):
+                if line:
+                    parts = line.split("\t")
+                    item = QTreeWidgetItem(parts + [""]*(3-len(parts)))
+                    self.installed_list.addTopLevelItem(item)
+        except: pass
+    
+    def search_apps(self):
+        query = self.search_input.text()
+        if not query:
+            return
+        self.search_list.clear()
+        self.status.setText("Searching...")
+        try:
+            out = subprocess.check_output(
+                ["flatpak", "search", query, "--columns=application,name,description"],
+                text=True
+            )
+            for line in out.strip().split("\n"):
+                if line:
+                    parts = line.split("\t")
+                    item = QTreeWidgetItem(parts + [""]*(3-len(parts)))
+                    self.search_list.addTopLevelItem(item)
+            self.status.setText(f"Found {self.search_list.topLevelItemCount()} results")
+        except:
+            self.status.setText("Search failed")
+    
+    def get_selected_app(self, tree):
+        item = tree.currentItem()
+        return item.text(0) if item else None
+    
+    def install_app(self):
+        app = self.get_selected_app(self.search_list)
+        if app:
+            self.status.setText(f"Installing {app}...")
+            subprocess.Popen(["flatpak", "install", "flathub", app, "-y"])
+    
+    def remove_app(self):
+        app = self.get_selected_app(self.installed_list)
+        if app:
+            subprocess.run(["flatpak", "uninstall", app, "-y"])
+            self.load_installed()
+    
+    def run_app(self):
+        app = self.get_selected_app(self.installed_list)
+        if app:
+            subprocess.Popen(["flatpak", "run", app])
+    
+    def update_all(self):
+        self.status.setText("Updating...")
+        subprocess.Popen(["flatpak", "update", "-y"])
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    w = FlatpakManager()
+    w.show()
+    sys.exit(app.exec())

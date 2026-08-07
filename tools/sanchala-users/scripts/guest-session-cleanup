@@ -1,0 +1,59 @@
+#!/bin/bash
+# ============================================
+# SANCHALA OS - Guest Session Cleanup Script
+# ============================================
+# Called when guest user logs out
+# /usr/lib/sanchala/guest-session-cleanup
+# ============================================
+
+set -e
+
+GUEST_USER="guest"
+GUEST_HOME="/home/guest"
+LOG_FILE="/var/log/sanchala/guest-session.log"
+
+log() {
+    echo "$(date '+%Y-%m-%d %H:%M:%S') [guest-cleanup] $1" >> "$LOG_FILE"
+}
+
+# Only run for guest user
+if [ "$PAM_USER" != "$GUEST_USER" ]; then
+    exit 0
+fi
+
+log "Starting guest session cleanup"
+
+# Calculate session duration
+if [ -f "$GUEST_HOME/.session_start" ]; then
+    START_TIME=$(cat "$GUEST_HOME/.session_start")
+    log "Session started at: $START_TIME"
+fi
+
+# Kill any remaining guest processes
+log "Terminating guest processes"
+pkill -u guest 2>/dev/null || true
+sleep 1
+pkill -9 -u guest 2>/dev/null || true
+
+# Sync filesystem
+sync
+
+# Unmount guest tmpfs
+log "Unmounting guest home"
+if mountpoint -q "$GUEST_HOME"; then
+    umount -l "$GUEST_HOME" 2>/dev/null || true
+fi
+
+# Clean up guest tmp directory
+log "Cleaning up temp files"
+rm -rf /tmp/guest-session-* 2>/dev/null || true
+
+# Clear any guest entries from /run
+rm -rf /run/user/65534 2>/dev/null || true
+
+# Recreate empty guest home
+mkdir -p "$GUEST_HOME"
+chmod 755 "$GUEST_HOME"
+
+log "Guest session cleanup completed"
+exit 0

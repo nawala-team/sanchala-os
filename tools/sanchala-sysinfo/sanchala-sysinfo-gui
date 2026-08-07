@@ -1,0 +1,99 @@
+#!/usr/bin/env python3
+"""Sanchala System Info GUI"""
+import sys, os, subprocess, platform
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+
+class SysInfoGUI(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Sanchala System Info")
+        self.setMinimumSize(550, 500)
+        self.init_ui()
+    
+    def init_ui(self):
+        tabs = QTabWidget()
+        self.setCentralWidget(tabs)
+        
+        # System Tab
+        sys_w = QWidget()
+        sys_l = QFormLayout(sys_w)
+        info = self.get_system_info()
+        for k, v in info.items():
+            sys_l.addRow(f"{k}:", QLabel(v))
+        tabs.addTab(sys_w, "System")
+        
+        # CPU Tab
+        cpu_w = QWidget()
+        cpu_l = QFormLayout(cpu_w)
+        cpu = self.get_cpu_info()
+        for k, v in cpu.items():
+            cpu_l.addRow(f"{k}:", QLabel(v))
+        tabs.addTab(cpu_w, "CPU")
+        
+        # Memory Tab
+        mem_w = QWidget()
+        mem_l = QFormLayout(mem_w)
+        mem = self.get_memory_info()
+        for k, v in mem.items():
+            mem_l.addRow(f"{k}:", QLabel(v))
+        tabs.addTab(mem_w, "Memory")
+        
+        # Storage Tab
+        storage_w = QWidget()
+        storage_l = QVBoxLayout(storage_w)
+        storage_t = QTreeWidget()
+        storage_t.setHeaderLabels(["Mount", "Size", "Used", "Available", "Use%"])
+        for line in self.get_storage_info():
+            storage_t.addTopLevelItem(QTreeWidgetItem(line))
+        storage_l.addWidget(storage_t)
+        tabs.addTab(storage_w, "Storage")
+    
+    def get_system_info(self):
+        info = {"Hostname": platform.node(), "OS": "Sanchala OS", "Kernel": platform.release(),
+                "Architecture": platform.machine()}
+        try:
+            with open("/etc/os-release") as f:
+                for line in f:
+                    if line.startswith("PRETTY_NAME="):
+                        info["Distribution"] = line.split("=", 1)[1].strip().strip('"')
+        except: pass
+        try:
+            info["Uptime"] = subprocess.check_output(["uptime", "-p"], text=True).strip()
+        except: pass
+        return info
+    
+    def get_cpu_info(self):
+        info = {"Processor": "Unknown", "Cores": str(os.cpu_count())}
+        try:
+            with open("/proc/cpuinfo") as f:
+                for line in f:
+                    if "model name" in line:
+                        info["Processor"] = line.split(":", 1)[1].strip()
+                        break
+        except: pass
+        return info
+    
+    def get_memory_info(self):
+        info = {}
+        try:
+            with open("/proc/meminfo") as f:
+                for line in f:
+                    if line.startswith(("MemTotal", "MemAvailable", "SwapTotal")):
+                        k, v = line.split(":")
+                        info[k.strip()] = v.strip()
+        except: pass
+        return info
+    
+    def get_storage_info(self):
+        try:
+            out = subprocess.check_output(["df", "-h", "--output=target,size,used,avail,pcent"], text=True)
+            return [line.split() for line in out.strip().split("\n")[1:] if not line.startswith("tmpfs")]
+        except: return []
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    w = SysInfoGUI()
+    w.show()
+    sys.exit(app.exec())

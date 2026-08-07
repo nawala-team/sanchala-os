@@ -1,0 +1,13 @@
+# Sanchala Cloud - Rclone Configuration Templates
+# Dropbox Template
+
+[dropbox_template]
+type = dropbox
+# OAuth tokens managed by sanchala-cloud-auth
+# token = {"access_token":"...","token_type":"bearer","refresh_token":"...","expiry":"..."}
+
+# Performance
+chunk_size = 48M
+batch_mode = async
+batch_size = 1000
+batch_timeout = 0

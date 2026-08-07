@@ -1,0 +1,30 @@
+# ============================================
+# SANCHALA OS - Dolphin State Configuration
+# ============================================
+# Persistent state and view preferences
+# ============================================
+
+[State]
+# Last visited locations
+firstRun=false
+lastViewMode=0
+lastSorting=0
+
+[IconView]
+# Default icon arrangement
+Arrangement=0
+# Preview enabled
+PreviewsShown=true
+# Sort role
+SortRole=text
+
+[DetailsView]
+# Default column visibility
+ColumnsVisible=size,modifiedTime,type
+# Expandable folders
+Expandable=true
+
+[SplitView]
+# Split view state
+SplitEnabled=false
+SplitOrientation=Horizontal

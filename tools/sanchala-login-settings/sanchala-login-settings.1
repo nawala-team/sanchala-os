@@ -1,0 +1,31 @@
+.TH SANCHALA-LOGIN-SETTINGS 1 "2024" "Sanchala OS" "User Commands"
+.SH NAME
+sanchala-login-settings \- Login screen (SDDM) configuration
+.SH SYNOPSIS
+.B sanchala-login-settings
+[\fIcommand\fR] [\fIoptions\fR]
+.SH DESCRIPTION
+Configure the login screen theme, auto-login, and user list.
+.SH COMMANDS
+.TP
+.B status
+Show current settings
+.TP
+.B theme \fIname\fR
+Set login theme
+.TP
+.B autologin \fIuser\fR
+Enable auto-login for user
+.TP
+.B autologin off
+Disable auto-login
+.TP
+.B userlist \fIon|off\fR
+Show/hide user list
+.SH EXAMPLES
+.TP
+sanchala-login-settings theme breeze
+.TP
+sanchala-login-settings autologin john
+.SH AUTHOR
+Sanchala OS Team

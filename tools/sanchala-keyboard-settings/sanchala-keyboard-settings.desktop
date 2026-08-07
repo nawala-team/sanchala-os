@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Sanchala Keyboard Settings
+Comment=Configure keyboard layout and shortcuts
+Exec=sanchala-keyboard-settings-gui
+Icon=preferences-desktop-keyboard
+Type=Application
+Categories=Settings;HardwareSettings;
+Keywords=keyboard;layout;shortcuts;input;

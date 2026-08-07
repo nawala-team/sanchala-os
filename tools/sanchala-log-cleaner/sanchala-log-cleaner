@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: GPL-3.0
+# Sanchala Log Cleaner - System Log Management
+set -euo pipefail
+VERSION="1.0.0"
+PROGRAM_NAME="sanchala-log-cleaner"
+RED="\033[0;31m" GREEN="\033[0;32m" YELLOW="\033[1;33m" BLUE="\033[0;34m" NC="\033[0m" BOLD="\033[1m"
+print_info() { echo -e "${BLUE}i $1${NC}"; }
+print_success() { echo -e "${GREEN}ok $1${NC}"; }
+print_warning() { echo -e "${YELLOW}! $1${NC}"; }
+print_error() { echo -e "${RED}x $1${NC}"; }
+check_root() { [[ $EUID -eq 0 ]] || { print_error "Root required"; exit 1; }; }
+show_help() {
+cat << HELP
+SANCHALA LOG CLEANER - System Log Management
+USAGE: sanchala-log-cleaner <COMMAND>
+COMMANDS:
+  status            Show log disk usage
+  clean             Clean old logs
+  vacuum <SIZE>     Reduce journal to SIZE
+  rotate            Force log rotation
+  archive           Archive old logs
+  analyze           Analyze log contents
+  errors            Show recent errors
+  clear-journal     Clear systemd journal
+  clear-old <DAYS>  Remove logs older than N days
+OPTIONS:
+  -h, --help        Show this help
+HELP
+}
+cmd_status() {
+    echo -e "${BOLD}Log Disk Usage:${NC}"
+    du -sh /var/log/* 2>/dev/null | sort -rh | head -15
+    [[ -d /var/log/journal ]] && journalctl --disk-usage 2>/dev/null
+    echo -e "${BOLD}Total:${NC} $(du -sh /var/log 2>/dev/null | cut -f1)"
+}
+cmd_clean() {
+    print_info "Cleaning logs..."
+    find /var/log -name "*.gz" -delete 2>/dev/null || true
+    find /var/log -name "*.old" -delete 2>/dev/null || true
+    journalctl --vacuum-time=7d 2>/dev/null || true
+    print_success "Logs cleaned"
+}
+cmd_vacuum() { local size="${1:-100M}"; print_info "Vacuuming to $size..."; journalctl --vacuum-size="$size" 2>/dev/null; print_success "Done"; }
+cmd_rotate() { print_info "Rotating..."; logrotate -f /etc/logrotate.conf 2>/dev/null || true; print_success "Done"; }
+cmd_archive() { local a="/var/log/archive-$(date +%Y%m%d).tar.gz"; print_info "Archiving..."; tar -czf "$a" /var/log/*.log 2>/dev/null; print_success "Archived: $a"; }
+cmd_analyze() { echo -e "${BOLD}Log Analysis:${NC}"; grep -rh "error" /var/log/syslog /var/log/messages 2>/dev/null | head -20; }
+cmd_errors() { echo -e "${BOLD}Recent Errors:${NC}"; journalctl -p err -b --no-pager 2>/dev/null | tail -30 || grep -i error /var/log/syslog 2>/dev/null | tail -30; }
+cmd_clear_journal() { print_info "Clearing journal..."; journalctl --flush --rotate 2>/dev/null; journalctl --vacuum-time=1s 2>/dev/null; print_success "Done"; }
+cmd_clear_old() { local d="${1:-30}"; print_info "Removing logs older than $d days..."; find /var/log -type f -mtime +"$d" -delete 2>/dev/null; print_success "Done"; }
+main() {
+    case "${1:-help}" in
+        status) cmd_status;; clean) check_root; cmd_clean;;
+        vacuum) check_root; shift; cmd_vacuum "$@";; rotate) check_root; cmd_rotate;;
+        archive) check_root; cmd_archive;; analyze) cmd_analyze;; errors) cmd_errors;;
+        clear-journal) check_root; cmd_clear_journal;; clear-old) check_root; shift; cmd_clear_old "$@";;
+        -h|--help|help) show_help;; --version) echo "$PROGRAM_NAME $VERSION";; *) print_error "Unknown: $1"; exit 1;;
+    esac
+}
+main "$@"

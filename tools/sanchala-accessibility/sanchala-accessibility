@@ -1,0 +1,335 @@
+#!/bin/bash
+# ============================================
+# SANCHALA OS - Accessibility Manager
+# ============================================
+# Command-line tool for managing accessibility settings
+# /usr/bin/sanchala-accessibility
+# ============================================
+
+set -e
+
+VERSION="1.0.0"
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/sanchala/accessibility"
+MAIN_CONFIG="$CONFIG_DIR/accessibility.conf"
+PROFILES_CONFIG="$CONFIG_DIR/profiles.conf"
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+print_info() { echo -e "${BLUE}[INFO]${NC} $1"; }
+print_success() { echo -e "${GREEN}[OK]${NC} $1"; }
+print_warning() { echo -e "${YELLOW}[WARN]${NC} $1"; }
+print_error() { echo -e "${RED}[ERROR]${NC} $1"; }
+
+get_config_value() {
+    local section="$1" key="$2" file="${3:-$MAIN_CONFIG}"
+    [[ -f "$file" ]] && awk -F= -v section="[$section]" -v key="$key" '
+        $0 == section { in_section=1; next }
+        /^\[/ { in_section=0 }
+        in_section && $1 == key { print $2; exit }
+    ' "$file"
+}
+
+set_config_value() {
+    local section="$1" key="$2" value="$3" file="${4:-$MAIN_CONFIG}"
+    [[ -f "$file" ]] && sed -i "/^\[$section\]/,/^\[/ s/^$key=.*/$key=$value/" "$file"
+}
+
+# Screen Reader Functions
+screen_reader_status() {
+    pgrep -x "orca" > /dev/null && echo "running" || echo "stopped"
+}
+
+screen_reader_start() {
+    [[ "$(screen_reader_status)" == "running" ]] && { print_warning "Already running"; return 0; }
+    print_info "Starting Orca screen reader..."
+    orca &
+    sleep 1
+    [[ "$(screen_reader_status)" == "running" ]] && { print_success "Started"; set_config_value "ScreenReader" "Enabled" "true"; } || { print_error "Failed"; return 1; }
+}
+
+screen_reader_stop() {
+    [[ "$(screen_reader_status)" == "stopped" ]] && { print_warning "Not running"; return 0; }
+    print_info "Stopping Orca..."
+    pkill -x orca || true
+    sleep 1
+    print_success "Stopped"
+    set_config_value "ScreenReader" "Enabled" "false"
+}
+
+screen_reader_toggle() {
+    [[ "$(screen_reader_status)" == "running" ]] && screen_reader_stop || screen_reader_start
+}
+
+# High Contrast Functions
+high_contrast_enable() {
+    local mode="${1:-high-contrast-dark}"
+    print_info "Enabling high contrast: $mode"
+    case "$mode" in
+        light|high-contrast-light)
+            plasma-apply-colorscheme SanchalaHighContrastLight
+            set_config_value "Visual" "HighContrastMode" "high-contrast-light" ;;
+        dark|high-contrast-dark)
+            plasma-apply-colorscheme SanchalaHighContrastDark
+            set_config_value "Visual" "HighContrastMode" "high-contrast-dark" ;;
+        *) print_error "Unknown mode: $mode"; return 1 ;;
+    esac
+    qdbus org.kde.KWin /KWin reconfigure 2>/dev/null || true
+    print_success "High contrast enabled"
+}
+
+high_contrast_disable() {
+    print_info "Disabling high contrast..."
+    plasma-apply-colorscheme SanchalaDark
+    set_config_value "Visual" "HighContrastMode" "off"
+    print_success "Disabled"
+}
+
+
+
+# Large Text Functions
+large_text_enable() {
+    local scale="${1:-1.5}"
+    print_info "Enabling large text (scale: $scale)..."
+    kwriteconfig5 --file kdeglobals --group KScreen --key ScaleFactor "$scale"
+    set_config_value "TextDisplay" "LargeText" "true"
+    set_config_value "TextDisplay" "FontScale" "$scale"
+    print_success "Large text enabled. Log out for full effect."
+}
+
+large_text_disable() {
+    print_info "Disabling large text..."
+    kwriteconfig5 --file kdeglobals --group KScreen --key ScaleFactor "1.0"
+    set_config_value "TextDisplay" "LargeText" "false"
+    set_config_value "TextDisplay" "FontScale" "1.0"
+    print_success "Large text disabled"
+}
+
+# Large Cursor Functions
+large_cursor_enable() {
+    local size="${1:-48}"
+    print_info "Enabling large cursor (size: $size)..."
+    kwriteconfig5 --file kcminputrc --group Mouse --key cursorSize "$size"
+    set_config_value "Cursor" "LargeCursor" "true"
+    set_config_value "Cursor" "CursorSize" "$size"
+    print_success "Large cursor enabled"
+}
+
+large_cursor_disable() {
+    print_info "Disabling large cursor..."
+    kwriteconfig5 --file kcminputrc --group Mouse --key cursorSize 24
+    set_config_value "Cursor" "LargeCursor" "false"
+    set_config_value "Cursor" "CursorSize" "24"
+    print_success "Large cursor disabled"
+}
+
+# Magnifier Functions
+magnifier_enable() {
+    local level="${1:-2.0}"
+    print_info "Enabling magnifier (level: $level)..."
+    kwriteconfig5 --file kwinrc --group Plugins --key zoomEnabled true
+    qdbus org.kde.KWin /KWin reconfigure 2>/dev/null || true
+    set_config_value "Reading" "Magnifier" "true"
+    set_config_value "Reading" "MagnificationLevel" "$level"
+    print_success "Magnifier enabled. Use Super+= to zoom in, Super+- to zoom out"
+}
+
+magnifier_disable() {
+    print_info "Disabling magnifier..."
+    kwriteconfig5 --file kwinrc --group Plugins --key zoomEnabled false
+    qdbus org.kde.KWin /KWin reconfigure 2>/dev/null || true
+    set_config_value "Reading" "Magnifier" "false"
+    print_success "Magnifier disabled"
+}
+
+# Sticky Keys Functions
+sticky_keys_enable() {
+    print_info "Enabling sticky keys..."
+    kwriteconfig5 --file kaccessrc --group StickyKeys --key StickyKeys true
+    set_config_value "Keyboard" "StickyKeys" "true"
+    print_success "Sticky keys enabled"
+}
+
+sticky_keys_disable() {
+    print_info "Disabling sticky keys..."
+    kwriteconfig5 --file kaccessrc --group StickyKeys --key StickyKeys false
+    set_config_value "Keyboard" "StickyKeys" "false"
+    print_success "Sticky keys disabled"
+}
+
+# Reduce Motion Functions
+reduce_motion_enable() {
+    print_info "Reducing animations..."
+    kwriteconfig5 --file kdeglobals --group KDE --key AnimationDurationFactor 0
+    qdbus org.kde.KWin /KWin reconfigure 2>/dev/null || true
+    set_config_value "Visual" "ReduceMotion" "true"
+    print_success "Motion reduced"
+}
+
+reduce_motion_disable() {
+    print_info "Restoring animations..."
+    kwriteconfig5 --file kdeglobals --group KDE --key AnimationDurationFactor 0.5
+    qdbus org.kde.KWin /KWin reconfigure 2>/dev/null || true
+    set_config_value "Visual" "ReduceMotion" "false"
+    print_success "Animations restored"
+}
+
+# Profile Functions
+apply_profile() {
+    local profile="$1"
+    print_info "Applying accessibility profile: $profile"
+    
+    case "$profile" in
+        default)
+            screen_reader_stop 2>/dev/null || true
+            high_contrast_disable 2>/dev/null || true
+            large_text_disable 2>/dev/null || true
+            large_cursor_disable 2>/dev/null || true
+            reduce_motion_disable 2>/dev/null || true
+            magnifier_disable 2>/dev/null || true
+            sticky_keys_disable 2>/dev/null || true
+            ;;
+        low-vision)
+            large_text_enable 1.5
+            large_cursor_enable 64
+            magnifier_enable 2.0
+            reduce_motion_enable
+            ;;
+        blind)
+            screen_reader_start
+            reduce_motion_enable
+            ;;
+        high-contrast-light)
+            high_contrast_enable light
+            large_cursor_enable 48
+            ;;
+        high-contrast-dark)
+            high_contrast_enable dark
+            large_cursor_enable 48
+            ;;
+        motor)
+            large_cursor_enable 64
+            sticky_keys_enable
+            ;;
+        *)
+            print_error "Unknown profile: $profile"
+            return 1
+            ;;
+    esac
+    
+    set_config_value "General" "Profile" "$profile"
+    print_success "Profile '$profile' applied"
+}
+
+# Status Function
+show_status() {
+    echo "=== Sanchala OS Accessibility Status ==="
+    echo ""
+    echo "Screen Reader (Orca): $(screen_reader_status)"
+    echo "High Contrast: $(get_config_value 'Visual' 'HighContrastMode')"
+    echo "Large Text: $(get_config_value 'TextDisplay' 'LargeText')"
+    echo "Font Scale: $(get_config_value 'TextDisplay' 'FontScale')"
+    echo "Large Cursor: $(get_config_value 'Cursor' 'LargeCursor')"
+    echo "Cursor Size: $(get_config_value 'Cursor' 'CursorSize')"
+    echo "Magnifier: $(get_config_value 'Reading' 'Magnifier')"
+    echo "Sticky Keys: $(get_config_value 'Keyboard' 'StickyKeys')"
+    echo "Reduce Motion: $(get_config_value 'Visual' 'ReduceMotion')"
+    echo "Active Profile: $(get_config_value 'General' 'Profile')"
+}
+
+# Help Function
+show_help() {
+    cat << EOF
+Sanchala OS Accessibility Manager v$VERSION
+
+Usage: sanchala-accessibility <command> [options]
+
+Commands:
+  status                    Show current accessibility settings
+  
+  screen-reader <action>    Manage screen reader (start|stop|toggle)
+  high-contrast <action>    Manage high contrast (enable|disable|toggle) [light|dark]
+  large-text <action>       Manage large text (enable|disable) [scale]
+  large-cursor <action>     Manage large cursor (enable|disable) [size]
+  magnifier <action>        Manage magnifier (enable|disable) [level]
+  sticky-keys <action>      Manage sticky keys (enable|disable)
+  reduce-motion <action>    Manage animations (enable|disable)
+  
+  profile <name>            Apply accessibility profile
+                            (default|low-vision|blind|high-contrast-light|
+                             high-contrast-dark|motor)
+  
+  help                      Show this help message
+
+Examples:
+  sanchala-accessibility screen-reader start
+  sanchala-accessibility high-contrast enable dark
+  sanchala-accessibility large-text enable 1.5
+  sanchala-accessibility large-cursor enable 64
+  sanchala-accessibility profile low-vision
+
+Keyboard Shortcuts:
+  Alt+Super+S       Toggle screen reader
+  Super+U           Open accessibility settings
+  Super+Alt+H       Toggle high contrast
+  Super+=           Zoom in (magnifier)
+  Super+-           Zoom out (magnifier)
+EOF
+}
+
+# Main
+case "${1:-}" in
+    status) show_status ;;
+    screen-reader)
+        case "${2:-}" in
+            start) screen_reader_start ;;
+            stop) screen_reader_stop ;;
+            toggle) screen_reader_toggle ;;
+            *) print_error "Usage: screen-reader <start|stop|toggle>" ;;
+        esac ;;
+    high-contrast)
+        case "${2:-}" in
+            enable) high_contrast_enable "${3:-dark}" ;;
+            disable) high_contrast_disable ;;
+            toggle) high_contrast_toggle ;;
+            *) print_error "Usage: high-contrast <enable|disable|toggle> [light|dark]" ;;
+        esac ;;
+    large-text)
+        case "${2:-}" in
+            enable) large_text_enable "${3:-1.5}" ;;
+            disable) large_text_disable ;;
+            *) print_error "Usage: large-text <enable|disable> [scale]" ;;
+        esac ;;
+    large-cursor)
+        case "${2:-}" in
+            enable) large_cursor_enable "${3:-48}" ;;
+            disable) large_cursor_disable ;;
+            *) print_error "Usage: large-cursor <enable|disable> [size]" ;;
+        esac ;;
+    magnifier)
+        case "${2:-}" in
+            enable) magnifier_enable "${3:-2.0}" ;;
+            disable) magnifier_disable ;;
+            *) print_error "Usage: magnifier <enable|disable> [level]" ;;
+        esac ;;
+    sticky-keys)
+        case "${2:-}" in
+            enable) sticky_keys_enable ;;
+            disable) sticky_keys_disable ;;
+            *) print_error "Usage: sticky-keys <enable|disable>" ;;
+        esac ;;
+    reduce-motion)
+        case "${2:-}" in
+            enable) reduce_motion_enable ;;
+            disable) reduce_motion_disable ;;
+            *) print_error "Usage: reduce-motion <enable|disable>" ;;
+        esac ;;
+    profile) apply_profile "${2:-default}" ;;
+    help|--help|-h) show_help ;;
+    *) show_help ;;
+esac
+

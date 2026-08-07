@@ -1,0 +1,84 @@
+# ============================================
+# SANCHALA OS - Firefox AppArmor Profile
+# ============================================
+
+#include <tunables/global>
+
+profile firefox /usr/lib/firefox/firefox flags=(attach_disconnected) {
+  #include <abstractions/base>
+  #include <abstractions/audio>
+  #include <abstractions/dbus-session-strict>
+  #include <abstractions/gnome>
+  #include <abstractions/nameservice>
+  #include <abstractions/ssl_certs>
+  #include <abstractions/user-download-strict>
+
+  # Deny sensitive paths
+  deny @{HOME}/.ssh/** rw,
+  deny @{HOME}/.gnupg/** rw,
+  deny @{HOME}/.config/chromium/** rw,
+  deny @{HOME}/.mozilla/**/key*.db rw,
+  deny @{HOME}/.pki/** rw,
+  deny /etc/passwd r,
+  deny /etc/shadow r,
+  
+  # Firefox directories
+  owner @{HOME}/.mozilla/** rw,
+  owner @{HOME}/.cache/mozilla/** rw,
+  owner @{HOME}/.config/mozilla/** rw,
+  
+  # Downloads only (read-write)
+  owner @{HOME}/Downloads/** rw,
+  
+  # Other home directories (read-only for file picker)
+  owner @{HOME}/Documents/** r,
+  owner @{HOME}/Pictures/** r,
+  owner @{HOME}/Videos/** r,
+  owner @{HOME}/Music/** r,
+  
+  # Firefox binaries
+  /usr/lib/firefox/** rm,
+  /usr/lib/firefox/firefox ix,
+  /usr/lib/firefox/firefox-bin ix,
+  /usr/lib/firefox/plugin-container ix,
+  
+  # System libraries
+  /usr/lib/** rm,
+  /usr/share/** r,
+  
+  # Proc filesystem
+  owner /proc/@{pid}/** r,
+  /proc/sys/kernel/random/uuid r,
+  
+  # Temp files
+  /tmp/** rw,
+  owner /var/tmp/** rw,
+  
+  # Network
+  network inet stream,
+  network inet6 stream,
+  network inet dgram,
+  network inet6 dgram,
+  network netlink raw,
+  
+  # DBus
+  dbus send bus=session,
+  dbus receive bus=session,
+  
+  # GPU access
+  /dev/dri/** rw,
+  /dev/nvidia* rw,
+  
+  # Audio
+  /dev/snd/** rw,
+  
+  # Camera/Mic (ask permission via portal)
+  /dev/video* rw,
+  
+  # Wayland
+  owner /run/user/*/wayland-* rw,
+  
+  # PipeWire/PulseAudio
+  owner /run/user/*/pipewire-* rw,
+  owner /run/user/*/pulse/** rw,
+}

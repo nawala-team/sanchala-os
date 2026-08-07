@@ -1,0 +1,84 @@
+#!/bin/bash
+# ============================================================================
+# SANCHALA OS - Performance Benchmark Tool
+# ============================================================================
+# Version: 1.0 | Usage: sanchala-benchmark [boot|memory|io|all]
+# ============================================================================
+
+set -euo pipefail
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+TARGET_BOOT=3.0
+TARGET_MEM=800
+
+print_header() {
+    echo -e "${BLUE}══════════════════════════════════════════${NC}"
+    echo -e "${BLUE}  SANCHALA OS Benchmark v1.0${NC}"
+    echo -e "${BLUE}══════════════════════════════════════════${NC}"
+    echo
+}
+
+benchmark_boot() {
+    echo -e "${YELLOW}▶ Boot Time${NC}"
+    systemd-analyze
+    echo
+    echo "Top 10 slowest:"
+    systemd-analyze blame | head -10
+    echo
+    echo "Critical chain:"
+    systemd-analyze critical-chain --no-pager 2>/dev/null || systemd-analyze critical-chain
+}
+
+benchmark_memory() {
+    echo -e "${YELLOW}▶ Memory Usage${NC}"
+    free -h
+    echo
+    
+    local used_mb=$(free -m | awk '/^Mem:/ {print $3}')
+    echo "Used: ${used_mb} MB (Target: <${TARGET_MEM} MB)"
+    
+    echo
+    echo "ZRAM Status:"
+    zramctl 2>/dev/null || echo "ZRAM not active"
+    
+    echo
+    echo "Top memory consumers:"
+    ps aux --sort=-%mem | head -8
+}
+
+benchmark_io() {
+    echo -e "${YELLOW}▶ I/O Schedulers${NC}"
+    for disk in /sys/block/sd* /sys/block/nvme* 2>/dev/null; do
+        if [[ -e "$disk/queue/scheduler" ]]; then
+            local name=$(basename "$disk")
+            local sched=$(cat "$disk/queue/scheduler" | grep -oP '\[\K[^\]]+')
+            echo "  $name: $sched"
+        fi
+    done
+    
+    echo
+    echo "Quick write test:"
+    dd if=/dev/zero of=/tmp/dd-test bs=1M count=128 conv=fdatasync 2>&1 | tail -1
+    rm -f /tmp/dd-test
+}
+
+print_header
+case "${1:-help}" in
+    boot) benchmark_boot ;;
+    memory|mem) benchmark_memory ;;
+    io|disk) benchmark_io ;;
+    all)
+        benchmark_boot; echo
+        benchmark_memory; echo
+        benchmark_io
+        ;;
+    *)
+        echo "Usage: sanchala-benchmark [boot|memory|io|all]"
+        ;;
+esac
+echo -e "\n${BLUE}Done.${NC}"

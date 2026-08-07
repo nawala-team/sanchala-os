@@ -1,0 +1,33 @@
+[Desktop Entry]
+Type=Service
+ServiceTypes=KonqPopupMenu/Plugin
+MimeType=all/allfiles;inode/directory;
+Actions=shareEmail;shareKDEConnect;shareQR
+X-KDE-Priority=TopLevel
+X-KDE-StartupNotify=false
+X-KDE-Submenu=Share
+X-KDE-Submenu-Icon=emblem-shared-symbolic
+
+[Desktop Action shareEmail]
+Name=Send via Email
+Name[es]=Enviar por correo electrónico
+Name[fr]=Envoyer par e-mail
+Name[de]=Per E-Mail senden
+Icon=mail-send
+Exec=xdg-email --attach %f
+
+[Desktop Action shareKDEConnect]
+Name=Send to Phone (KDE Connect)
+Name[es]=Enviar al teléfono (KDE Connect)
+Name[fr]=Envoyer au téléphone (KDE Connect)
+Name[de]=An Telefon senden (KDE Connect)
+Icon=kdeconnect
+Exec=kdeconnect-cli --share %f -d $(kdeconnect-cli -l --id-only | head -1)
+
+[Desktop Action shareQR]
+Name=Create QR Code
+Name[es]=Crear código QR
+Name[fr]=Créer un code QR
+Name[de]=QR-Code erstellen
+Icon=view-barcode-qr
+Exec=sh -c 'qrencode -o "/tmp/qrcode_$(basename "%f").png" -s 10 "file://%f" && xdg-open "/tmp/qrcode_$(basename "%f").png"'

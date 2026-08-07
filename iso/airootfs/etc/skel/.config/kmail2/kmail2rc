@@ -1,0 +1,177 @@
+# ============================================================================
+# SANCHALA OS - KMail Configuration
+# ============================================================================
+# Email Client - Privacy-focused with modern defaults
+# ============================================================================
+
+[General]
+# First run wizard completed
+FirstRunCompleted=false
+
+# Show system tray icon
+SystemTrayEnabled=true
+
+# Close to tray
+CloseToTray=true
+
+# Check mail on startup
+CheckOnStartup=true
+
+[Composer]
+# Default text format: plain, html, auto
+DefaultTextFormat=plain
+
+# Confirm sending
+ConfirmSend=false
+
+# Auto-save drafts (seconds, 0=disabled)
+AutoSaveInterval=60
+
+# Word wrap at column
+WordWrap=true
+WordWrapColumn=78
+
+# Quote character
+QuoteCharacter=>
+
+# Reply above quote (top-posting)
+ReplyAboveQuote=false
+
+# Signature position: above, below
+SignaturePosition=below
+
+# Include original message in reply
+IncludeOriginalMessage=true
+
+# Strip signature on reply
+StripSignatureOnReply=true
+
+[Reader]
+# HTML rendering: never, sameServer, always
+HtmlRendering=sameServer
+
+# Load external references (tracking pixels)
+LoadExternalReferences=false
+
+# Show attachments inline
+ShowAttachmentsInline=false
+
+# Mark as read after (seconds)
+MarkAsReadAfter=0
+
+# Thread view
+ThreadMessages=true
+ThreadBySubject=true
+
+# Show message preview pane
+ShowPreviewPane=true
+
+# Preview pane position: bottom, right
+PreviewPanePosition=bottom
+
+[Appearance]
+# Font settings
+UseSystemFont=true
+
+# Show unread count in tray
+ShowUnreadInTray=true
+
+# Folder icon: standard, unread
+FolderIcon=unread
+
+# Message list columns
+ShowDate=true
+ShowFrom=true
+ShowSubject=true
+ShowSize=false
+ShowAttachment=true
+
+[Folders]
+# Default folders
+DraftsFolder=Drafts
+SentFolder=Sent
+TrashFolder=Trash
+TemplatesFolder=Templates
+
+# Archive folder
+ArchiveFolder=Archive
+
+# Auto-expunge trash after (days)
+ExpungeTrashAfter=30
+
+# Compact folders automatically
+AutoCompact=true
+
+[Security]
+# GPG/S-MIME integration
+EnableCrypto=true
+
+# Sign messages by default
+SignByDefault=false
+
+# Encrypt to self
+EncryptToSelf=true
+
+# Warn on unencrypted reply to encrypted
+WarnUnencryptedReply=true
+
+# MDN (read receipts): ask, never, always
+MDNPolicy=ask
+
+[Privacy]
+# Block remote content by default (tracking protection)
+BlockRemoteContent=true
+
+# Strip identifying headers on send
+StripIdentifyingHeaders=false
+
+# Proxy images through cache
+ProxyImages=false
+
+[Notifications]
+# New mail notification
+NotifyNewMail=true
+
+# Play sound
+PlaySound=true
+SoundFile=/usr/share/sounds/sanchala/notifications/email.ogg
+
+# Desktop notification
+DesktopNotification=true
+
+[Sync]
+# Default sync interval (minutes)
+SyncInterval=5
+
+# Sync method: manual, interval, push (if supported)
+SyncMethod=interval
+
+# Max messages to sync (IMAP)
+MaxMessagesToSync=1000
+
+# Sync all folders or subscribed only
+SyncAllFolders=false
+
+[Filter]
+# Enable spam filtering
+SpamFilterEnabled=true
+
+# SpamAssassin integration
+UseSpamAssassin=false
+
+# Sieve filter support
+SieveSupport=true
+
+[Antiphishing]
+# Highlight external sender warnings
+ExternalSenderWarning=true
+
+# Warn on suspicious links
+SuspiciousLinkWarning=true
+
+# Check against known phishing domains
+PhishingDomainCheck=true
+
+[MainWindow]
+Height=700
+Width=1100

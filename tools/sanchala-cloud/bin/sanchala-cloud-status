@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+# Sanchala Cloud Status Query Tool
+# Quick status checks for cloud accounts
+
+set -euo pipefail
+
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/sanchala-cloud"
+DATA_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/sanchala-cloud"
+RCLONE_CONFIG="$CONFIG_DIR/rclone.conf"
+
+get_daemon_status() {
+    if systemctl --user is-active sanchala-cloudd &>/dev/null; then
+        echo "running"
+    else
+        echo "stopped"
+    fi
+}
+
+get_account_status() {
+    local account="$1"
+    # Query D-Bus for status
+    local status
+    status=$(dbus-send --session --print-reply --dest=org.sanchala.cloud \
+        /org/sanchala/cloud org.sanchala.cloud.GetAccountStatus \
+        string:"$account" 2>/dev/null | grep string | cut -d'"' -f2) || status="unknown"
+    echo "$status"
+}
+
+get_file_status() {
+    local path="$1"
+    # Check extended attributes
+    local pinned
+    pinned=$(getfattr -n user.sanchala.pinned "$path" 2>/dev/null | grep -q "true" && echo "pinned" || echo "")
+    
+    # Query database
+    if [[ -f "$DATA_DIR/cloud.db" ]]; then
+        local status
+        status=$(sqlite3 "$DATA_DIR/cloud.db" \
+            "SELECT status FROM file_status WHERE path='$path'" 2>/dev/null) || status="unknown"
+        [[ -n "$pinned" ]] && status="$status (pinned)"
+        echo "$status"
+    else
+        echo "unknown"
+    fi
+}
+
+show_summary() {
+    echo "=== Sanchala Cloud Status ==="
+    echo
+    echo "Daemon: $(get_daemon_status)"
+    echo
+    echo "Accounts:"
+    if [[ -f "$RCLONE_CONFIG" ]]; then
+        rclone listremotes --config "$RCLONE_CONFIG" | while read -r remote; do
+            remote="${remote%:}"
+            echo "  - $remote: $(get_account_status "$remote")"
+        done
+    else
+        echo "  (none configured)"
+    fi
+}
+
+case "${1:-}" in
+    daemon)  get_daemon_status ;;
+    account) get_account_status "${2:-}" ;;
+    file)    get_file_status "${2:-}" ;;
+    *)       show_summary ;;
+esac

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Cursor Themes
+Comment=Manage cursor themes
+Exec=sanchala-cursor-themes gui
+Icon=preferences-desktop-cursor
+Terminal=false
+Type=Application
+Categories=Settings;DesktopSettings;
+Keywords=cursor;mouse;pointer;theme;

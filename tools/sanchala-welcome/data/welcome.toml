@@ -1,0 +1,72 @@
+# Sanchala Welcome Configuration
+# /etc/sanchala/welcome.toml
+
+[wizard]
+# Pages to skip (for OEM/enterprise)
+skip_pages = []
+
+# Timeout before auto-advancing welcome page (0 = disabled)
+welcome_timeout_secs = 0
+
+# Enable accessibility announcements
+accessibility = true
+
+# Animation speed multiplier (0.5 = slower, 2.0 = faster)
+animation_speed = 1.0
+
+[wizard.defaults]
+# Auto-detect if empty
+language = ""
+timezone = ""
+keyboard = ""
+
+[wizard.locked]
+# Values users cannot change (enterprise use)
+# Example: telemetry = false
+
+[tour]
+# Automatically start tour after setup
+auto_start = false
+
+# Default tour to offer
+default_tour = "desktop"
+
+# Available tours
+available = ["desktop", "security", "privacy"]
+
+[tips]
+# Enable tips system
+enabled = true
+
+# How often to show tips
+# Options: startup, daily, weekly, on_idle
+frequency = "daily"
+
+# Tip categories to show (or ["all"])
+categories = ["all"]
+
+# Minimum idle time before showing tip (seconds)
+idle_threshold_secs = 300
+
+# Maximum tips per day
+max_daily_tips = 3
+
+[appearance]
+# OEM branding overrides
+logo = ""
+background = ""
+accent_color = ""
+
+# Custom welcome message
+welcome_title = "Welcome to Sanchala OS"
+welcome_subtitle = "Beautiful. Secure. Private."
+
+[integration]
+# SDDM auto-launch on first boot
+sddm_trigger = true
+
+# Create desktop shortcut for re-running wizard
+desktop_shortcut = true
+
+# Add to help menu
+help_menu_entry = true

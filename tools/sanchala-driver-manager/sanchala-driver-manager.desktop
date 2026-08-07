@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Sanchala Driver Manager
+Comment=Manage hardware drivers
+Exec=sanchala-driver-manager-gui
+Icon=application-x-firmware
+Type=Application
+Categories=Settings;System;
+Keywords=driver;hardware;gpu;nvidia;

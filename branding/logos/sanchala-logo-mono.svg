@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  SANCHALA OS - Monochrome Logo
+  Version: 1.0
+  Description: Single color variant for limited color contexts
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 100" width="300" height="100">
+  <!-- Logo Mark - Monochrome -->
+  <g id="logomark-mono" transform="translate(10, 10)">
+    <circle cx="40" cy="40" r="36" fill="none" stroke="currentColor" stroke-width="3"/>
+    
+    <!-- Motion arcs -->
+    <path d="M 40 6 A 34 34 0 0 1 72 28" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+    <path d="M 74 40 A 34 34 0 0 1 56 70" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" opacity="0.7"/>
+    <path d="M 40 74 A 34 34 0 0 1 8 52" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" opacity="0.5"/>
+    
+    <!-- Inner gear -->
+    <circle cx="40" cy="40" r="12" fill="currentColor"/>
+    <rect x="38" y="16" width="4" height="12" rx="2" fill="currentColor"/>
+    <rect x="38" y="52" width="4" height="12" rx="2" fill="currentColor"/>
+    <rect x="16" y="38" width="12" height="4" rx="2" fill="currentColor"/>
+    <rect x="52" y="38" width="12" height="4" rx="2" fill="currentColor"/>
+    
+    <!-- Center dot -->
+    <circle cx="40" cy="40" r="5" fill="#FFFFFF"/>
+    <circle cx="40" cy="40" r="3" fill="currentColor"/>
+  </g>
+  
+  <!-- Wordmark - Monochrome -->
+  <g id="wordmark-mono" transform="translate(100, 35)">
+    <text x="0" y="30" font-family="Inter, Arial, sans-serif" font-size="36" font-weight="600" fill="currentColor" letter-spacing="2">
+      SANCHALA
+    </text>
+    <text x="2" y="48" font-family="Inter, Arial, sans-serif" font-size="10" font-weight="400" fill="currentColor" letter-spacing="4" opacity="0.7">
+      SET IN MOTION
+    </text>
+  </g>
+</svg>

@@ -1,0 +1,26 @@
+# Sanchala Scheduler - Daily Backup Template
+# SPDX-License-Identifier: GPL-3.0
+
+[template]
+name = "daily-backup"
+description = "Automatic daily backup at specified time"
+category = "backup"
+icon = "backup"
+
+[task]
+name = "auto-backup"
+description = "Sanchala Automatic Backup"
+command = "/usr/bin/sanchala-backup create 'Scheduled backup'"
+working_directory = "~"
+
+[schedule]
+type = "calendar"
+calendar = "*-*-* 03:00:00"
+persistent = true
+randomized_delay = "5min"
+
+[options]
+notify_on_complete = true
+notify_on_failure = true
+retry_on_failure = false
+log_output = true

@@ -1,0 +1,30 @@
+# SANCHALA OS - FIDO2/U2F udev Rules
+# Enables non-root access to security keys
+
+# Generic FIDO/U2F devices
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1050", MODE="0660", GROUP="plugdev", TAG+="uaccess"
+
+# YubiKey
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1050", ATTRS{idProduct}=="0113|0114|0115|0116|0120|0121|0200|0402|0403|0406|0407|0410", MODE="0660", GROUP="plugdev", TAG+="uaccess"
+
+# SoloKey
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="a2ca", MODE="0660", GROUP="plugdev", TAG+="uaccess"
+
+# Google Titan
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="18d1", ATTRS{idProduct}=="5026", MODE="0660", GROUP="plugdev", TAG+="uaccess"
+
+# Thetis
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1ea8", MODE="0660", GROUP="plugdev", TAG+="uaccess"
+
+# Feitian
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="096e", MODE="0660", GROUP="plugdev", TAG+="uaccess"
+
+# Nitrokey
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="20a0", MODE="0660", GROUP="plugdev", TAG+="uaccess"
+
+# OnlyKey
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1d50", ATTRS{idProduct}=="60fc", MODE="0660", GROUP="plugdev", TAG+="uaccess"
+
+# Generic FIDO2 (fallback)
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0660", GROUP="plugdev", TAG+="uaccess", \
+  ENV{ID_SECURITY_TOKEN}=="1"

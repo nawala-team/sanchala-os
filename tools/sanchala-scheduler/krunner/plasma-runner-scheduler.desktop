@@ -1,0 +1,16 @@
+# Sanchala Scheduler KRunner Plugin
+# Provides quick task scheduling from KRunner
+
+[Desktop Entry]
+Name=Task Scheduler
+Comment=Schedule and manage automated tasks
+Icon=chronometer
+Type=Service
+X-KDE-ServiceTypes=Plasma/Runner
+
+X-Plasma-API=dbus
+
+[PropertyDef::X-Plasma-Args]
+Type=QString
+
+Keywords=schedule,task,timer,cron,automation,backup

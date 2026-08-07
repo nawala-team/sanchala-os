@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Sanchala Notes
+Comment=Beautiful note-taking application
+Exec=sanchala-notes
+Icon=knotes
+Terminal=false
+Type=Application
+Categories=Utility;Office;
+Keywords=notes;memo;text;markdown;

@@ -1,0 +1,145 @@
+name: 🧪 Beta Bug Report
+description: Report a bug found during beta testing
+title: "[BETA] "
+labels: ["bug", "beta", "needs-triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for testing Sanchala OS Beta! Please fill out this form to help us fix the issue.
+
+  - type: input
+    id: beta-version
+    attributes:
+      label: Beta Version
+      description: Which beta version are you using?
+      placeholder: "e.g., 1.0-beta.2"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      description: Which part of Sanchala OS is affected?
+      options:
+        - Installation / Calamares
+        - Boot / GRUB / Plymouth
+        - Desktop (KDE Plasma)
+        - Dock / Panel / Global Menu
+        - Sanchala Guardian
+        - Sanchala Store
+        - Sanchala Welcome
+        - Sanchala Backup
+        - Security (AppArmor, Firewall)
+        - Encryption (LUKS)
+        - Networking (WiFi, Ethernet, VPN)
+        - Graphics / Display
+        - Audio / Sound
+        - Bluetooth
+        - Power Management / Suspend
+        - Storage / Btrfs / Snapshots
+        - Updates / Package Manager
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: How severe is this issue?
+      options:
+        - Critical (System unusable, data loss risk)
+        - High (Major feature broken, no workaround)
+        - Medium (Feature impaired, workaround exists)
+        - Low (Minor issue, cosmetic)
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear description of the bug
+      placeholder: What went wrong?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: How can we reproduce this issue?
+      placeholder: |
+        1. Go to...
+        2. Click on...
+        3. See error...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected vs Actual
+      description: What should happen vs what actually happens?
+      placeholder: |
+        Expected: ...
+        Actual: ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: system-info
+    attributes:
+      label: System Information
+      description: Run `sanchala-info` or provide manually
+      placeholder: |
+        - Sanchala Version: 
+        - Kernel: (uname -r)
+        - CPU: 
+        - GPU: 
+        - RAM: 
+        - Install Type: (Fresh/Upgrade/VM)
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant Logs
+      description: Include relevant log output (journalctl, dmesg, etc.)
+      render: shell
+
+  - type: dropdown
+    id: reproducible
+    attributes:
+      label: Reproducibility
+      description: How often can you reproduce this?
+      options:
+        - Always (100%)
+        - Often (>50%)
+        - Sometimes (<50%)
+        - Rarely
+        - Only once
+
+  - type: textarea
+    id: workaround
+    attributes:
+      label: Workaround
+      description: Have you found any workaround?
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I checked the Known Issues document
+          required: true
+        - label: I searched existing issues for duplicates
+          required: true
+        - label: I am using the latest beta version
+          required: true

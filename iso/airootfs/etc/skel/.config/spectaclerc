@@ -1,0 +1,153 @@
+# ============================================
+# SANCHALA OS - Spectacle Screenshot Configuration
+# ============================================
+# macOS-quality screenshot experience
+# Privacy-first, powerful capture tools
+# ============================================
+
+[General]
+# Default capture mode (0=Fullscreen, 1=Current Screen, 2=Active Window, 3=Region, 4=Window Under Cursor)
+launchAction=3
+# Remember last used capture mode
+rememberLastRectangularRegion=true
+# Show magnifier for precise selection
+showMagnifier=true
+magnifierPixelCount=15
+
+# Screenshot quality
+compressionQuality=95
+# Auto-detect content and optimize
+useContentBasedCompression=false
+
+# Clipboard behavior
+clipboardGroup=PostScreenshotCopyImage
+# Copy to clipboard after capture
+copyImageToClipboard=true
+# Also save to file
+copySaveLocationToClipboard=false
+
+# Notification after screenshot
+showOnScreenNotification=true
+autoSaveImage=true
+
+# Include mouse pointer
+includePointer=false
+
+# Include window decorations
+includeDecorations=true
+
+# On-click action (0=Save, 1=Copy to Clipboard, 2=Open With, 3=Edit)
+onClickAction=1
+
+# Transient window mode (0=Never, 1=Always, 2=Ask)
+transientOnly=0
+
+[ImageGrabber]
+# Window capture includes shadows (macOS-like)
+includeWindowShadow=true
+# Translucent background for window captures
+translucentWindowBackground=false
+
+[VideoCapture]
+# Video format (webm recommended for quality/size)
+preferredVideoFormat=webm
+# Include audio in recordings
+includeAudio=true
+# Audio source (pipewire default)
+audioSource=default
+
+[GuiConfig]
+# Remember window position
+rememberWindowPosition=true
+# Preview before save
+showPreviewBeforeSave=true
+# Editor opens in annotate mode
+defaultEditorMode=annotate
+
+[Save]
+# Default save location
+defaultSaveLocation[$e]=$HOME/Pictures/Screenshots
+# Save filename template
+# %Y=year, %m=month, %d=day, %H=hour, %M=minute, %S=second
+# %T=timestamp, %n=sequential number
+saveFilenameFormat=Screenshot_%Y-%m-%d_%H-%M-%S
+# Default image format
+preferredImageFormat=png
+# Fallback format for clipboard paste
+clipboardImageFormat=png
+
+[TimedScreenshots]
+# Default delay in seconds
+timerDelay=5
+# Countdown notification
+showCountdown=true
+
+[Annotation]
+# Default pen color (Sanchala accent blue)
+penColor=#1a237e
+# Pen width
+penWidth=3
+# Highlighter color
+highlighterColor=#ffeb3b
+highlighterWidth=20
+# Arrow color
+arrowColor=#e91e63
+# Text color
+textColor=#212121
+# Font for annotations
+annotationFont=Inter,12,-1,5,50,0,0,0,0,0
+# Blur tool for privacy
+blurRadius=15
+# Number annotation style
+numberAnnotationSize=24
+numberAnnotationColor=#1a237e
+
+[Tools]
+# External annotation tool (fallback)
+externalAnnotationTool=krita
+# OCR tool integration
+ocrTool=tesseract
+# Quick edit tool
+quickEditTool=gwenview
+
+[PrintScreen]
+# Use Spectacle for Print Screen
+usePrintScreenKey=true
+
+[Shortcuts]
+# In-app shortcuts
+Save=Ctrl+S
+SaveAs=Ctrl+Shift+S
+CopyToClipboard=Ctrl+C
+Print=Ctrl+P
+Annotate=Ctrl+A
+OpenWith=Ctrl+O
+NewScreenshot=Ctrl+N
+Quit=Ctrl+Q
+Undo=Ctrl+Z
+Redo=Ctrl+Y
+
+[RecentCaptures]
+# Remember recent captures for quick access
+maxRecentCaptures=20
+showRecentInMenu=true
+
+[Export]
+# Quick export destinations
+enableQuickShare=true
+# Share services (comma-separated)
+shareServices=clipboard,file,imgur,nextcloud
+
+[Wayland]
+# PipeWire screen capture (required for Wayland)
+usePipeWire=true
+# Portal-based capture
+useXdgPortal=true
+
+[Privacy]
+# Auto-blur detected sensitive content
+autoBlurSensitive=false
+# Strip EXIF metadata from screenshots
+stripMetadata=true
+# No location data
+includeLocationData=false

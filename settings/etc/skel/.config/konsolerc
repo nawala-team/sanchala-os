@@ -1,0 +1,16 @@
+# ============================================
+# SANCHALA OS - Konsole Terminal Settings
+# ============================================
+# Beautiful terminal with JetBrains Mono font
+# Sanchala Dark color scheme
+# ============================================
+
+[Desktop Entry]
+DefaultProfile=Sanchala.profile
+
+[General]
+ConfigVersion=1
+
+[MainWindow]
+MenuBar=Disabled
+ToolBarsMovable=Disabled

@@ -1,0 +1,11 @@
+[Desktop Action OCR]
+Name=Extract Text (OCR)
+Icon=text-x-generic
+Exec=sanchala-ocr %f
+
+[Desktop Entry]
+Type=Service
+ServiceTypes=KonqPopupMenu/Plugin
+MimeType=image/png;image/jpeg;image/tiff;image/bmp;application/pdf;
+Actions=OCR;
+X-KDE-Priority=TopLevel

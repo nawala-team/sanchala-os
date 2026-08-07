@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Sanchala Contacts
+Comment=Contact Management
+Exec=sanchala-contacts
+Icon=contact-new
+Terminal=false
+Type=Application
+Categories=Office;ContactManagement;

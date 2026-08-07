@@ -1,0 +1,44 @@
+{
+  "name": "sanchala-diagnostics",
+  "version": "1.0.0",
+  "description": "macOS-style Activity Monitor + System Information for Sanchala OS",
+  "author": "Sanchala Team",
+  "license": "GPL-3.0",
+  "categories": ["System", "Monitor", "Utilities"],
+  "keywords": ["diagnostics", "monitor", "activity", "system-info", "hardware"],
+  "dependencies": {
+    "required": [],
+    "optional": [
+      "btop",
+      "htop",
+      "smartmontools",
+      "lm_sensors",
+      "pciutils",
+      "usbutils",
+      "sysstat",
+      "vnstat",
+      "speedtest-cli"
+    ]
+  },
+  "files": {
+    "bin": "sanchala-diagnostics",
+    "lib": ["lib/system.sh", "lib/process.sh", "lib/disk.sh", "lib/network.sh", "lib/hardware.sh"],
+    "config": ["config/btop.conf", "config/diagnostics.toml"]
+  },
+  "install": {
+    "bin_path": "/usr/bin/sanchala-diagnostics",
+    "lib_path": "/usr/lib/sanchala/diagnostics/",
+    "config_path": "/etc/sanchala/diagnostics/",
+    "btop_theme": "~/.config/btop/themes/sanchala.theme"
+  },
+  "permissions": [
+    "system-info",
+    "process-list",
+    "hardware-access"
+  ],
+  "integration": {
+    "plasma_widget": "org.sanchala.sysmonitor",
+    "desktop_entry": true,
+    "systemd_service": false
+  }
+}

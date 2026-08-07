@@ -1,0 +1,22 @@
+[Unit]
+Description=Sanchala Welcome D-Bus Service
+Documentation=man:sanchala-welcomd(1)
+After=dbus.service
+
+[Service]
+Type=dbus
+BusName=id.sanchala.Welcome1
+ExecStart=/usr/bin/sanchala-welcomd
+Restart=on-failure
+RestartSec=5
+
+# Security hardening
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=yes
+ReadWritePaths=/var/lib/sanchala/welcome
+
+[Install]
+WantedBy=multi-user.target
+Alias=dbus-id.sanchala.Welcome1.service

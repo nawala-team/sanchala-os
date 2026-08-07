@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: GPL-3.0
+# Sanchala Font Manager - Font Management Tool
+
+set -euo pipefail
+VERSION="1.0.0"
+
+FONT_DIRS=("/usr/share/fonts" "$HOME/.local/share/fonts" "$HOME/.fonts")
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/sanchala/fonts"
+
+RED='\033[0;31m' GREEN='\033[0;32m' BLUE='\033[0;34m' NC='\033[0m'
+info() { echo -e "${BLUE}ℹ${NC} $1"; }
+ok() { echo -e "${GREEN}✓${NC} $1"; }
+err() { echo -e "${RED}✗${NC} $1" >&2; }
+
+show_help() {
+    cat << 'EOF'
+SANCHALA FONT MANAGER
+
+USAGE: sanchala-font-manager <COMMAND> [ARGS]
+
+COMMANDS:
+    list              List installed fonts
+    search <PATTERN>  Search fonts by name
+    install <FILE>    Install font file(s)
+    remove <FONT>     Remove font
+    info <FONT>       Show font information
+    preview <FONT>    Preview font
+    refresh           Refresh font cache
+    --gui             Launch GUI
+EOF
+}
+
+cmd_list() {
+    echo -e "${BLUE}═══ Installed Fonts ═══${NC}"
+    fc-list --format="%{family}\n" 2>/dev/null | sort -u | head -100
+    echo -e "\nTotal: $(fc-list 2>/dev/null | wc -l) font faces"
+}
+
+cmd_search() {
+    fc-list : family style | grep -i "$1" 2>/dev/null | sort -u
+}
+
+cmd_install() {
+    local dest="$HOME/.local/share/fonts"
+    mkdir -p "$dest"
+    for f in "$@"; do
+        [[ -f "$f" ]] || { err "Not found: $f"; continue; }
+        cp "$f" "$dest/" && ok "Installed: $(basename "$f")"
+    done
+    fc-cache -f && ok "Font cache updated"
+}
+
+cmd_remove() {
+    local font="$1"
+    for dir in "${FONT_DIRS[@]}"; do
+        find "$dir" -iname "*$font*" -type f 2>/dev/null | while read -r f; do
+            rm -v "$f" && ok "Removed: $f"
+        done
+    done
+    fc-cache -f
+}
+
+cmd_info() {
+    fc-query "$1" 2>/dev/null | head -30 || fc-list : family style file | grep -i "$1"
+}
+
+cmd_preview() {
+    local font="$1" text="${2:-The quick brown fox jumps over the lazy dog}"
+    if command -v pango-view &>/dev/null; then
+        echo "$text" | pango-view --font="$font 24" /dev/stdin &
+    else
+        info "Preview: $font"
+        echo "$text"
+    fi
+}
+
+cmd_refresh() {
+    info "Refreshing font cache..."
+    fc-cache -fv && ok "Font cache refreshed"
+}
+
+case "${1:-list}" in
+    list|ls) cmd_list ;; search) cmd_search "${2:?Pattern required}" ;;
+    install) shift; cmd_install "$@" ;; remove|rm) cmd_remove "${2:?Font required}" ;;
+    info) cmd_info "${2:?Font required}" ;; preview) cmd_preview "${2:?Font required}" "${3:-}" ;;
+    refresh) cmd_refresh ;; --gui) exec "$(dirname "$0")/sanchala-font-manager-gui" ;;
+    -h|--help) show_help ;; *) err "Unknown: $1"; exit 1 ;;
+esac

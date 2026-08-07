@@ -1,0 +1,52 @@
+#!/usr/bin/env python3
+"""Sanchala Subscription - Plan and billing management"""
+import json,secrets
+from datetime import datetime,timedelta
+from pathlib import Path
+
+class Subscription:
+    def __init__(self):
+        self.base=Path(__file__).parent
+        self.plans_dir=self.base/"plans";self.plans_dir.mkdir(parents=True,exist_ok=True)
+        self.receipts_dir=self.base/"receipts";self.receipts_dir.mkdir(exist_ok=True)
+        self.data=self.base/"lib/subs.json";self.base.joinpath("lib").mkdir(exist_ok=True)
+        self.subs=json.load(open(self.data))if self.data.exists()else{}
+        self.plans={"free":{"price":0,"storage":5,"devices":3,"features":["basic_sync"]},
+            "plus":{"price":2.99,"storage":50,"devices":5,"features":["basic_sync","family","priority"]},
+            "pro":{"price":9.99,"storage":200,"devices":10,"features":["all"]},
+            "family":{"price":14.99,"storage":200,"devices":10,"members":6,"features":["all","family_sharing"]}}
+    def _save(self):json.dump(self.subs,open(self.data,'w'),indent=2)
+    def get_plans(self):return self.plans
+    def subscribe(self,aid,plan,payment=None):
+        if plan not in self.plans:return{"success":False,"error":"Invalid plan"}
+        p=self.plans[plan];sid=f"SUB-{secrets.token_hex(8).upper()}"
+        self.subs[aid]={"id":sid,"plan":plan,"price":p["price"],"started":datetime.now().isoformat(),
+            "expires":(datetime.now()+timedelta(days=30)).isoformat()if plan!="free"else None,
+            "storage_gb":p["storage"],"devices":p["devices"],"features":p["features"],"active":True}
+        if payment:self._receipt(aid,sid,p["price"],payment)
+        self._save();return{"success":True,"subscription_id":sid,"plan":plan}
+    def _receipt(self,aid,sid,amount,method):
+        rid=f"RCP-{secrets.token_hex(6).upper()}"
+        json.dump({"id":rid,"aid":aid,"sid":sid,"amount":amount,"method":method,
+            "date":datetime.now().isoformat()},open(self.receipts_dir/f"{rid}.json",'w'),indent=2)
+    def cancel(self,aid):
+        if aid not in self.subs:return{"success":False,"error":"No subscription"}
+        self.subs[aid]["active"]=False;self.subs[aid]["cancelled"]=datetime.now().isoformat()
+        self._save();return{"success":True}
+    def get(self,aid):return self.subs.get(aid,{"plan":"free","storage_gb":5,"devices":3})
+    def check_feature(self,aid,feature):
+        s=self.get(aid);return feature in s.get("features",[])or"all"in s.get("features",[])
+
+if __name__=="__main__":
+    import argparse;p=argparse.ArgumentParser();s=p.add_subparsers(dest="c")
+    s.add_parser("plans")
+    sub=s.add_parser("subscribe");sub.add_argument("--account-id",required=True);sub.add_argument("--plan",required=True)
+    g=s.add_parser("get");g.add_argument("--account-id",required=True)
+    c=s.add_parser("cancel");c.add_argument("--account-id",required=True)
+    s.add_parser("status");a=p.parse_args();mgr=Subscription()
+    if a.c=="plans":print(json.dumps(mgr.get_plans(),indent=2))
+    elif a.c=="subscribe":print(json.dumps(mgr.subscribe(a.account_id,a.plan),indent=2))
+    elif a.c=="get":print(json.dumps(mgr.get(a.account_id),indent=2))
+    elif a.c=="cancel":print(json.dumps(mgr.cancel(a.account_id),indent=2))
+    elif a.c=="status":print(f"Subscription Manager\nActive: {len([x for x in mgr.subs.values()if x.get('active')])}\nPlans: {list(mgr.plans.keys())}")
+    else:p.print_help()

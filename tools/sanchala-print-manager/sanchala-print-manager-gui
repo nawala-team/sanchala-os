@@ -1,0 +1,106 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0
+# Sanchala Print Manager GUI
+
+import sys, subprocess
+from PyQt6.QtWidgets import *
+from PyQt6.QtGui import QIcon
+
+class PrintManager(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Sanchala Print Manager")
+        self.setWindowIcon(QIcon.fromTheme("printer"))
+        self.setMinimumSize(600, 400)
+        self.setup_ui()
+        self.refresh()
+        
+    def setup_ui(self):
+        central = QWidget()
+        self.setCentralWidget(central)
+        layout = QVBoxLayout(central)
+        
+        tabs = QTabWidget()
+        
+        # Printers tab
+        printers_tab = QWidget()
+        pl = QVBoxLayout(printers_tab)
+        tb = QHBoxLayout()
+        for txt, slot in [("Refresh", self.refresh), ("Add", self.add_printer),
+                          ("Remove", self.remove_printer), ("Set Default", self.set_default)]:
+            b = QPushButton(txt); b.clicked.connect(slot); tb.addWidget(b)
+        tb.addStretch()
+        pl.addLayout(tb)
+        self.printer_list = QListWidget()
+        pl.addWidget(self.printer_list)
+        tabs.addTab(printers_tab, "Printers")
+        
+        # Jobs tab
+        jobs_tab = QWidget()
+        jl = QVBoxLayout(jobs_tab)
+        jb = QHBoxLayout()
+        ref_btn = QPushButton("Refresh"); ref_btn.clicked.connect(self.refresh_jobs)
+        cancel_btn = QPushButton("Cancel"); cancel_btn.clicked.connect(self.cancel_job)
+        jb.addWidget(ref_btn); jb.addWidget(cancel_btn); jb.addStretch()
+        jl.addLayout(jb)
+        self.jobs_list = QListWidget()
+        jl.addWidget(self.jobs_list)
+        tabs.addTab(jobs_tab, "Jobs")
+        
+        layout.addWidget(tabs)
+        self.setStatusBar(QStatusBar())
+        
+    def refresh(self):
+        self.printer_list.clear()
+        try:
+            out = subprocess.getoutput("lpstat -p 2>/dev/null")
+            for line in out.split('\n'):
+                if line.strip():
+                    self.printer_list.addItem(line)
+        except: pass
+        
+    def refresh_jobs(self):
+        self.jobs_list.clear()
+        try:
+            out = subprocess.getoutput("lpq -a 2>/dev/null")
+            for line in out.split('\n'):
+                if line.strip():
+                    self.jobs_list.addItem(line)
+        except: pass
+        
+    def add_printer(self):
+        uri, ok = QInputDialog.getText(self, "Add Printer", "Printer URI:")
+        if ok and uri:
+            name, ok = QInputDialog.getText(self, "Add Printer", "Printer Name:")
+            if ok and name:
+                subprocess.run(["sanchala-print-manager", "add", uri, name])
+                self.refresh()
+                
+    def remove_printer(self):
+        item = self.printer_list.currentItem()
+        if item:
+            name = item.text().split()[1] if "printer" in item.text() else ""
+            if name and QMessageBox.question(self, "Remove", f"Remove {name}?") == QMessageBox.StandardButton.Yes:
+                subprocess.run(["sanchala-print-manager", "remove", name])
+                self.refresh()
+                
+    def set_default(self):
+        item = self.printer_list.currentItem()
+        if item:
+            name = item.text().split()[1] if "printer" in item.text() else ""
+            if name:
+                subprocess.run(["sanchala-print-manager", "default", name])
+                self.statusBar().showMessage(f"Default: {name}")
+                
+    def cancel_job(self):
+        item = self.jobs_list.currentItem()
+        if item:
+            parts = item.text().split()
+            if len(parts) > 0:
+                subprocess.run(["sanchala-print-manager", "cancel", parts[0]])
+                self.refresh_jobs()
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    win = PrintManager(); win.show()
+    sys.exit(app.exec())

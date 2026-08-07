@@ -1,0 +1,95 @@
+# ============================================
+# SANCHALA OS - Brave Browser AppArmor Profile
+# ============================================
+
+#include <tunables/global>
+
+profile brave /opt/brave-bin/brave flags=(attach_disconnected) {
+  #include <abstractions/base>
+  #include <abstractions/audio>
+  #include <abstractions/dbus-session-strict>
+  #include <abstractions/gnome>
+  #include <abstractions/nameservice>
+  #include <abstractions/ssl_certs>
+  #include <abstractions/user-download-strict>
+
+  # Deny sensitive paths
+  deny @{HOME}/.ssh/** rw,
+  deny @{HOME}/.gnupg/** rw,
+  deny @{HOME}/.mozilla/** rw,
+  deny @{HOME}/.pki/** rw,
+  deny /etc/passwd r,
+  deny /etc/shadow r,
+  
+  # Brave directories
+  owner @{HOME}/.config/BraveSoftware/** rw,
+  owner @{HOME}/.cache/BraveSoftware/** rw,
+  owner @{HOME}/.local/share/BraveSoftware/** rw,
+  
+  # Downloads (read-write)
+  owner @{HOME}/Downloads/** rw,
+  
+  # Other home directories (read-only for file picker)
+  owner @{HOME}/Documents/** r,
+  owner @{HOME}/Pictures/** r,
+  owner @{HOME}/Videos/** r,
+  owner @{HOME}/Music/** r,
+  
+  # Brave binaries
+  /opt/brave-bin/** rm,
+  /opt/brave-bin/brave ix,
+  /opt/brave-bin/brave-browser ix,
+  
+  # System libraries
+  /usr/lib/** rm,
+  /usr/share/** r,
+  
+  # Proc filesystem
+  owner /proc/@{pid}/** r,
+  /proc/sys/kernel/random/uuid r,
+  /proc/version r,
+  /proc/meminfo r,
+  /proc/cpuinfo r,
+  
+  # Sys filesystem
+  /sys/devices/system/cpu/** r,
+  /sys/devices/pci**/** r,
+  
+  # Temp files
+  /tmp/** rw,
+  owner /var/tmp/** rw,
+  
+  # Network
+  network inet stream,
+  network inet6 stream,
+  network inet dgram,
+  network inet6 dgram,
+  network netlink raw,
+  
+  # DBus
+  dbus send bus=session,
+  dbus receive bus=session,
+  
+  # GPU access
+  /dev/dri/** rw,
+  /dev/nvidia* rw,
+  
+  # Audio
+  /dev/snd/** rw,
+  
+  # Camera/Mic (permission portal)
+  /dev/video* rw,
+  
+  # Wayland
+  owner /run/user/*/wayland-* rw,
+  
+  # PipeWire/PulseAudio
+  owner /run/user/*/pipewire-* rw,
+  owner /run/user/*/pulse/** rw,
+  
+  # Font config
+  /etc/fonts/** r,
+  owner @{HOME}/.config/fontconfig/** r,
+  owner @{HOME}/.local/share/fonts/** r,
+  /usr/share/fonts/** r,
+}

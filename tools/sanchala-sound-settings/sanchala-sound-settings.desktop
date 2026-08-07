@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Sanchala Sound Settings
+Comment=Configure audio devices and volume
+Exec=sanchala-sound-settings-gui
+Icon=audio-volume-high
+Type=Application
+Categories=Settings;HardwareSettings;Audio;
+Keywords=sound;audio;volume;speaker;microphone;

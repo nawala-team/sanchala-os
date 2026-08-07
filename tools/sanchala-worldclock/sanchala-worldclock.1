@@ -1,0 +1,28 @@
+.TH SANCHALA-WORLDCLOCK 1 "2024" "Sanchala OS" "User Commands"
+.SH NAME
+sanchala-worldclock \- World clock with multiple timezone support
+.SH SYNOPSIS
+.B sanchala-worldclock
+[\fIcommand\fR] [\fIoptions\fR]
+.SH DESCRIPTION
+Beautiful world clock displaying time across multiple timezones with elegant formatting.
+.SH COMMANDS
+.TP
+.B show
+Display all configured clocks
+.TP
+.B add \fItimezone\fR [\fIlabel\fR]
+Add a new timezone clock
+.TP
+.B remove \fItimezone\fR
+Remove a timezone from display
+.TP
+.B list
+List available timezones
+.SH EXAMPLES
+.TP
+sanchala-worldclock show
+.TP
+sanchala-worldclock add America/New_York "New York"
+.SH AUTHOR
+Sanchala OS Team

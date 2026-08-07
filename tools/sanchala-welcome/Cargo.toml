@@ -1,0 +1,79 @@
+[package]
+name = "sanchala-welcome"
+version = "1.0.0"
+edition = "2021"
+authors = ["Sanchala OS Team"]
+description = "First-run setup wizard and onboarding system for Sanchala OS"
+license = "GPL-3.0"
+repository = "https://github.com/sanchala-os/sanchala-welcome"
+
+[dependencies]
+# Async runtime
+tokio = { version = "1.35", features = ["full"] }
+
+# D-Bus
+zbus = { version = "4.0", features = ["tokio"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+toml = "0.8"
+
+# Error handling
+anyhow = "1.0"
+thiserror = "1.0"
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# CLI
+clap = { version = "4.4", features = ["derive"] }
+
+# System interaction
+nix = { version = "0.27", features = ["user", "fs"] }
+users = "0.11"
+
+# Network detection
+network-interface = "1.1"
+
+# Localization
+sys-locale = "0.3"
+icu = "1.4"
+
+# Hardware detection
+sysinfo = "0.30"
+
+# UUID generation
+uuid = { version = "1.6", features = ["v4"] }
+
+# Date/time
+chrono = { version = "0.4", features = ["serde"] }
+
+# Password strength
+zxcvbn = "2.2"
+
+# Async traits
+async-trait = "0.1"
+
+[dev-dependencies]
+tempfile = "3.9"
+mockall = "0.12"
+tokio-test = "0.4"
+
+[[bin]]
+name = "sanchala-welcome"
+path = "src/main.rs"
+
+[[bin]]
+name = "sanchala-welcomd"
+path = "src/daemon/main.rs"
+
+[features]
+default = []
+integration = []
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true

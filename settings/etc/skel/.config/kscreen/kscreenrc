@@ -1,0 +1,11 @@
+# ============================================
+# SANCHALA OS - Plasma Display Configuration
+# ============================================
+
+[General]
+# Automatically apply display configuration
+ApplyOnStartup=true
+
+[Outputs]
+# Output-specific configurations are stored per-profile
+# KScreen generates these automatically based on connected displays

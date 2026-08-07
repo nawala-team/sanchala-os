@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Sanchala Flatpak Manager
+Comment=Manage Flatpak applications
+Exec=sanchala-flatpak-manager-gui
+Icon=flatpak
+Type=Application
+Categories=System;PackageManager;
+Keywords=flatpak;install;software;apps;

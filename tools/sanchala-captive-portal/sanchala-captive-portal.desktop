@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Captive Portal
+Comment=Detect and login to WiFi captive portals
+Exec=sanchala-captive-portal
+Icon=network-wireless
+Terminal=false
+Type=Application
+Categories=Network;Settings;
+Keywords=captive;portal;wifi;hotspot;login;
+StartupNotify=true

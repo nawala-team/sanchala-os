@@ -1,0 +1,36 @@
+.TH SANCHALA-SOUND-THEMES 1 "2024" "Sanchala OS" "User Commands"
+.SH NAME
+sanchala-sound-themes \- System sound theme management
+.SH SYNOPSIS
+.B sanchala-sound-themes
+[\fIcommand\fR] [\fIoptions\fR]
+.SH DESCRIPTION
+Configure system notification and event sounds.
+.SH COMMANDS
+.TP
+.B list
+List installed sound themes
+.TP
+.B set \fItheme\fR
+Apply sound theme
+.TP
+.B preview \fIevent\fR
+Play sound for event
+.TP
+.B mute
+Mute all system sounds
+.TP
+.B unmute
+Enable system sounds
+.TP
+.B volume \fIlevel\fR
+Set system sounds volume (0-100)
+.SH EVENTS
+notification, warning, error, login, logout, device-added, device-removed
+.SH EXAMPLES
+.TP
+sanchala-sound-themes set freedesktop
+.TP
+sanchala-sound-themes preview notification
+.SH AUTHOR
+Sanchala OS Team

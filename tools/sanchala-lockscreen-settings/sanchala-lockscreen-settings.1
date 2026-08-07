@@ -1,0 +1,31 @@
+.TH SANCHALA-LOCKSCREEN-SETTINGS 1 "2024" "Sanchala OS" "User Commands"
+.SH NAME
+sanchala-lockscreen-settings \- Lock screen configuration
+.SH SYNOPSIS
+.B sanchala-lockscreen-settings
+[\fIcommand\fR] [\fIoptions\fR]
+.SH DESCRIPTION
+Configure lock screen appearance, timeout, and security settings.
+.SH COMMANDS
+.TP
+.B status
+Show current settings
+.TP
+.B timeout \fIseconds\fR
+Set auto-lock timeout
+.TP
+.B wallpaper \fIimage\fR
+Set lock screen wallpaper
+.TP
+.B clock \fIformat\fR
+Set clock format (12h/24h)
+.TP
+.B notifications \fIon|off\fR
+Show/hide notifications on lock screen
+.SH EXAMPLES
+.TP
+sanchala-lockscreen-settings timeout 300
+.TP
+sanchala-lockscreen-settings wallpaper ~/Pictures/lock.jpg
+.SH AUTHOR
+Sanchala OS Team

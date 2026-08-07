@@ -1,0 +1,32 @@
+# Maintainer: Sanchala Team <dev@sanchala.id>
+# Note: This is a metapackage - latte-dock is from official repos
+# This package provides Sanchala-specific dock configuration
+
+pkgname=sanchala-dock
+pkgver=1.0.0
+pkgrel=1
+pkgdesc='Sanchala OS dock configuration (latte-dock preset)'
+arch=('any')
+url='https://sanchala.id'
+license=('GPL3')
+groups=('sanchala')
+depends=('latte-dock')
+optdepends=(
+    'plasma-desktop: KDE Plasma desktop'
+)
+
+package() {
+    # Install Latte dock layout
+    install -dm755 "$pkgdir/usr/share/latte/layouts"
+    install -Dm644 "$srcdir/Sanchala.layout.latte" \
+        "$pkgdir/usr/share/latte/layouts/Sanchala.layout.latte"
+    
+    # Install as default for new users
+    install -dm755 "$pkgdir/etc/skel/.config/latte"
+    install -Dm644 "$srcdir/Sanchala.layout.latte" \
+        "$pkgdir/etc/skel/.config/latte/Sanchala.layout.latte"
+    
+    # Latte dock config
+    install -Dm644 "$srcdir/lattedockrc" \
+        "$pkgdir/etc/skel/.config/lattedockrc"
+}

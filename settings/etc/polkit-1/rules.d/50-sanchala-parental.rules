@@ -1,0 +1,41 @@
+// Sanchala Parental Controls - Polkit Rules
+// /etc/polkit-1/rules.d/50-sanchala-parental.rules
+
+polkit.addRule(function(action, subject) {
+    // Allow parents to manage parental controls
+    if (action.id.indexOf("id.sanchala.parental") === 0) {
+        if (subject.isInGroup("wheel")) {
+            return polkit.Result.YES;
+        }
+        // Require authentication for non-admins
+        return polkit.Result.AUTH_ADMIN;
+    }
+});
+
+polkit.addRule(function(action, subject) {
+    // Prevent supervised users from disabling controls
+    if (action.id === "id.sanchala.parental.disable") {
+        var user = subject.user;
+        // Check if user is supervised (would query parental service)
+        // For now, always require admin auth
+        return polkit.Result.AUTH_ADMIN_KEEP;
+    }
+});
+
+polkit.addRule(function(action, subject) {
+    // Block supervised users from certain actions
+    var restrictedActions = [
+        "org.freedesktop.packagekit.package-install",
+        "org.freedesktop.packagekit.system-update",
+        "org.freedesktop.accounts.user-administration",
+        "org.freedesktop.systemd1.manage-units"
+    ];
+    
+    if (restrictedActions.indexOf(action.id) >= 0) {
+        // Check user's parental control status
+        // Supervised users need admin auth
+        if (subject.isInGroup("supervised")) {
+            return polkit.Result.AUTH_ADMIN;
+        }
+    }
+});

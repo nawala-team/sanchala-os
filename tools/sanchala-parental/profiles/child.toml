@@ -1,0 +1,38 @@
+# Sanchala Parental Controls - Age Profile: Child (0-7)
+# Strict supervision with whitelist-only content
+
+[screentime]
+daily_limit_minutes = 60
+schedule_start = "09:00"
+schedule_end = "18:00"
+bedtime = "19:00"
+weekend_bonus_minutes = 30
+
+[content_filter]
+level = "strict"
+safe_search = true
+whitelist_only = true
+
+[allowed_apps]
+apps = [
+    "org.kde.dolphin",
+    "org.kde.gwenview",
+    "vlc",
+    "krita",
+    "tuxpaint",
+]
+
+[allowed_sites]
+sites = [
+    "pbskids.org",
+    "nickjr.com",
+    "starfall.com",
+    "abcya.com",
+    "funbrain.com",
+]
+
+[restrictions]
+can_install_apps = false
+can_add_accounts = false
+can_change_settings = false
+can_use_terminal = false

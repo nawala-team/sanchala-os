@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 200" width="800" height="200">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#0D1421"/>
+      <stop offset="50%" style="stop-color:#1A237E"/>
+      <stop offset="100%" style="stop-color:#0D1421"/>
+    </linearGradient>
+    
+    <linearGradient id="textGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#536DFE">
+        <animate attributeName="stop-color" values="#536DFE;#FFB300;#536DFE" dur="4s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="50%" style="stop-color:#FFFFFF"/>
+      <stop offset="100%" style="stop-color:#536DFE">
+        <animate attributeName="stop-color" values="#536DFE;#FFB300;#536DFE" dur="4s" repeatCount="indefinite"/>
+      </stop>
+    </linearGradient>
+    
+    <linearGradient id="astraGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFB300">
+        <animate attributeName="stop-color" values="#FFB300;#FFD54F;#FFB300" dur="2s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="100%" style="stop-color:#FF8F00"/>
+    </linearGradient>
+    
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <filter id="textGlow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="800" height="200" fill="url(#bgGradient)"/>
+  
+  <!-- Animated stars background -->
+  <g opacity="0.6">
+    <circle cx="50" cy="30" r="1" fill="white">
+      <animate attributeName="opacity" values="0.3;1;0.3" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="150" cy="80" r="1.5" fill="white">
+      <animate attributeName="opacity" values="0.5;1;0.5" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="250" cy="40" r="1" fill="white">
+      <animate attributeName="opacity" values="0.4;1;0.4" dur="2.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="650" cy="50" r="1" fill="white">
+      <animate attributeName="opacity" values="0.3;1;0.3" dur="1.8s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="720" cy="120" r="1.5" fill="white">
+      <animate attributeName="opacity" values="0.5;1;0.5" dur="2.2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="780" cy="30" r="1" fill="white">
+      <animate attributeName="opacity" values="0.4;1;0.4" dur="3s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  
+  <!-- Logo Circle -->
+  <g transform="translate(100, 100)">
+    <circle cx="0" cy="0" r="60" fill="#3949AB" filter="url(#glow)">
+      <animate attributeName="r" values="58;62;58" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="0" cy="0" r="50" fill="none" stroke="#536DFE" stroke-width="2" opacity="0.5">
+      <animate attributeName="opacity" values="0.3;0.7;0.3" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    
+    <!-- Astra 8-point star -->
+    <g filter="url(#glow)">
+      <polygon points="0,-45 5,-15 0,-20 -5,-15" fill="url(#astraGold)">
+        <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="15s" repeatCount="indefinite"/>
+      </polygon>
+      <polygon points="0,-45 5,-15 0,-20 -5,-15" fill="url(#astraGold)">
+        <animateTransform attributeName="transform" type="rotate" from="45" to="405" dur="15s" repeatCount="indefinite"/>
+      </polygon>
+      <polygon points="0,-45 5,-15 0,-20 -5,-15" fill="url(#astraGold)">
+        <animateTransform attributeName="transform" type="rotate" from="90" to="450" dur="15s" repeatCount="indefinite"/>
+      </polygon>
+      <polygon points="0,-45 5,-15 0,-20 -5,-15" fill="url(#astraGold)">
+        <animateTransform attributeName="transform" type="rotate" from="135" to="495" dur="15s" repeatCount="indefinite"/>
+      </polygon>
+      <polygon points="0,-45 5,-15 0,-20 -5,-15" fill="url(#astraGold)">
+        <animateTransform attributeName="transform" type="rotate" from="180" to="540" dur="15s" repeatCount="indefinite"/>
+      </polygon>
+      <polygon points="0,-45 5,-15 0,-20 -5,-15" fill="url(#astraGold)">
+        <animateTransform attributeName="transform" type="rotate" from="225" to="585" dur="15s" repeatCount="indefinite"/>
+      </polygon>
+      <polygon points="0,-45 5,-15 0,-20 -5,-15" fill="url(#astraGold)">
+        <animateTransform attributeName="transform" type="rotate" from="270" to="630" dur="15s" repeatCount="indefinite"/>
+      </polygon>
+      <polygon points="0,-45 5,-15 0,-20 -5,-15" fill="url(#astraGold)">
+        <animateTransform attributeName="transform" type="rotate" from="315" to="675" dur="15s" repeatCount="indefinite"/>
+      </polygon>
+    </g>
+    
+    <!-- Center -->
+    <circle cx="0" cy="0" r="18" fill="#1A237E"/>
+    <circle cx="0" cy="0" r="12" fill="url(#astraGold)">
+      <animate attributeName="r" values="10;14;10" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <text x="0" y="6" font-family="Arial Black, sans-serif" font-size="18" font-weight="bold" fill="#1A237E" text-anchor="middle">S</text>
+  </g>
+  
+  <!-- Main Text -->
+  <g filter="url(#textGlow)">
+    <text x="400" y="85" font-family="Arial Black, sans-serif" font-size="52" font-weight="bold" fill="url(#textGradient)" text-anchor="middle">
+      SANCHALA OS
+    </text>
+  </g>
+  
+  <!-- Version badge -->
+  <g transform="translate(400, 115)">
+    <rect x="-80" y="0" width="160" height="28" rx="14" fill="url(#astraGold)">
+      <animate attributeName="opacity" values="0.9;1;0.9" dur="2s" repeatCount="indefinite"/>
+    </rect>
+    <text x="0" y="20" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#1A237E" text-anchor="middle">
+      v1.0 "Astra"
+    </text>
+  </g>
+  
+  <!-- Tagline -->
+  <text x="400" y="170" font-family="Arial, sans-serif" font-size="16" fill="#8C9EFF" text-anchor="middle" font-style="italic">
+    The Divine Weapon of Digital Freedom
+  </text>
+  
+  <!-- Sanskrit -->
+  <text x="400" y="190" font-family="Arial, sans-serif" font-size="12" fill="#536DFE" text-anchor="middle">
+    अस्त्र • संञ्चल
+  </text>
+</svg>

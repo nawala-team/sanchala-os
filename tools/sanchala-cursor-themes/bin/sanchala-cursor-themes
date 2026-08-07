@@ -1,0 +1,122 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0
+# Sanchala Cursor Themes - Manage cursor themes
+"""Browse, install, and apply cursor themes"""
+
+import sys, json, argparse, subprocess, shutil
+from pathlib import Path
+
+VERSION = "1.0.0"
+CONFIG_DIR = Path.home() / ".config" / "sanchala" / "cursors"
+CURSOR_DIRS = [Path.home() / ".local/share/icons", Path("/usr/share/icons")]
+
+class CursorConfig:
+    def __init__(self):
+        CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+        self.file = CONFIG_DIR / "config.json"
+        self.data = self._load()
+    
+    def _load(self):
+        defaults = {"current": "default", "size": 24}
+        if self.file.exists():
+            try: defaults.update(json.load(open(self.file)))
+            except: pass
+        return defaults
+    
+    def save(self):
+        with open(self.file, 'w') as f: json.dump(self.data, f, indent=2)
+
+def get_themes():
+    themes = []
+    for d in CURSOR_DIRS:
+        if d.exists():
+            for t in d.iterdir():
+                if t.is_dir() and (t / "cursors").exists():
+                    themes.append(t.name)
+    return sorted(set(themes))
+
+def get_current():
+    try:
+        r = subprocess.run(["gsettings", "get", "org.gnome.desktop.interface", "cursor-theme"],
+                          capture_output=True, text=True)
+        return r.stdout.strip().strip("'")
+    except: return "default"
+
+def apply_theme(theme: str, size: int = 24):
+    cmds = [
+        f"plasma-apply-cursortheme {theme}",
+        f"gsettings set org.gnome.desktop.interface cursor-theme '{theme}'",
+        f"gsettings set org.gnome.desktop.interface cursor-size {size}",
+    ]
+    for cmd in cmds:
+        subprocess.run(cmd, shell=True, capture_output=True)
+    
+    # Update Xresources
+    xres = Path.home() / ".Xresources"
+    lines = xres.read_text().split('\n') if xres.exists() else []
+    lines = [l for l in lines if 'Xcursor' not in l]
+    lines.extend([f"Xcursor.theme: {theme}", f"Xcursor.size: {size}"])
+    xres.write_text('\n'.join(lines))
+    subprocess.run(["xrdb", "-merge", str(xres)], capture_output=True)
+
+def cmd_list(args):
+    themes = get_themes()
+    current = get_current()
+    
+    print(f"\n🖱️  Cursor Themes\n" + "━"*35)
+    for t in themes:
+        marker = "●" if t == current else "○"
+        print(f"  {marker} {t}")
+    print()
+    return 0
+
+def cmd_set(args):
+    config = CursorConfig()
+    theme = args.theme
+    size = args.size or config.data["size"]
+    
+    if theme not in get_themes():
+        print(f"❌ Theme not found: {theme}")
+        return 1
+    
+    apply_theme(theme, size)
+    config.data["current"] = theme
+    config.data["size"] = size
+    config.save()
+    print(f"✅ Cursor theme: {theme} ({size}px)")
+    return 0
+
+def cmd_size(args):
+    config = CursorConfig()
+    config.data["size"] = args.pixels
+    apply_theme(config.data["current"], args.pixels)
+    config.save()
+    print(f"✅ Cursor size: {args.pixels}px")
+    return 0
+
+def cmd_current(args):
+    config = CursorConfig()
+    print(f"\n🖱️  Current Cursor\n" + "━"*30)
+    print(f"  Theme: {config.data['current']}")
+    print(f"  Size:  {config.data['size']}px")
+    print()
+    return 0
+
+def main():
+    p = argparse.ArgumentParser(prog="sanchala-cursor-themes", description="🖱️ Cursor Themes")
+    p.add_argument("--version", action="version", version=f"%(prog)s {VERSION}")
+    sub = p.add_subparsers(dest="cmd")
+    
+    sub.add_parser("list", help="List themes")
+    s = sub.add_parser("set", help="Set theme"); s.add_argument("theme"); s.add_argument("-s","--size",type=int)
+    s = sub.add_parser("size", help="Set size"); s.add_argument("pixels", type=int)
+    sub.add_parser("current", help="Show current")
+    sub.add_parser("gui", help="Open settings")
+    
+    args = p.parse_args()
+    cmds = {"list": cmd_list, "set": cmd_set, "size": cmd_size, "current": cmd_current,
+            "gui": lambda a: subprocess.run(["kcmshell5", "kcm_cursortheme"]) or 0}
+    if args.cmd in cmds: return cmds[args.cmd](args)
+    return cmd_list(args)
+
+if __name__ == "__main__": sys.exit(main())

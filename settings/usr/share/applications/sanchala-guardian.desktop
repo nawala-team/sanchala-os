@@ -1,0 +1,16 @@
+[Desktop Entry]
+Version=1.0
+Name=Sanchala Guardian
+Name[id]=Sanchala Guardian
+Comment=Sanchala OS Security Center
+Comment[id]=Pusat Keamanan Sanchala OS
+GenericName=Security Center
+Exec=/usr/bin/sanchala-guardian %f
+Terminal=false
+Type=Application
+Icon=sanchala-guardian
+Categories=System;Security;Settings;
+MimeType=application/x-sanchala-policy;application/x-sanchala-audit-log;
+Keywords=security;firewall;antivirus;protection;guardian;
+StartupNotify=true
+X-GNOME-UsesNotifications=true

@@ -1,0 +1,49 @@
+# ============================================
+# SANCHALA OS - Konsole Terminal Shortcuts
+# ============================================
+# Standard terminal shortcuts
+# ============================================
+
+[Shortcuts]
+# Tab Management
+new-tab=Ctrl+Shift+T
+close-tab=Ctrl+Shift+W
+next-tab=Ctrl+PgDown
+previous-tab=Ctrl+PgUp
+move-tab-left=Ctrl+Shift+Left
+move-tab-right=Ctrl+Shift+Right
+
+# Window Management
+new-window=Ctrl+Shift+N
+split-view-left-right=Ctrl+Shift+L
+split-view-top-bottom=Ctrl+Shift+H
+close-active-view=Ctrl+Shift+X
+toggle-maximize-current-view=Ctrl+Shift+E
+
+# Edit Operations
+copy=Ctrl+Shift+C
+paste=Ctrl+Shift+V
+select-all=Ctrl+Shift+A
+clear-history=Ctrl+Shift+K
+
+# Search
+find=Ctrl+Shift+F
+find-next=F3
+find-previous=Shift+F3
+
+# Scrolling
+scroll-up-line=Shift+Up
+scroll-down-line=Shift+Down
+scroll-up-page=Shift+PgUp
+scroll-down-page=Shift+PgDown
+scroll-to-top=Shift+Home
+scroll-to-bottom=Shift+End
+
+# Font Size
+enlarge-font=Ctrl++
+shrink-font=Ctrl+-
+reset-font-size=Ctrl+0
+
+# Misc
+toggle-fullscreen=F11
+rename-tab=Ctrl+Alt+S

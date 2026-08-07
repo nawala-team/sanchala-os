@@ -1,0 +1,49 @@
+{
+  "name": "sanchala-remote-desktop",
+  "version": "1.0.0",
+  "description": "Remote desktop client supporting multiple protocols",
+  "author": "Sanchala OS Team",
+  "license": "GPL-3.0",
+  "category": "Network",
+  "settings": {
+    "defaultProtocol": "rdp",
+    "quality": "auto",
+    "colorDepth": 32,
+    "resolution": "auto",
+    "fullscreen": false,
+    "multiMonitor": true
+  },
+  "protocols": {
+    "rdp": {
+      "enabled": true,
+      "port": 3389,
+      "security": "nla",
+      "compression": true,
+      "audioRedirection": true,
+      "printerRedirection": false,
+      "clipboardSync": true
+    },
+    "vnc": {
+      "enabled": true,
+      "port": 5900,
+      "encoding": "tight",
+      "viewOnly": false,
+      "sharedConnection": true
+    },
+    "spice": {
+      "enabled": true,
+      "port": 5900,
+      "usb Redirection": true
+    }
+  },
+  "performance": {
+    "wallpaper": false,
+    "fontSmoothing": true,
+    "desktopComposition": false,
+    "animations": false
+  },
+  "security": {
+    "certificateValidation": true,
+    "credentialStorage": "keyring"
+  }
+}

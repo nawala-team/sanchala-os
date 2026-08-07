@@ -1,0 +1,42 @@
+# ============================================================================
+# SANCHALA OS - System Authentication Configuration
+# ============================================================================
+# Primary authentication stack for all system services
+# Implements: Fingerprint → FIDO2 → Password fallback (Apple Touch ID-like UX)
+# ============================================================================
+
+# --- Authentication Phase ---
+# Try fingerprint first (instant unlock like Touch ID)
+auth        sufficient    pam_fprintd.so max_tries=3 timeout=10
+
+# Try FIDO2/WebAuthn hardware key
+auth        sufficient    pam_u2f.so cue [cue_prompt=Touch your security key] authfile=/etc/sanchala/identity/u2f_keys interactive
+
+# Fallback to password with TPM-backed verification
+auth        required      pam_faillock.so preauth silent deny=5 unlock_time=900 fail_interval=900
+auth        required      pam_unix.so try_first_pass nullok
+auth        required      pam_faillock.so authfail deny=5 unlock_time=900
+
+# Environment and limits
+auth        required      pam_env.so
+auth        optional      pam_gnome_keyring.so
+
+# --- Account Phase ---
+account     required      pam_faillock.so
+account     required      pam_unix.so
+account     optional      pam_permit.so
+account     required      pam_time.so
+
+# --- Password Management Phase ---
+password    requisite     pam_pwquality.so retry=3 local_users_only
+password    required      pam_unix.so sha512 shadow try_first_pass use_authtok remember=5
+password    optional      pam_gnome_keyring.so use_authtok
+
+# --- Session Phase ---
+session     required      pam_limits.so
+session     required      pam_unix.so
+session     optional      pam_umask.so usergroups
+session     optional      pam_systemd.so
+session     optional      pam_gnome_keyring.so auto_start
+session     optional      pam_kwallet5.so auto_start
+session     optional      pam_env.so readenv=1 user_readenv=1

@@ -1,0 +1,10 @@
+[Unit]
+Description=Apply scheduled bandwidth limits
+After=network.target
+
+[Timer]
+OnCalendar=*:0/5
+Persistent=true
+
+[Install]
+WantedBy=timers.target

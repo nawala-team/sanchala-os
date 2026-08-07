@@ -1,0 +1,71 @@
+# ============================================================================
+# SANCHALA OS - Kernel Configuration Reference
+# ============================================================================
+# Version: 1.0 | Base Kernel: linux-hardened (Arch)
+# We use pre-built linux-hardened from Arch repos - no custom kernel build.
+# ============================================================================
+
+# ============================================================================
+# KERNEL SELECTION: linux-hardened
+# ============================================================================
+# We use linux-hardened from Arch repos because:
+# 1. Maintained by security experts (anthraxx)
+# 2. Includes hardened patchset with security features
+# 3. Binary packages = faster updates, reproducible builds
+# 4. Already enables most CONFIG options we need
+#
+# Package: linux-hardened linux-hardened-headers
+# Source: https://github.com/anthraxx/linux-hardened
+
+# ============================================================================
+# SECURITY FEATURES (Already enabled in linux-hardened)
+# ============================================================================
+
+# --- Kernel Self-Protection ---
+# CONFIG_RANDOMIZE_BASE=y              # KASLR
+# CONFIG_STACKPROTECTOR_STRONG=y       # Stack canaries
+# CONFIG_HARDENED_USERCOPY=y           # Harden usercopy
+# CONFIG_FORTIFY_SOURCE=y              # FORTIFY_SOURCE
+# CONFIG_INIT_ON_ALLOC_DEFAULT_ON=y    # Zero memory on alloc
+# CONFIG_SLAB_FREELIST_HARDENED=y      # Harden freelist
+
+# --- Memory Protection ---
+# CONFIG_STRICT_KERNEL_RWX=y           # Kernel code read-only
+# CONFIG_VMAP_STACK=y                  # Virtually-mapped stacks
+# CONFIG_REFCOUNT_FULL=y               # Full refcount checking
+
+# --- Module Security ---
+# CONFIG_MODULE_SIG=y                  # Module signature verification
+# CONFIG_SECURITY_LOCKDOWN_LSM=y       # Lockdown LSM
+
+# ============================================================================
+# LSM (Linux Security Modules)
+# ============================================================================
+# CONFIG_SECURITY_APPARMOR=y           # AppArmor (Primary for Sanchala)
+# CONFIG_SECURITY_YAMA=y               # Yama (ptrace hardening)
+# CONFIG_SECURITY_LANDLOCK=y           # Landlock (sandboxing)
+# CONFIG_IMA=y                         # Integrity Measurement Architecture
+
+# ============================================================================
+# HARDWARE SECURITY
+# ============================================================================
+# CONFIG_TCG_TPM=y                     # TPM support
+# CONFIG_INTEL_IOMMU=y                 # Intel VT-d IOMMU
+# CONFIG_AMD_IOMMU=y                   # AMD IOMMU
+
+# ============================================================================
+# DESKTOP REQUIREMENTS
+# ============================================================================
+# CONFIG_DRM=y                         # Graphics (i915, amdgpu, nouveau)
+# CONFIG_SND=y                         # ALSA sound
+# CONFIG_BTRFS_FS=y                    # Btrfs (primary filesystem)
+# CONFIG_DM_CRYPT=y                    # dm-crypt (LUKS)
+# CONFIG_SQUASHFS=y                    # Squashfs (Flatpak)
+# CONFIG_OVERLAY_FS=y                  # Overlayfs (containers)
+
+# ============================================================================
+# VERIFICATION
+# ============================================================================
+# Check kernel config after installation:
+#   zcat /proc/config.gz | grep CONFIG_OPTION
+#   dmesg | grep -i security

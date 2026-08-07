@@ -1,0 +1,27 @@
+# SANCHALA OS - Network Security Firewall
+# Package requirements for distro build
+
+# Core Networking
+networkmanager
+networkmanager-openvpn
+networkmanager-strongswan
+plasma-nm
+
+# Firewall
+nftables
+iptables-nft
+
+# VPN
+wireguard-tools
+openvpn
+
+# DNS Security
+systemd-resolvconf
+
+# Privacy Tools
+macchanger
+
+# Optional: Network Monitoring
+nethogs
+iftop
+tcpdump

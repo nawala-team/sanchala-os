@@ -1,0 +1,6 @@
+{
+  "default_format": "hex",
+  "copy_on_pick": true,
+  "show_preview": true,
+  "history_size": 50
+}

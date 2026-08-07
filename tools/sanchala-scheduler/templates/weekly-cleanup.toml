@@ -1,0 +1,24 @@
+# Sanchala Scheduler - Weekly Cleanup Template
+# SPDX-License-Identifier: GPL-3.0
+
+[template]
+name = "weekly-cleanup"
+description = "System cleanup every Sunday"
+category = "maintenance"
+icon = "edit-clear-all"
+
+[task]
+name = "auto-cleanup"
+description = "Sanchala Automatic System Cleanup"
+command = "/usr/bin/sanchala-cleaner auto"
+working_directory = "~"
+
+[schedule]
+type = "calendar"
+calendar = "Sun *-*-* 04:00:00"
+persistent = true
+
+[options]
+notify_on_complete = true
+notify_on_failure = true
+log_output = true

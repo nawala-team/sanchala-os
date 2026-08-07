@@ -1,0 +1,98 @@
+#!/bin/bash
+# SANCHALA-ONSCREEN-KEYBOARD - Virtual Keyboard for Sanchala OS
+# WCAG 2.1 AAA Compliant | Copyright (c) 2025 Sanchala OS Project
+set -euo pipefail
+
+VERSION="1.0.0"
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/sanchala/accessibility"
+CONFIG_FILE="$CONFIG_DIR/onscreen-keyboard.conf"
+PID_FILE="/tmp/sanchala-osk.pid"
+
+declare -A OSK=([enabled]=false [size]=medium [position]=bottom [opacity]=95 [theme]=dark [dwell]=false [dwell_time]=1.0 [sound]=true [prediction]=true)
+
+mkdir -p "$CONFIG_DIR"
+
+load_config() { [[ -f "$CONFIG_FILE" ]] && source "$CONFIG_FILE"; }
+save_config() { declare -p OSK > "$CONFIG_FILE"; }
+
+detect_osk() {
+    command -v onboard &>/dev/null && echo "onboard" && return
+    command -v florence &>/dev/null && echo "florence" && return
+    command -v squeekboard &>/dev/null && echo "squeekboard" && return
+    command -v maliit-keyboard &>/dev/null && echo "maliit" && return
+    command -v matchbox-keyboard &>/dev/null && echo "matchbox" && return
+    echo "none"
+}
+
+configure_onboard() {
+    gsettings set org.onboard.window.landscape width $([[ "${OSK[size]}" == "large" ]] && echo 1200 || echo 800) 2>/dev/null ||:
+    gsettings set org.onboard.window.landscape height $([[ "${OSK[size]}" == "large" ]] && echo 400 || echo 250) 2>/dev/null ||:
+    gsettings set org.onboard layout "Full Keyboard" 2>/dev/null ||:
+    gsettings set org.onboard theme "$([[ "${OSK[theme]}" == "dark" ]] && echo "Nightshade" || echo "Droid")" 2>/dev/null ||:
+    gsettings set org.onboard.scanner enabled "${OSK[dwell]}" 2>/dev/null ||:
+    gsettings set org.onboard.typing-assistance.word-suggestions "${OSK[prediction]}" 2>/dev/null ||:
+}
+
+start_keyboard() {
+    load_config
+    [[ -f "$PID_FILE" ]] && kill -0 "$(cat "$PID_FILE")" 2>/dev/null && echo "Already running" && return 1
+    
+    local osk=$(detect_osk)
+    echo "Starting on-screen keyboard (backend: $osk)"
+    
+    case "$osk" in
+        onboard)
+            configure_onboard
+            onboard &
+            echo $! > "$PID_FILE"
+            ;;
+        florence)
+            florence &
+            echo $! > "$PID_FILE"
+            ;;
+        squeekboard)
+            squeekboard &
+            echo $! > "$PID_FILE"
+            ;;
+        matchbox)
+            matchbox-keyboard &
+            echo $! > "$PID_FILE"
+            ;;
+        none)
+            echo "No OSK found. Install: onboard, florence, or matchbox-keyboard"
+            return 1
+            ;;
+    esac
+    
+    OSK[enabled]="true"; save_config
+    echo "On-screen keyboard active"
+}
+
+stop_keyboard() {
+    [[ -f "$PID_FILE" ]] && kill "$(cat "$PID_FILE")" 2>/dev/null ||:
+    pkill -f "onboard\|florence\|squeekboard\|matchbox-keyboard" 2>/dev/null ||:
+    rm -f "$PID_FILE"
+    OSK[enabled]="false"; save_config
+    echo "On-screen keyboard stopped"
+}
+
+status() {
+    load_config
+    if [[ -f "$PID_FILE" ]] && kill -0 "$(cat "$PID_FILE")" 2>/dev/null; then
+        echo "● On-Screen Keyboard running | Backend: $(detect_osk) | Size: ${OSK[size]}"
+    else
+        echo "○ On-Screen Keyboard not running | Available: $(detect_osk)"
+    fi
+}
+
+case "${1:-status}" in
+    start|show|on) start_keyboard ;; stop|hide|off) stop_keyboard ;; status) status ;;
+    toggle) [[ -f "$PID_FILE" ]] && stop_keyboard || start_keyboard ;;
+    --size) OSK[size]="$2"; save_config; echo "Size: $2" ;;
+    --position) OSK[position]="$2"; save_config ;;
+    --theme) OSK[theme]="$2"; save_config ;;
+    --dwell) OSK[dwell]="$2"; save_config ;;
+    --prediction) OSK[prediction]="$2"; save_config ;;
+    --help|-h) echo "Usage: sanchala-onscreen-keyboard {start|stop|toggle|--size small|medium|large|--dwell true|false}" ;;
+    --version|-v) echo "v$VERSION" ;; *) echo "Unknown: $1"; exit 1 ;;
+esac

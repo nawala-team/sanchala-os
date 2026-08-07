@@ -1,0 +1,253 @@
+# ============================================
+# SANCHALA OS - KWin Window Manager Settings
+# ============================================
+# Optimized for smooth 60fps desktop experience
+# macOS-style window decorations and effects
+# Enhanced tiling and Stage Manager support
+# ============================================
+
+[Compositing]
+# Use OpenGL for hardware acceleration
+Backend=OpenGL
+# Use OpenGL 3.1+ Core Profile for better performance
+GLCore=true
+# Auto buffer swap for optimal VSync
+GLPreferBufferSwap=a
+# Trilinear filtering for smooth scaling
+GLTextureFilter=2
+# Show previews for hidden windows (better alt-tab)
+HiddenPreviews=5
+# Trust GPU drivers
+OpenGLIsUnsafe=false
+# Allow apps to block compositing for fullscreen games
+WindowsBlockCompositing=true
+# Animation speed (1=instant, 4=slow, 2=smooth-fast)
+AnimationSpeed=2
+# Latency mode: Medium for balance
+LatencyPolicy=Medium
+# Maximum FPS - match monitor refresh rate
+MaxFPS=60
+# Refresh rate auto-detection
+RefreshRate=0
+# Enable VSync to prevent tearing
+VSync=true
+# Allow tearing for fullscreen apps (reduces input lag in games)
+AllowTearing=true
+
+[Desktops]
+Number=4
+Rows=2
+Id_1=desktop-main
+Id_2=desktop-work
+Id_3=desktop-dev
+Id_4=desktop-media
+Name_1=Main
+Name_2=Work
+Name_3=Development
+Name_4=Media
+
+[Effect-blur]
+# Moderate blur for good visuals without GPU strain
+BlurStrength=10
+NoiseStrength=2
+
+[Effect-diminactive]
+DimFullScreen=false
+Strength=12
+
+[Effect-kwin4_effect_translucency]
+Inactive=95
+
+[Effect-overview]
+BorderActivate=9
+TouchBorderActivate=7
+FilterWindows=true
+OrganizedGrid=true
+
+[Effect-windowview]
+BorderActivateAll=9
+BorderActivateClass=7
+
+[Effect-slide]
+Duration=200
+HorizontalGap=0
+VerticalGap=0
+
+[Effect-fadingpopups]
+FadeInTime=100
+FadeOutTime=100
+
+[Effect-morphingpopups]
+Duration=150
+
+[Effect-glide]
+Duration=200
+InDistance=20
+InRotation=5
+OutDistance=50
+OutRotation=5
+
+[Effect-scale]
+Duration=150
+InScale=0.96
+OutScale=0.96
+
+[Effect-wobblywindows]
+Drag=85
+MoveFactor=15
+Stiffness=10
+Wobbliness=15
+
+[Plugins]
+# Core visual effects
+blurEnabled=true
+contrastEnabled=true
+slidingpopupsEnabled=true
+slideEnabled=true
+# macOS-style window animations
+glideEnabled=true
+kwin4_effect_fadeEnabled=true
+scaleEnabled=true
+fadingpopupsEnabled=true
+morphingpopupsEnabled=true
+# Desktop navigation
+desktopgridEnabled=true
+overviewEnabled=true
+windowviewEnabled=true
+# Sanchala custom scripts
+sanchala-tilingEnabled=true
+sanchala-stage-managerEnabled=true
+sanchala-quick-tileEnabled=true
+# Performance - disable heavy effects
+diminactiveEnabled=false
+kwin4_effect_squashEnabled=false
+wobblywindowsEnabled=false
+magiclampEnabled=false
+# Accessibility
+zoomEnabled=true
+# Night color for eye comfort
+nightcolorEnabled=true
+# Window thumbnails in taskbar
+thumbnailasideEnabled=false
+# Background contrast
+backgroundcontrastEnabled=true
+# Translucency
+kwin4_effect_translucencyEnabled=true
+
+[Script-sanchala-tiling]
+innerGap=8
+outerGap=12
+masterRatio=55
+autoTileEnabled=false
+
+[Script-sanchala-stage-manager]
+stripWidth=160
+groupByApp=true
+maxStrips=6
+
+[Script-sanchala-quick-tile]
+gap=8
+
+[TabBox]
+ActivitiesMode=1
+ApplicationsMode=0
+BorderActivate=9
+BorderAlternativeActivate=9
+DesktopLayout=org.kde.breeze.desktop
+DesktopListLayout=org.kde.breeze.desktop
+DesktopMode=1
+HighlightWindows=true
+LayoutName=thumbnail_grid
+MinimizedMode=0
+MultiScreenMode=0
+ShowDesktopMode=0
+ShowTabBox=true
+SwitchingMode=0
+
+[TabBoxAlternative]
+ActivitiesMode=1
+ApplicationsMode=0
+DesktopMode=1
+HighlightWindows=true
+LayoutName=thumbnails
+MinimizedMode=0
+MultiScreenMode=0
+ShowDesktopMode=0
+ShowTabBox=true
+SwitchingMode=0
+
+[Windows]
+ActivationDesktopPolicy=SwitchToOtherDesktop
+AutoRaise=false
+AutoRaiseInterval=750
+BorderSnapZone=15
+BorderlessMaximizedWindows=false
+CenterSnapZone=0
+ClickRaise=true
+DelayFocusInterval=150
+# Screen edge activation - enhanced
+ElectricBorderCooldown=350
+ElectricBorderCornerRatio=0.20
+ElectricBorderDelay=100
+ElectricBorderMaximize=true
+ElectricBorderTiling=true
+ElectricBorders=0
+# Click to focus (macOS style)
+FocusPolicy=ClickToFocus
+FocusStealingPreventionLevel=1
+GeometryTip=false
+HideUtilityWindowsForInactive=true
+# Center new windows (macOS style)
+Placement=Centered
+RollOverDesktops=true
+SnapOnlyWhenOverlapping=false
+TitlebarDoubleClickCommand=Maximize
+WindowSnapZone=15
+
+[MouseBindings]
+# macOS-style mouse bindings
+CommandActiveTitlebar1=Raise
+CommandActiveTitlebar2=Nothing
+CommandActiveTitlebar3=Operations menu
+CommandAll1=Move
+CommandAll2=Toggle raise and lower
+CommandAll3=Resize
+CommandInactiveTitlebar1=Activate and raise
+CommandInactiveTitlebar2=Nothing
+CommandInactiveTitlebar3=Operations menu
+CommandWindow1=Activate, raise and pass click
+CommandWindow2=Activate and pass click
+CommandWindow3=Activate and pass click
+CommandWindowWheel=Nothing
+
+[ElectricBorders]
+Bottom=None
+BottomLeft=None
+BottomRight=None
+Left=None
+Right=None
+Top=ShowDesktop
+TopLeft=Overview
+TopRight=ApplicationLauncher
+
+[NightColor]
+Active=true
+Mode=Automatic
+NightTemperature=4500
+DayTemperature=6500
+TransitionTime=30
+
+[Xwayland]
+# Scale for XWayland apps
+Scale=1
+
+[org.kde.kdecoration2]
+# macOS-style window buttons (traffic lights on left)
+BorderSize=None
+BorderSizeAuto=false
+ButtonsOnLeft=XIA
+ButtonsOnRight=
+CloseOnDoubleClickOnMenu=false
+library=org.kde.breeze
+theme=Breeze
+

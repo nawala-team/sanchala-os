@@ -1,0 +1,64 @@
+#!/usr/bin/env python3
+"""Sanchala Sidecar - Use tablet/phone as secondary display"""
+import json,secrets,socket
+from datetime import datetime
+from pathlib import Path
+
+class Sidecar:
+    def __init__(self):
+        self.base=Path(__file__).parent
+        self.displays=self.base/"displays";self.displays.mkdir(parents=True,exist_ok=True)
+        self.config_dir=self.base/"config";self.config_dir.mkdir(exist_ok=True)
+        self.data=self.base/"lib/sidecar.json";self.base.joinpath("lib").mkdir(exist_ok=True)
+        self.state=json.load(open(self.data))if self.data.exists()else{"displays":{},"active":None}
+    def _save(self):json.dump(self.state,open(self.data,'w'),indent=2)
+    def discover_devices(self):
+        """Discover compatible devices on network"""
+        return{"devices":[{"id":"mock-tablet","name":"Sanchala Tablet","resolution":"2560x1600","type":"tablet"},
+            {"id":"mock-phone","name":"Sanchala Phone","resolution":"1080x2400","type":"phone"}]}
+    def add_display(self,device):
+        did=device.get("id")or secrets.token_hex(8)
+        self.state["displays"][did]={"id":did,"name":device.get("name","Display"),
+            "resolution":device.get("resolution","1920x1080"),"type":device.get("type","tablet"),
+            "mode":"extend","position":"right","touch":True,"pencil":True,
+            "added":datetime.now().isoformat(),"connected":False}
+        self._save();return{"success":True,"display_id":did}
+    def connect(self,did):
+        if did not in self.state["displays"]:return{"success":False,"error":"Display not found"}
+        self.state["displays"][did]["connected"]=True;self.state["active"]=did
+        self.state["displays"][did]["connected_at"]=datetime.now().isoformat()
+        self._save();return{"success":True,"resolution":self.state["displays"][did]["resolution"]}
+    def disconnect(self,did=None):
+        did=did or self.state["active"]
+        if did and did in self.state["displays"]:
+            self.state["displays"][did]["connected"]=False
+            if self.state["active"]==did:self.state["active"]=None
+        self._save();return{"success":True}
+    def set_mode(self,did,mode,position="right"):
+        """Modes: extend, mirror"""
+        if did not in self.state["displays"]:return{"success":False,"error":"Not found"}
+        self.state["displays"][did]["mode"]=mode;self.state["displays"][did]["position"]=position
+        self._save();return{"success":True}
+    def set_options(self,did,touch=True,pencil=True):
+        if did in self.state["displays"]:
+            self.state["displays"][did]["touch"]=touch;self.state["displays"][did]["pencil"]=pencil;self._save()
+        return{"success":True}
+    def get_status(self):
+        return{"active":self.state["active"],"displays":len(self.state["displays"]),
+            "connected":[d for d in self.state["displays"].values()if d["connected"]]}
+
+if __name__=="__main__":
+    import argparse;p=argparse.ArgumentParser();s=p.add_subparsers(dest="c")
+    s.add_parser("discover")
+    ad=s.add_parser("add");ad.add_argument("--name",required=True);ad.add_argument("--resolution",default="1920x1080")
+    cn=s.add_parser("connect");cn.add_argument("--display-id",required=True)
+    dc=s.add_parser("disconnect");dc.add_argument("--display-id")
+    md=s.add_parser("mode");md.add_argument("--display-id",required=True);md.add_argument("--mode",required=True);md.add_argument("--position",default="right")
+    s.add_parser("status");a=p.parse_args();sc=Sidecar()
+    if a.c=="discover":print(json.dumps(sc.discover_devices(),indent=2))
+    elif a.c=="add":print(json.dumps(sc.add_display({"name":a.name,"resolution":a.resolution}),indent=2))
+    elif a.c=="connect":print(json.dumps(sc.connect(a.display_id),indent=2))
+    elif a.c=="disconnect":print(json.dumps(sc.disconnect(getattr(a,"display_id",None)),indent=2))
+    elif a.c=="mode":print(json.dumps(sc.set_mode(a.display_id,a.mode,a.position),indent=2))
+    elif a.c=="status":print(json.dumps(sc.get_status(),indent=2))
+    else:p.print_help()

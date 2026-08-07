@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Sanchala Chess
+Comment=Chess Game
+Exec=sanchala-chess
+Icon=knights
+Terminal=false
+Type=Application
+Categories=Game;BoardGame;

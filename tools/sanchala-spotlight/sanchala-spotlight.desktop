@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Sanchala Spotlight
+Comment=Universal search
+Exec=sanchala-spotlight gui
+Icon=search
+Terminal=false
+Type=Application
+Categories=Utility;
+Keywords=search;find;spotlight;launcher;

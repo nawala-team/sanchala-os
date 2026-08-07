@@ -1,0 +1,19 @@
+{
+    "KPlugin": {
+        "Authors": [
+            {
+                "Email": "team@sanchala.org",
+                "Name": "Sanchala OS Team"
+            }
+        ],
+        "Category": "Plasma Theme",
+        "Description": "The official Sanchala OS light theme with modern blur effects and clean aesthetics",
+        "EnabledByDefault": true,
+        "Id": "sanchala",
+        "License": "GPL-3.0+",
+        "Name": "Sanchala",
+        "Version": "1.0",
+        "Website": "https://sanchala.org"
+    },
+    "X-Plasma-API": "5.0"
+}

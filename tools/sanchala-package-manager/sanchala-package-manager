@@ -1,0 +1,49 @@
+#!/bin/bash
+# Sanchala Package Manager - Pacman Frontend
+set -euo pipefail
+
+search_pkg() {
+    pacman -Ss "$1" 2>/dev/null || echo "No packages found"
+}
+
+install_pkg() {
+    pacman -S "$@" --noconfirm
+}
+
+remove_pkg() {
+    pacman -Rs "$@" --noconfirm
+}
+
+update_system() {
+    echo "Updating package database..."
+    pacman -Sy
+    echo "Upgrading packages..."
+    pacman -Su --noconfirm
+}
+
+list_installed() {
+    pacman -Q | head -50
+    echo "..."
+    echo "Total: $(pacman -Q | wc -l) packages"
+}
+
+show_info() {
+    pacman -Qi "$1" 2>/dev/null || pacman -Si "$1" 2>/dev/null || echo "Package not found"
+}
+
+clean_cache() {
+    pacman -Sc --noconfirm
+    echo "Cache cleaned"
+}
+
+case "${1:-help}" in
+    search|-s) search_pkg "$2" ;;
+    install|-S) shift; install_pkg "$@" ;;
+    remove|-R) shift; remove_pkg "$@" ;;
+    update|-u) update_system ;;
+    list|-l) list_installed ;;
+    info|-i) show_info "$2" ;;
+    clean|-c) clean_cache ;;
+    gui) exec sanchala-package-manager-gui ;;
+    *) echo "Usage: $0 {search|install|remove|update|list|info|clean|gui}" ;;
+esac

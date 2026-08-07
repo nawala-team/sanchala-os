@@ -1,0 +1,92 @@
+#!/usr/bin/env python3
+"""Sanchala eBooks - eBook Reader"""
+import sys, json
+from pathlib import Path
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+
+class EbooksApp(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Sanchala eBooks")
+        self.setMinimumSize(900, 650)
+        self.data_dir = Path.home() / ".local/share/sanchala/ebooks"
+        self.data_dir.mkdir(parents=True, exist_ok=True)
+        self.library = self.load()
+        self.init_ui()
+    
+    def init_ui(self):
+        self.setStyleSheet("QMainWindow{background:#faf8f5;}QLabel{color:#333;}QPushButton{background:#e8e4df;color:#333;border:none;padding:10px 16px;border-radius:6px;}QPushButton:hover{background:#d4d0cb;}")
+        c = QWidget(); self.setCentralWidget(c); m = QVBoxLayout(c)
+        
+        # Toolbar
+        tb = QHBoxLayout()
+        self.tabs = QButtonGroup()
+        for i, txt in enumerate(["📚 Library", "📖 Reading Now", "🛒 Store", "🔍 Search"]):
+            b = QPushButton(txt); b.setCheckable(True)
+            if i == 0: b.setChecked(True)
+            self.tabs.addButton(b, i); tb.addWidget(b)
+        tb.addStretch()
+        sort = QPushButton("⇅ Sort"); tb.addWidget(sort)
+        m.addLayout(tb)
+        
+        # Content area
+        self.stack = QStackedWidget()
+        
+        # Library view
+        lib = QWidget(); lib_l = QVBoxLayout(lib)
+        lib_l.addWidget(QLabel("📚 My Library")); 
+        self.grid = QScrollArea(); self.grid.setWidgetResizable(True)
+        gw = QWidget(); self.grid_layout = QGridLayout(gw)
+        self.refresh_library()
+        self.grid.setWidget(gw); lib_l.addWidget(self.grid)
+        add = QPushButton("+ Add Book"); add.clicked.connect(self.add_book); lib_l.addWidget(add)
+        self.stack.addWidget(lib)
+        
+        # Reader view
+        reader = QWidget(); reader_l = QVBoxLayout(reader)
+        nav = QHBoxLayout()
+        self.prev_btn = QPushButton("◀ Prev"); self.page_lbl = QLabel("Page 1 of 1")
+        self.next_btn = QPushButton("Next ▶")
+        nav.addWidget(self.prev_btn); nav.addStretch(); nav.addWidget(self.page_lbl); nav.addStretch(); nav.addWidget(self.next_btn)
+        reader_l.addLayout(nav)
+        self.reader_text = QTextEdit()
+        self.reader_text.setStyleSheet("background:#fffef9;padding:40px;font-size:16px;line-height:1.8;border:none;")
+        self.reader_text.setReadOnly(True)
+        reader_l.addWidget(self.reader_text)
+        self.stack.addWidget(reader)
+        
+        m.addWidget(self.stack)
+        self.tabs.buttonClicked.connect(lambda b: self.stack.setCurrentIndex(self.tabs.id(b)))
+    
+    def load(self):
+        f = self.data_dir / "library.json"
+        if f.exists(): return json.loads(f.read_text())
+        return [{"title": "Welcome to Sanchala eBooks", "author": "Sanchala Team", "pages": 10, "current": 1, "content": "Welcome to Sanchala eBooks!\n\nThis is your personal library where you can:\n• Read EPUB and PDF books\n• Sync across devices\n• Customize reading experience\n• Take notes and highlights"}]
+    
+    def save(self):
+        (self.data_dir / "library.json").write_text(json.dumps(self.library, indent=2))
+    
+    def refresh_library(self):
+        for i in reversed(range(self.grid_layout.count())): self.grid_layout.itemAt(i).widget().deleteLater()
+        for i, book in enumerate(self.library):
+            card = QPushButton(); card.setFixedSize(150, 220)
+            card.setStyleSheet("background:#e8e4df;border-radius:8px;text-align:center;")
+            card.setText(f"📖\n\n{book['title'][:15]}...\n{book['author'][:12]}")
+            card.clicked.connect(lambda _, b=book: self.open_book(b))
+            self.grid_layout.addWidget(card, i // 4, i % 4)
+    
+    def open_book(self, book):
+        self.reader_text.setText(book.get("content", "No content"))
+        self.page_lbl.setText(f"Page {book.get('current', 1)} of {book.get('pages', 1)}")
+        self.stack.setCurrentIndex(1)
+    
+    def add_book(self):
+        path, _ = QFileDialog.getOpenFileName(self, "Add Book", "", "eBooks (*.epub *.pdf *.txt)")
+        if path:
+            self.library.append({"title": Path(path).stem, "author": "Unknown", "pages": 1, "current": 1, "path": path})
+            self.save(); self.refresh_library()
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv); w = EbooksApp(); w.show(); sys.exit(app.exec())

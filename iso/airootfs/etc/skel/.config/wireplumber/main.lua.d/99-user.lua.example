@@ -1,0 +1,54 @@
+-- ============================================
+-- SANCHALA OS - User WirePlumber Configuration
+-- ============================================
+-- User-level overrides for WirePlumber
+-- Copy to ~/.config/wireplumber/main.lua.d/
+-- ============================================
+
+-- Example: Override device settings for specific hardware
+-- Uncomment and modify as needed
+
+--[[
+-- Custom settings for specific USB DAC
+alsa_monitor.rules = {
+  {
+    matches = {
+      { { "device.name", "equals", "alsa_card.usb-MyDAC" } },
+    },
+    apply_properties = {
+      ["api.alsa.period-size"] = 128,
+      ["api.alsa.headroom"] = 512,
+      ["device.nick"] = "My USB DAC",
+    },
+  },
+}
+--]]
+
+--[[
+-- Disable a specific device
+alsa_monitor.rules = {
+  {
+    matches = {
+      { { "device.name", "equals", "alsa_card.pci-0000_00_1f.3" } },
+    },
+    apply_properties = {
+      ["device.disabled"] = true,
+    },
+  },
+}
+--]]
+
+--[[
+-- Force mono for specific microphone
+alsa_monitor.rules = {
+  {
+    matches = {
+      { { "node.name", "matches", "alsa_input.usb-MyMic*" } },
+    },
+    apply_properties = {
+      ["audio.channels"] = 1,
+      ["audio.position"] = "MONO",
+    },
+  },
+}
+--]]

@@ -1,0 +1,26 @@
+# Sanchala Parental Controls - Age Profile: Teen (13-17)
+# Light supervision with adult content blocking
+
+[screentime]
+daily_limit_minutes = 180
+schedule_start = "06:00"
+schedule_end = "22:00"
+bedtime = "23:00"
+weekend_bonus_minutes = 120
+
+[content_filter]
+level = "minimal"
+safe_search = true
+whitelist_only = false
+
+[blocked_categories]
+categories = [
+    "adult",
+    "gambling",
+]
+
+[restrictions]
+can_install_apps = true   # Flatpak only, with approval
+can_add_accounts = false
+can_change_settings = true  # Limited settings
+can_use_terminal = true     # With logging

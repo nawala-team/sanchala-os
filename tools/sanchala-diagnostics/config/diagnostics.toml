@@ -1,0 +1,70 @@
+# Sanchala Diagnostics Configuration
+# /etc/sanchala/diagnostics/diagnostics.toml
+
+[general]
+version = "1.0.0"
+log_level = "info"
+log_file = "/var/log/sanchala/diagnostics.log"
+
+[monitor]
+# Default system monitor (btop, htop, top)
+default_monitor = "btop"
+# Update interval in milliseconds
+update_interval = 1000
+# Show notifications for critical events
+notifications = true
+
+[thresholds]
+# Warning/Critical thresholds (percentage)
+cpu_warning = 80
+cpu_critical = 95
+memory_warning = 80
+memory_critical = 95
+disk_warning = 80
+disk_critical = 95
+temperature_warning = 70
+temperature_critical = 85
+
+[smart]
+# Enable SMART monitoring
+enabled = true
+# Check interval in hours
+check_interval = 24
+# Devices to monitor (empty = auto-detect)
+devices = []
+# Alert on predicted failure
+alert_on_warning = true
+
+[network]
+# Preferred DNS test servers
+dns_test_servers = ["8.8.8.8", "1.1.1.1"]
+# Speed test server
+speed_test_url = "http://speedtest.tele2.net/10MB.zip"
+# Bandwidth monitoring
+monitor_bandwidth = true
+
+[hardware]
+# Temperature sensor paths (auto-detect if empty)
+temp_sensors = []
+# Fan sensor paths
+fan_sensors = []
+# GPU monitoring
+gpu_monitoring = true
+
+[reports]
+# Auto-generate reports
+auto_report = false
+# Report directory
+report_dir = "/var/lib/sanchala/diagnostics/reports"
+# Report format (html, json, text)
+format = "html"
+# Keep reports for N days
+retention_days = 30
+
+[ui]
+# Color scheme (sanchala, dark, light)
+theme = "sanchala"
+# Show ASCII graphs
+ascii_graphs = true
+# Progress bar width
+progress_width = 40

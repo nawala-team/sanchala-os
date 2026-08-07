@@ -1,0 +1,263 @@
+# ============================================================================
+# SANCHALA OS - Klipper Clipboard Manager Configuration
+# ============================================================================
+# Location: ~/.config/klipperrc
+# Universal Clipboard - Apple ecosystem-quality clipboard experience
+# Privacy-first, rich content support, cross-device sync
+# ============================================================================
+
+[General]
+# Keep clipboard contents across logout/restart
+KeepClipboardContents=true
+PreventEmptyClipboard=true
+MaxClipItems=100
+IgnoreSelection=false
+SyncClipboards=true
+IgnoreImages=false
+PopupAtMousePosition=true
+SelectionTextOnly=true
+StripWhiteSpace=false
+ReplayActionInHistory=false
+ShowNotificationOnCopy=false
+TimeoutForActionPopups=8000
+URLGrabberEnabled=true
+
+[History]
+MaxItems=100
+MaxItemSize=10485760
+HistoryFile=~/.local/share/sanchala/clipboard/history.lst
+PersistHistory=true
+MaxAgeDays=30
+RemoveDuplicates=true
+CaseSensitiveDuplicates=false
+ShowTimestamps=true
+TimestampFormat=relative
+GroupSimilarItems=true
+SearchEnabled=true
+SearchHighlight=true
+FuzzySearch=true
+
+[RichContent]
+Enabled=true
+ImagesEnabled=true
+MaxImageWidth=4096
+MaxImageHeight=4096
+ImageQuality=90
+ImageFormat=PNG
+GenerateThumbnails=true
+ThumbnailSize=64
+HTMLEnabled=true
+PreserveFormatting=true
+FileReferencesEnabled=true
+MaxFileReferences=50
+ColorValuesEnabled=true
+ColorFormat=hex
+
+[Files]
+Enabled=true
+ShowPreviews=true
+MaxPreviewSize=52428800
+PreviewTypes=image/*,text/*,application/pdf
+TrackFilePaths=true
+
+# ============================================================================
+# SENSITIVE DATA PROTECTION
+# ============================================================================
+
+[Security]
+Enabled=true
+AutoClearTimeout=30
+SensitivePatterns=password,passwd,secret,token,api[_-]?key,private[_-]?key,credit[_-]?card,cvv,ssn
+ClearPasswordManagerEntries=true
+PasswordManagerApps=keepassxc,bitwarden,1password,lastpass,org.kde.kwalletmanager5
+DetectCreditCards=true
+CreditCardPattern=\b(?:\d{4}[- ]?){3}\d{4}\b
+DetectSSN=true
+SSNPattern=\b\d{3}[- ]?\d{2}[- ]?\d{4}\b
+DetectAPIKeys=true
+APIKeyPattern=\b[A-Za-z0-9_-]{32,}\b
+DetectPrivateKeys=true
+PrivateKeyPattern=-----BEGIN.*PRIVATE KEY-----
+DetectOTP=true
+OTPPattern=\b\d{6}\b
+OTPClearTimeout=60
+ExcludeSensitiveFromHistory=true
+ShowSensitiveIndicator=true
+SensitiveIndicatorIcon=security-high
+UseSecureMemory=true
+ClearOnScreenLock=false
+ClearOnLogout=true
+NotifyOnAutoClear=true
+
+# ============================================================================
+# CROSS-DEVICE SYNC (KDE Connect Universal Clipboard)
+# ============================================================================
+
+[Sync]
+Enabled=true
+Provider=kdeconnect
+SyncMode=auto
+SyncDirection=both
+SyncText=true
+MaxTextSyncSize=65536
+SyncImages=true
+MaxImageSyncSize=5242880
+CompressImagesForSync=true
+SyncImageQuality=80
+SyncFiles=false
+SyncURLs=true
+AutoOpenURLs=false
+EncryptSync=true
+SyncDebounce=500
+TrustedDevicesOnly=true
+SyncSensitiveData=false
+NotifyOnReceive=true
+NotifyOnSend=false
+ConflictResolution=newest
+OfflineQueue=true
+MaxQueueSize=10
+
+[KDEConnect]
+Enabled=true
+AutoDiscover=true
+PairingMode=ask
+TrustedDevices=
+SyncDelay=300
+ReceiveDelay=100
+ShowDeviceIndicator=true
+PhoneClipboardEnabled=true
+TabletClipboardEnabled=true
+DesktopClipboardEnabled=true
+HandoffEnabled=true
+HandoffApps=brave-browser,firefox,org.kde.kate,libreoffice
+
+# ============================================================================
+# ACTIONS & AUTOMATION
+# ============================================================================
+
+[Actions]
+Enabled=true
+ShowActionMenu=false
+AutoDetectContentType=true
+URLActionsEnabled=true
+EmailActionsEnabled=true
+PhoneActionsEnabled=true
+FilePathActionsEnabled=true
+ColorActionsEnabled=true
+
+[Actions][URL]
+Enabled=true
+Pattern=https?://[^\s]+
+Actions=open,copy-clean,qr-code,archive
+
+[Actions][URL][open]
+Name=Open in Browser
+Icon=internet-web-browser
+Command=xdg-open %s
+
+[Actions][URL][qr-code]
+Name=Generate QR Code
+Icon=qr-code
+Command=sanchala-clipboard qr %s
+
+[Actions][Email]
+Enabled=true
+Pattern=[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}
+Actions=compose,copy,contact
+
+[Actions][Email][compose]
+Name=Compose Email
+Icon=mail-message-new
+Command=xdg-open "mailto:%s"
+
+[Actions][Phone]
+Enabled=true
+Pattern=[\+]?[(]?[0-9]{1,3}[)]?[-\s\.]?[(]?[0-9]{1,3}[)]?[-\s\.]?[0-9]{3,6}[-\s\.]?[0-9]{3,6}
+Actions=call,sms,contact
+
+[Actions][Phone][call]
+Name=Call via KDE Connect
+Icon=call-start
+Command=kdeconnect-cli --call %s
+
+[Actions][Color]
+Enabled=true
+Pattern=#[0-9A-Fa-f]{6}|rgb\([^)]+\)|hsl\([^)]+\)
+Actions=preview,convert
+
+# ============================================================================
+# APPEARANCE
+# ============================================================================
+
+[Appearance]
+PopupStyle=modern
+PopupWidth=400
+PopupMaxHeight=500
+ShowIcons=true
+IconSize=24
+ShowPreview=true
+PreviewMaxLines=3
+PreviewMaxWidth=60
+HighlightSearch=true
+GroupByType=false
+SortOrder=recent
+FollowSystemTheme=true
+CornerRadius=12
+BlurBackground=true
+AnimationDuration=150
+
+# ============================================================================
+# KEYBOARD SHORTCUTS
+# ============================================================================
+
+[Shortcuts]
+ShowHistory=Meta+V
+ShowActions=Meta+Ctrl+V
+ClearClipboard=Meta+Shift+V
+PastePlainText=Meta+Shift+Ctrl+V
+PasteHistory1=Meta+1
+PasteHistory2=Meta+2
+PasteHistory3=Meta+3
+SearchHistory=Meta+Ctrl+F
+SyncNow=Meta+Ctrl+S
+ToggleSync=Meta+Ctrl+Shift+S
+
+# ============================================================================
+# INTEGRATION
+# ============================================================================
+
+[Integration]
+Fcitx5Enabled=true
+KRunnerEnabled=true
+KRunnerKeyword=clip
+SystemTrayEnabled=true
+SystemTrayIcon=klipper
+DolphinEnabled=true
+KateEnabled=true
+KonsoleEnabled=true
+BrowserExtensionEnabled=true
+
+# ============================================================================
+# ADVANCED
+# ============================================================================
+
+[Advanced]
+Debug=false
+LogFile=~/.local/share/sanchala/clipboard/clipboard.log
+LogLevel=warn
+MemoryLimit=256
+CompressHistory=true
+BackupHistory=true
+BackupInterval=daily
+MaxBackups=7
+DBusEnabled=true
+IPCSocketPath=/run/user/%U/sanchala-clipboard.sock
+PerformanceMode=balanced
+WaylandEnabled=true
+WaylandDataControlV1=true
+X11SelectionTimeout=5000
+
+
+WatchFileChanges=false
+DefaultMode=reference
+DragDropEnabled=true

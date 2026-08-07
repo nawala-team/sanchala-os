@@ -1,0 +1,35 @@
+# ============================================
+# SANCHALA OS - User PipeWire Configuration
+# ============================================
+# User-level overrides (copy to ~/.config/pipewire/)
+# ============================================
+
+# Uncomment sections as needed
+
+# ============================================
+# Low Latency Gaming
+# ============================================
+# context.properties = {
+#     default.clock.quantum = 256
+#     default.clock.min-quantum = 32
+#     default.clock.max-quantum = 512
+# }
+
+# ============================================
+# High Quality Audio
+# ============================================
+# context.properties = {
+#     default.clock.rate = 96000
+#     default.clock.quantum = 2048
+# }
+# stream.properties = {
+#     resample.quality = 10
+# }
+
+# ============================================
+# Bit-Perfect Passthrough (for external DAC)
+# ============================================
+# stream.properties = {
+#     resample.disable = true
+#     channelmix.disable = true
+# }

@@ -1,0 +1,25 @@
+{
+  "name": "sanchala-captive-portal",
+  "version": "1.0.0",
+  "description": "Detect and authenticate with captive portals",
+  "author": "Sanchala OS Team",
+  "category": "Network",
+  "settings": {
+    "autoDetect": true,
+    "autoOpen": true,
+    "detectionUrls": [
+      "http://connectivitycheck.gstatic.com/generate_204",
+      "http://www.msftconnecttest.com/connecttest.txt",
+      "http://captive.apple.com/hotspot-detect.html"
+    ],
+    "checkInterval": 30,
+    "savedCredentials": [],
+    "autoLogin": false,
+    "notifications": true,
+    "timeout": 10,
+    "retries": 3,
+    "browserMode": "embedded",
+    "clearCookiesOnSuccess": false
+  },
+  "permissions": ["network", "notifications", "credentials"]
+}

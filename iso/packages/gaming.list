@@ -1,0 +1,171 @@
+# ============================================
+# SANCHALA OS - Gaming Packages
+# ============================================
+# SteamOS-level gaming experience
+# ============================================
+
+# ===========================================
+# Steam & Proton
+# ===========================================
+steam
+steam-native-runtime
+proton-ge-custom-bin
+
+# ===========================================
+# Wine Stack (Native Windows Gaming)
+# ===========================================
+wine-staging
+wine-gecko
+wine-mono
+winetricks
+lib32-wine-staging
+
+# Wine Dependencies
+lib32-gnutls
+lib32-libldap
+lib32-libgpg-error
+lib32-sqlite
+lib32-libpulse
+lib32-alsa-lib
+lib32-alsa-plugins
+lib32-libxcomposite
+lib32-libxinerama
+lib32-opencl-icd-loader
+lib32-libxslt
+lib32-libva
+lib32-gtk3
+lib32-gst-plugins-base-libs
+lib32-vulkan-icd-loader
+
+# ===========================================
+# Game Launchers
+# ===========================================
+lutris
+heroic-games-launcher-bin
+gamehub
+bottles
+
+# ===========================================
+# Performance & Game Mode
+# ===========================================
+gamemode
+lib32-gamemode
+mangohud
+lib32-mangohud
+goverlay
+corectrl
+
+# ===========================================
+# Vulkan (Essential for Gaming)
+# ===========================================
+vulkan-icd-loader
+lib32-vulkan-icd-loader
+vulkan-tools
+vulkan-headers
+
+# Mesa Vulkan (AMD/Intel)
+vulkan-radeon
+lib32-vulkan-radeon
+vulkan-intel
+lib32-vulkan-intel
+vulkan-mesa-layers
+lib32-vulkan-mesa-layers
+
+# NVIDIA Vulkan (installed by gpu-detect)
+# nvidia-utils
+# lib32-nvidia-utils
+
+# ===========================================
+# DXVK/VKD3D (DirectX to Vulkan)
+# ===========================================
+dxvk-bin
+vkd3d
+lib32-vkd3d
+
+# ===========================================
+# Controller Support
+# ===========================================
+game-devices-udev
+xpadneo-dkms
+xone-dkms
+hid-nintendo-dkms
+dualsensectl
+antimicrox
+sc-controller
+
+# SDL for controller input
+sdl2
+lib32-sdl2
+sdl2_ttf
+sdl2_image
+sdl2_mixer
+
+# ===========================================
+# Game Streaming
+# ===========================================
+sunshine
+moonlight-qt
+
+# ===========================================
+# Emulation (RetroArch + Cores)
+# ===========================================
+retroarch
+retroarch-assets-xmb
+retroarch-assets-ozone
+libretro-core-info
+
+# Popular cores
+libretro-beetle-psx-hw
+libretro-dolphin
+libretro-mgba
+libretro-mupen64plus-next
+libretro-pcsx2
+libretro-ppsspp
+libretro-snes9x
+libretro-nestopia
+libretro-desmume
+libretro-flycast
+
+# Standalone emulators
+dolphin-emu
+pcsx2
+rpcs3
+yuzu
+ryujinx
+ppsspp
+duckstation
+
+# ===========================================
+# Gaming Utilities
+# ===========================================
+protontricks
+protonup-qt
+steamtinkerlaunch
+gamescope
+vkbasalt
+
+# Wine/Proton tools
+wine-installer
+q4wine
+
+# Game save management
+ludusavi
+
+# ===========================================
+# Voice Chat (Gaming)
+# ===========================================
+discord
+teamspeak3
+mumble
+
+# ===========================================
+# Input Latency Tools
+# ===========================================
+libstrangle
+cpupower
+
+# ===========================================
+# OBS Game Capture
+# ===========================================
+obs-vkcapture
+lib32-obs-vkcapture

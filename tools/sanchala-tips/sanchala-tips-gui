@@ -1,0 +1,80 @@
+#!/usr/bin/env python3
+"""Sanchala Tips - Tips and Tricks"""
+import sys, random
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+
+class TipsApp(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Sanchala Tips")
+        self.setMinimumSize(600, 450)
+        self.tips = [
+            ("⌨️ Keyboard Shortcuts", "Press Super+Space to open the app launcher quickly.", "Productivity"),
+            ("🔒 Security", "Enable two-factor authentication for extra security.", "Security"),
+            ("⚡ Performance", "Close unused apps to free up memory and improve speed.", "Performance"),
+            ("🎨 Customization", "Right-click the desktop to access appearance settings.", "Personalization"),
+            ("💾 Backup", "Use Sanchala Backup to automatically save your important files.", "Data Safety"),
+            ("🔍 Search", "Press Super+F to search files and apps instantly.", "Productivity"),
+            ("🌙 Dark Mode", "Enable dark mode in Settings > Appearance to reduce eye strain.", "Comfort"),
+            ("📱 Sync", "Connect your phone to sync contacts, photos, and more.", "Connectivity"),
+        ]
+        self.current = 0
+        self.init_ui()
+    
+    def init_ui(self):
+        self.setStyleSheet("QMainWindow{background:qlineargradient(x1:0,y1:0,x2:1,y2:1,stop:0 #667eea,stop:1 #764ba2);}QLabel{color:#fff;}QPushButton{background:#ffffff30;color:#fff;border:none;padding:12px 24px;border-radius:8px;}QPushButton:hover{background:#ffffff50;}")
+        c = QWidget(); self.setCentralWidget(c); m = QVBoxLayout(c)
+        m.setContentsMargins(40, 40, 40, 40)
+        
+        # Header
+        h = QLabel("💡 Sanchala Tips"); h.setStyleSheet("font-size:28px;font-weight:bold;")
+        h.setAlignment(Qt.AlignmentFlag.AlignCenter); m.addWidget(h)
+        
+        m.addStretch()
+        
+        # Tip card
+        card = QFrame(); card.setStyleSheet("background:#ffffff20;border-radius:20px;padding:30px;")
+        cl = QVBoxLayout(card)
+        self.cat = QLabel(); self.cat.setStyleSheet("color:#ffffff80;font-size:12px;"); self.cat.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.icon = QLabel(); self.icon.setStyleSheet("font-size:48px;"); self.icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.title = QLabel(); self.title.setStyleSheet("font-size:20px;font-weight:bold;"); self.title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.desc = QLabel(); self.desc.setWordWrap(True); self.desc.setAlignment(Qt.AlignmentFlag.AlignCenter); self.desc.setStyleSheet("font-size:14px;line-height:1.5;")
+        cl.addWidget(self.cat); cl.addWidget(self.icon); cl.addWidget(self.title); cl.addWidget(self.desc)
+        m.addWidget(card)
+        
+        m.addStretch()
+        
+        # Navigation
+        nav = QHBoxLayout()
+        prev_btn = QPushButton("◀ Previous"); prev_btn.clicked.connect(self.prev_tip)
+        next_btn = QPushButton("Next ▶"); next_btn.clicked.connect(self.next_tip)
+        rand_btn = QPushButton("🎲 Random"); rand_btn.clicked.connect(self.random_tip)
+        nav.addWidget(prev_btn); nav.addWidget(rand_btn); nav.addWidget(next_btn)
+        m.addLayout(nav)
+        
+        # Show on startup checkbox
+        cb = QCheckBox("Show tips at startup"); cb.setChecked(True); cb.setStyleSheet("color:#fff;")
+        m.addWidget(cb, alignment=Qt.AlignmentFlag.AlignCenter)
+        
+        self.show_tip()
+    
+    def show_tip(self):
+        t = self.tips[self.current]
+        self.icon.setText(t[0].split()[0])
+        self.title.setText(t[0])
+        self.desc.setText(t[1])
+        self.cat.setText(f"Category: {t[2]}")
+    
+    def next_tip(self):
+        self.current = (self.current + 1) % len(self.tips); self.show_tip()
+    
+    def prev_tip(self):
+        self.current = (self.current - 1) % len(self.tips); self.show_tip()
+    
+    def random_tip(self):
+        self.current = random.randint(0, len(self.tips) - 1); self.show_tip()
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv); w = TipsApp(); w.show(); sys.exit(app.exec())

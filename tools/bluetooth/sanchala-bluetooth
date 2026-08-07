@@ -1,0 +1,93 @@
+#!/bin/bash
+# SANCHALA OS - Bluetooth Management Tool
+# Usage: sanchala-bluetooth <command> [options]
+set -euo pipefail
+
+VERSION="1.0.0"
+RED='\033[0;31m'; GREEN='\033[0;32m'; BLUE='\033[0;34m'; CYAN='\033[0;36m'; NC='\033[0m'
+
+print_ok() { echo -e "${GREEN}✓ $1${NC}"; }
+print_err() { echo -e "${RED}✗ $1${NC}" >&2; }
+print_info() { echo -e "${BLUE}ℹ $1${NC}"; }
+
+check_bt() { systemctl is-active --quiet bluetooth || { print_err "Bluetooth not running"; exit 1; }; }
+
+cmd_power() {
+    case "${1:-status}" in
+        on)  bluetoothctl power on; print_ok "Bluetooth ON" ;;
+        off) bluetoothctl power off; print_ok "Bluetooth OFF" ;;
+        *)   bluetoothctl show | grep -q "Powered: yes" && echo -e "${GREEN}󰂯 ON${NC}" || echo -e "${RED}󰂯 OFF${NC}" ;;
+    esac
+}
+
+cmd_scan() {
+    local dur="${1:-10}"; print_info "Scanning ${dur}s..."
+    timeout "$dur" bluetoothctl scan on &>/dev/null || true
+    bluetoothctl devices | while read -r _ mac name; do
+        local st=""; bluetoothctl info "$mac" 2>/dev/null | grep -q "Connected: yes" && st="${GREEN}[C]${NC}"
+        echo -e "  ${name:-Unknown} ($mac) $st"
+    done
+}
+
+cmd_connect() {
+    local mac="${1:-$(bluetoothctl devices Paired | head -1 | awk '{print $2}')}"
+    [[ -z "$mac" ]] && { print_err "No device"; exit 1; }
+    bluetoothctl connect "$mac" && print_ok "Connected $mac"
+}
+
+cmd_disconnect() {
+    [[ -z "${1:-}" ]] && { bluetoothctl devices Connected | awk '{print $2}' | xargs -I{} bluetoothctl disconnect {}; print_ok "All disconnected"; } \
+        || { bluetoothctl disconnect "$1"; print_ok "Disconnected $1"; }
+}
+
+cmd_pair() { [[ -z "${1:-}" ]] && { print_err "Need MAC"; exit 1; }; bluetoothctl trust "$1"; bluetoothctl pair "$1"; print_ok "Paired $1"; }
+cmd_remove() { [[ -z "${1:-}" ]] && { print_err "Need MAC"; exit 1; }; bluetoothctl remove "$1"; print_ok "Removed $1"; }
+
+cmd_info() {
+    local mac="${1:-$(bluetoothctl devices Connected | head -1 | awk '{print $2}')}"
+    [[ -z "$mac" ]] && { print_err "No device"; exit 1; }
+    local info=$(bluetoothctl info "$mac" 2>/dev/null)
+    echo "$info" | grep -E "Alias:|Connected:|Paired:|Battery"
+}
+
+cmd_battery() {
+    bluetoothctl devices Connected | while read -r _ mac name; do
+        local bat=$(bluetoothctl info "$mac" 2>/dev/null | grep "Battery" | grep -oP '\d+')
+        [[ -n "$bat" ]] && echo "󰁹 ${name}: ${bat}%"
+    done
+}
+
+cmd_list() {
+    case "${1:-all}" in
+        paired) bluetoothctl devices Paired ;;
+        connected) bluetoothctl devices Connected ;;
+        *) bluetoothctl devices ;;
+    esac
+}
+
+cmd_help() { cat << 'EOF'
+sanchala-bluetooth - Bluetooth Manager
+
+Commands:
+  power [on|off]    Toggle power
+  scan [secs]       Scan devices  
+  connect [MAC]     Connect device
+  disconnect [MAC]  Disconnect
+  pair <MAC>        Pair device
+  remove <MAC>      Forget device
+  info [MAC]        Device info
+  battery           Battery levels
+  list [filter]     List devices
+EOF
+}
+
+main() {
+    local cmd="${1:-help}"; shift || true
+    case "$cmd" in
+        power) cmd_power "$@" ;; scan) check_bt; cmd_scan "$@" ;; connect) check_bt; cmd_connect "$@" ;;
+        disconnect) check_bt; cmd_disconnect "$@" ;; pair) check_bt; cmd_pair "$@" ;; remove) check_bt; cmd_remove "$@" ;;
+        info) check_bt; cmd_info "$@" ;; battery) check_bt; cmd_battery ;; list) check_bt; cmd_list "$@" ;;
+        help|*) cmd_help ;;
+    esac
+}
+main "$@"

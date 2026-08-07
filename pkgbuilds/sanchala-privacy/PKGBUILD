@@ -1,0 +1,59 @@
+# Maintainer: Sanchala Team <dev@sanchala.id>
+pkgname=sanchala-privacy
+pkgver=1.0.0
+pkgrel=1
+pkgdesc="Sanchala OS Privacy Dashboard and Controls"
+arch=('x86_64')
+url="https://github.com/dansiapa/sanchala-os"
+license=('GPL3')
+depends=(
+    'sanchala-guardian'
+    'sqlite'
+    'firewalld'
+)
+makedepends=(
+    'rust'
+    'cargo'
+)
+backup=(
+    'etc/sanchala/privacy.toml'
+    'etc/sanchala/telemetry.toml'
+)
+source=("$pkgname-$pkgver.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+    cd "$srcdir/$pkgname-$pkgver"
+    cargo build --release
+}
+
+package() {
+    cd "$srcdir/$pkgname-$pkgver"
+    
+    # Install binaries
+    install -Dm755 "target/release/sanchala-privacy" \
+        "$pkgdir/usr/bin/sanchala-privacy"
+    install -Dm755 "target/release/sanchala-privd" \
+        "$pkgdir/usr/bin/sanchala-privd"
+    
+    # Install configuration
+    install -Dm644 "config/privacy.toml" \
+        "$pkgdir/etc/sanchala/privacy.toml"
+    install -Dm644 "config/telemetry.toml" \
+        "$pkgdir/etc/sanchala/telemetry.toml"
+    
+    # Install systemd service
+    install -Dm644 "systemd/sanchala-privd.service" \
+        "$pkgdir/usr/lib/systemd/system/sanchala-privd.service"
+    
+    # Install D-Bus policy
+    install -Dm644 "dbus/id.sanchala.Privacy.conf" \
+        "$pkgdir/usr/share/dbus-1/system.d/id.sanchala.Privacy.conf"
+    
+    # Create data directories
+    install -dm755 "$pkgdir/var/lib/sanchala/privacy"
+    install -dm755 "$pkgdir/var/log/sanchala"
+    
+    # Install documentation
+    install -Dm644 README.md "$pkgdir/usr/share/doc/$pkgname/README.md"
+}

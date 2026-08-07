@@ -1,0 +1,13 @@
+[Desktop Entry]
+Name=Sanchala AI
+Comment=Local AI Assistant
+Icon=sanchala-ai
+Type=Service
+X-KDE-ServiceTypes=Plasma/Applet
+X-Plasma-API=declarativeappletscript
+X-Plasma-MainScript=ui/main.qml
+X-KDE-PluginInfo-Name=id.sanchala.ai.plasmoid
+X-KDE-PluginInfo-Category=Utilities
+X-KDE-PluginInfo-Author=Sanchala Team
+X-KDE-PluginInfo-Version=1.0
+X-KDE-PluginInfo-License=GPL-3.0

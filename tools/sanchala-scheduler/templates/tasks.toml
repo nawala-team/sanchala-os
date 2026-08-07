@@ -1,0 +1,51 @@
+# Sanchala Scheduler Task Templates
+# Use with: sanchala-scheduler from-template <name>
+
+[daily-backup]
+name = "auto-backup"
+description = "Daily system backup"
+command = "/usr/bin/sanchala-backup create 'Scheduled backup'"
+schedule = "*-*-* 03:00:00"
+enabled = true
+
+[weekly-cleanup]
+name = "auto-cleanup"
+description = "Weekly system cleanup"
+command = "/usr/bin/sanchala-cleaner auto"
+schedule = "Sun *-*-* 04:00:00"
+enabled = true
+
+[hourly-sync]
+name = "cloud-sync"
+description = "Hourly cloud sync"
+command = "/usr/bin/sanchala-cloud sync --quiet"
+schedule = "*:00"
+enabled = false
+
+[boot-optimize]
+name = "boot-optimize"
+description = "Optimize on boot"
+command = "/usr/bin/sanchala-boot-optimize --quick"
+on_boot = "2min"
+enabled = false
+
+[temp-cleanup]
+name = "temp-cleanup"
+description = "Clean temporary files"
+command = "find /tmp -user $USER -atime +7 -delete; find ~/.cache -atime +30 -type f -delete"
+schedule = "*-*-* 05:30:00"
+enabled = false
+
+[screenshot-cleanup]
+name = "screenshot-cleanup"
+description = "Clean old screenshots"
+command = "find ~/Pictures/Screenshots -mtime +30 -delete"
+schedule = "Sun *-*-* 06:00:00"
+enabled = false
+
+[update-check]
+name = "update-check"
+description = "Check for system updates"
+command = "/usr/bin/sanchala-updater check --notify"
+schedule = "*-*-* 10:00:00"
+enabled = true

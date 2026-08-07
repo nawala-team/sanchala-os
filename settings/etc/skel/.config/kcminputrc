@@ -1,0 +1,35 @@
+# ============================================================================
+# SANCHALA OS - KDE Input Device Settings
+# ============================================================================
+# Location: ~/.config/kcminputrc
+# ============================================================================
+
+[Keyboard]
+# Key repeat settings
+RepeatDelay=400
+RepeatRate=30
+
+# NumLock state on startup (0=off, 1=on, 2=leave unchanged)
+NumLock=2
+
+[Mouse]
+# Mouse cursor acceleration
+Acceleration=1.0
+Threshold=2
+
+# Cursor size (24 = default, 32 = large, 48 = extra large)
+cursorSize=24
+cursorTheme=breeze_cursors
+
+# Single click to open (false = double-click, macOS uses double-click)
+SingleClick=false
+
+# Wheel scroll lines
+WheelScrollLines=3
+
+[Touchpad]
+# These mirror touchpadxlibinputrc for KDE integration
+PointerAcceleration=0.4
+PointerAccelerationProfile=1
+TapToClick=true
+NaturalScroll=true

@@ -1,0 +1,29 @@
+# Sanchala Parental Controls - Default Configuration
+# /etc/sanchala/parental/config.toml
+
+[general]
+enabled = true
+require_pin = true
+pin_hash = ""  # Set via sanchala-parental setup
+data_dir = "/var/lib/sanchala/parental"
+log_level = "info"
+
+[screentime]
+default_daily_limit_minutes = 120
+warning_minutes_before = 15
+allow_extensions = true
+max_extension_minutes = 30
+weekend_bonus_minutes = 60
+
+[content_filter]
+default_level = "moderate"  # strict, moderate, minimal, off
+safe_search_enforced = true
+block_adult_content = true
+block_social_media = false
+block_gaming = false
+
+[notifications]
+notify_parent_on_block = true
+notify_child_warnings = true
+daily_report = false
+report_email = ""

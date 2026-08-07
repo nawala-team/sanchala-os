@@ -1,0 +1,30 @@
+# Maintainer: Sanchala Team <dev@sanchala.id>
+
+pkgname=sanchala-wallpapers
+pkgver=1.0.0
+pkgrel=1
+pkgdesc='Sanchala OS wallpaper collection'
+arch=('any')
+url='https://sanchala.id'
+license=('CC-BY-SA-4.0')
+groups=('sanchala')
+
+package() {
+    # Install wallpapers
+    install -dm755 "$pkgdir/usr/share/wallpapers/sanchala"
+    
+    # Copy all wallpapers
+    for img in "$srcdir/wallpapers/"*.{jpg,png,svg}; do
+        [[ -f "$img" ]] && install -Dm644 "$img" \
+            "$pkgdir/usr/share/wallpapers/sanchala/$(basename "$img")"
+    done
+    
+    # KDE Plasma metadata
+    install -Dm644 "$srcdir/metadata.json" \
+        "$pkgdir/usr/share/wallpapers/sanchala/metadata.json"
+    
+    # Set as default wallpaper
+    install -dm755 "$pkgdir/usr/share/backgrounds"
+    ln -sf /usr/share/wallpapers/sanchala/sanchala-default.png \
+        "$pkgdir/usr/share/backgrounds/sanchala-default.png"
+}

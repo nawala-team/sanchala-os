@@ -1,0 +1,60 @@
+# ============================================================================
+# SANCHALA OS - Kontact Configuration
+# ============================================================================
+# Unified PIM suite - Apple iLife-style integration
+# ============================================================================
+
+[General]
+# Active plugins (enabled components)
+ActivePlugins=kontact_summaryplugin,kontact_korganizerplugin,kontact_kaddressbookplugin,kontact_kmailplugin,kontact_knotesplugin
+
+# Show splash screen
+ShowSplash=false
+
+# Sidebar icon size
+IconSize=32
+
+# Sidebar position: left, right
+SideBarPosition=left
+
+# Remember window size
+RememberWindowSize=true
+
+[MainWindow]
+# Window geometry (will be set on first run)
+# Height=700
+# Width=1200
+
+# Maximized state
+Maximized=false
+
+# Show menubar
+MenuBar=true
+
+# Show statusbar
+StatusBar=true
+
+# Toolbar style
+ToolBarsMovable=false
+
+[Plugins]
+# Plugin load order (Summary first for dashboard)
+LoadOrder=kontact_summaryplugin,kontact_korganizerplugin,kontact_kaddressbookplugin,kontact_kmailplugin,kontact_knotesplugin
+
+[kontact_summaryplugin]
+# Show on startup
+ShowOnStartup=true
+
+[LastRun]
+# Track last used plugin for restore
+LastPlugin=kontact_summaryplugin
+
+[SidePane]
+# Enable quick navigation
+Enabled=true
+Style=icon
+
+[Notification]
+# Integrated notifications
+EnableNotifications=true
+ShowInSystemTray=true

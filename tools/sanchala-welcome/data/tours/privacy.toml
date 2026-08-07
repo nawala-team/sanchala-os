@@ -1,0 +1,49 @@
+# Privacy Dashboard Tour
+[tour]
+id = "privacy"
+name = "Privacy Dashboard"
+description = "Control your privacy and monitor app access"
+estimated_minutes = 2
+
+[[steps]]
+id = "intro"
+title = "Privacy First"
+description = "Sanchala OS is designed with privacy at its core. No telemetry, no tracking, no ads."
+target = { type = "fullscreen" }
+position = "center"
+
+[[steps]]
+id = "dashboard"
+title = "Privacy Dashboard"
+description = "See your privacy score and monitor what apps have accessed."
+target = { type = "fullscreen" }
+position = "center"
+action = { type = "open_app", app_id = "id.sanchala.Privacy" }
+
+[[steps]]
+id = "permissions"
+title = "Permission History"
+description = "See when apps accessed your camera, microphone, or location."
+target = { type = "area", x = 100, y = 150, width = 500, height = 300 }
+position = "right"
+
+[[steps]]
+id = "network"
+title = "Network Privacy"
+description = "DNS-over-HTTPS and MAC randomization protect your network identity."
+target = { type = "fullscreen" }
+position = "center"
+
+[[steps]]
+id = "browser"
+title = "Private Browsing"
+description = "Brave browser with enhanced tracking protection is your default browser."
+target = { type = "fullscreen" }
+position = "center"
+
+[[steps]]
+id = "complete"
+title = "You're in Control"
+description = "Your data stays yours. Check Privacy Dashboard anytime to audit app access."
+target = { type = "fullscreen" }
+position = "center"

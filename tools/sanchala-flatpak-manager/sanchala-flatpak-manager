@@ -1,0 +1,39 @@
+#!/bin/bash
+# Sanchala Flatpak Manager
+set -euo pipefail
+
+list_installed() {
+    echo "=== Installed Flatpaks ==="
+    flatpak list --app --columns=application,name,version 2>/dev/null || echo "Flatpak not available"
+}
+
+search_pkg() {
+    flatpak search "$1" 2>/dev/null || echo "No results"
+}
+
+install_pkg() {
+    flatpak install flathub "$1" -y && echo "Installed: $1"
+}
+
+remove_pkg() {
+    flatpak uninstall "$1" -y && echo "Removed: $1"
+}
+
+update_all() {
+    flatpak update -y
+}
+
+run_app() {
+    flatpak run "$1"
+}
+
+case "${1:-list}" in
+    list|-l) list_installed ;;
+    search|-s) search_pkg "$2" ;;
+    install|-i) install_pkg "$2" ;;
+    remove|-r) remove_pkg "$2" ;;
+    update|-u) update_all ;;
+    run) run_app "$2" ;;
+    gui) exec sanchala-flatpak-manager-gui ;;
+    *) echo "Usage: $0 {list|search|install|remove|update|run|gui}" ;;
+esac

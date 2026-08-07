@@ -1,0 +1,26 @@
+{
+  "name": "sanchala-kvm-switch",
+  "version": "1.0.0",
+  "description": "Software KVM switch for multi-computer control",
+  "author": "Sanchala OS Team",
+  "category": "Network",
+  "settings": {
+    "enabled": true,
+    "role": "server",
+    "serverAddress": "",
+    "serverPort": 24800,
+    "computers": [],
+    "layout": "horizontal",
+    "screenEdge": "right",
+    "clipboardSharing": true,
+    "fileDragging": true,
+    "relativeMouse": false,
+    "lockCursorToScreen": false,
+    "switchDelay": 250,
+    "hotkey": "Scroll Lock",
+    "encryption": true,
+    "requirePassword": true,
+    "switchOnDoubleClick": false
+  },
+  "permissions": ["network", "input", "clipboard"]
+}

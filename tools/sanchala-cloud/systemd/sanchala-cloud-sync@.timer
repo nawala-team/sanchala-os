@@ -1,0 +1,12 @@
+[Unit]
+Description=Sanchala Cloud Sync Timer (%i)
+After=sanchala-cloudd.service
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+RandomizedDelaySec=30
+Persistent=true
+
+[Install]
+WantedBy=timers.target

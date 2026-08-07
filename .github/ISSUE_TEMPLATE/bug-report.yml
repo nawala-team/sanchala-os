@@ -1,0 +1,127 @@
+name: 🐛 Bug Report
+description: Report a bug or issue with Sanchala OS
+title: "[BUG] "
+labels: ["bug", "needs-triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug! Please fill out the form below to help us identify and fix the issue.
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      description: Which part of Sanchala OS is affected?
+      options:
+        - Installation / ISO
+        - Boot / GRUB / Plymouth
+        - Desktop Environment (KDE Plasma)
+        - Security (AppArmor, Firewall, etc.)
+        - Sanchala Guardian
+        - Sanchala Store
+        - Sanchala Welcome
+        - Sanchala Backup
+        - Sanchala Permission Manager
+        - Networking
+        - Graphics / GPU
+        - Storage / Btrfs / LUKS
+        - Kernel
+        - Updates / Package Manager
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: How severe is this issue?
+      options:
+        - Critical (System unusable, data loss)
+        - High (Major feature broken)
+        - Medium (Feature impaired but workaround exists)
+        - Low (Minor inconvenience)
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of the bug
+      placeholder: Describe what went wrong...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+      placeholder: I expected...
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: What actually happened?
+      placeholder: Instead, what happened was...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to Reproduce
+      description: How can we reproduce this issue?
+      placeholder: |
+        1. Go to...
+        2. Click on...
+        3. See error...
+    validations:
+      required: true
+
+  - type: textarea
+    id: system-info
+    attributes:
+      label: System Information
+      description: Please provide system details
+      placeholder: |
+        - Sanchala OS Version: 
+        - Kernel: (uname -r)
+        - Hardware: (CPU, RAM, GPU)
+        - Installation Type: (Fresh install / Upgrade)
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant Logs
+      description: Include any relevant log output
+      placeholder: |
+        Paste logs here (journalctl, dmesg, etc.)
+      render: shell
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: If applicable, add screenshots to help explain your problem
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I have searched existing issues to ensure this is not a duplicate
+          required: true
+        - label: I have included all relevant system information
+          required: true
+        - label: I can reproduce this issue consistently

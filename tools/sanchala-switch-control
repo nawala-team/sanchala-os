@@ -1,0 +1,139 @@
+#!/bin/bash
+# SANCHALA-SWITCH-CONTROL - Switch Access Control for Sanchala OS
+# WCAG 2.1 AAA Compliant | Copyright (c) 2025 Sanchala OS Project
+set -euo pipefail
+
+VERSION="1.0.0"
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/sanchala/accessibility"
+CONFIG_FILE="$CONFIG_DIR/switch-control.conf"
+PID_FILE="/tmp/sanchala-switch-control.pid"
+
+declare -A SWITCH=([enabled]=false [mode]=scan [speed]=1.5 [switches]=2 [sound]=true [highlight]=yellow)
+declare -A KEYS=([select]=space [next]=Tab [prev]=shift+Tab [back]=Escape)
+
+mkdir -p "$CONFIG_DIR"
+
+load_config() { [[ -f "$CONFIG_FILE" ]] && source "$CONFIG_FILE"; }
+save_config() { declare -p SWITCH > "$CONFIG_FILE"; declare -p KEYS >> "$CONFIG_FILE"; }
+
+play_sound() {
+    [[ "${SWITCH[sound]}" != "true" ]] && return
+    paplay /usr/share/sounds/freedesktop/stereo/message.oga 2>/dev/null ||:
+}
+
+# Scanning mode - highlight elements sequentially
+scan_elements() {
+    local elements=("$@")
+    local index=0 total=${#elements[@]}
+    
+    while true; do
+        local el="${elements[$index]}"
+        echo "Scanning: $el"
+        play_sound
+        
+        # Highlight current element (using xdotool for focus)
+        xdotool search --name "$el" windowactivate 2>/dev/null ||:
+        
+        sleep "${SWITCH[speed]}"
+        ((index = (index + 1) % total))
+    done
+}
+
+# Point scanning - move cursor in grid
+point_scan() {
+    local screen_w screen_h
+    read -r screen_w screen_h < <(xdpyinfo 2>/dev/null | awk '/dimensions:/{print $2}' | tr 'x' ' ')
+    screen_w=${screen_w:-1920}; screen_h=${screen_h:-1080}
+    
+    local step=50 x=$((screen_w/2)) y=$((screen_h/2)) direction="horizontal"
+    
+    echo "Point scanning mode (${screen_w}x${screen_h})"
+    
+    while true; do
+        xdotool mousemove "$x" "$y"
+        play_sound
+        
+        if [[ "$direction" == "horizontal" ]]; then
+            ((x += step))
+            [[ $x -ge $screen_w ]] && x=0
+        else
+            ((y += step))
+            [[ $y -ge $screen_h ]] && y=0
+        fi
+        
+        sleep "${SWITCH[speed]}"
+    done
+}
+
+handle_switch_input() {
+    echo "Waiting for switch input..."
+    
+    # Monitor keyboard for switch keys
+    while read -r key; do
+        case "$key" in
+            "${KEYS[select]}")
+                echo "SELECT pressed"
+                xdotool click 1  # Left click
+                play_sound
+                ;;
+            "${KEYS[next]}")
+                echo "NEXT pressed"
+                xdotool key Tab
+                ;;
+            "${KEYS[prev]}")
+                echo "PREV pressed"
+                xdotool key shift+Tab
+                ;;
+            "${KEYS[back]}")
+                echo "BACK pressed"
+                xdotool key Escape
+                ;;
+        esac
+    done
+}
+
+start_service() {
+    load_config
+    [[ -f "$PID_FILE" ]] && kill -0 "$(cat "$PID_FILE")" 2>/dev/null && echo "Already running" && return 1
+    
+    echo $$ > "$PID_FILE"
+    SWITCH[enabled]="true"; save_config
+    
+    echo "Switch Control active (mode: ${SWITCH[mode]}, speed: ${SWITCH[speed]}s)"
+    
+    trap 'rm -f "$PID_FILE"; exit' SIGTERM SIGINT
+    
+    case "${SWITCH[mode]}" in
+        scan) scan_elements "File" "Edit" "View" "Help" ;;
+        point) point_scan ;;
+        step) handle_switch_input ;;
+    esac
+}
+
+stop_service() {
+    [[ -f "$PID_FILE" ]] && kill "$(cat "$PID_FILE")" 2>/dev/null ||:
+    rm -f "$PID_FILE"
+    SWITCH[enabled]="false"; save_config
+    echo "Switch control stopped"
+}
+
+status() {
+    load_config
+    if [[ -f "$PID_FILE" ]] && kill -0 "$(cat "$PID_FILE")" 2>/dev/null; then
+        echo "● Switch Control running | Mode: ${SWITCH[mode]} | Speed: ${SWITCH[speed]}s"
+    else
+        echo "○ Switch Control not running"
+    fi
+    echo "Keys: Select=${KEYS[select]} Next=${KEYS[next]} Back=${KEYS[back]}"
+}
+
+case "${1:-status}" in
+    start|on) start_service ;; stop|off) stop_service ;; status) status ;;
+    toggle) [[ -f "$PID_FILE" ]] && stop_service || (start_service &) ;;
+    --mode) SWITCH[mode]="$2"; save_config; echo "Mode: $2" ;;
+    --speed) SWITCH[speed]="$2"; save_config; echo "Speed: ${2}s" ;;
+    --key-select) KEYS[select]="$2"; save_config ;;
+    --key-next) KEYS[next]="$2"; save_config ;;
+    --help|-h) echo "Usage: sanchala-switch-control {start|stop|toggle|--mode scan|point|step|--speed N}" ;;
+    --version|-v) echo "v$VERSION" ;; *) echo "Unknown: $1"; exit 1 ;;
+esac

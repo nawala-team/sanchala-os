@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Gestures Settings
+Comment=Configure touchpad gestures
+Exec=sanchala-gestures-settings gui
+Icon=input-touchpad
+Terminal=false
+Type=Application
+Categories=Settings;HardwareSettings;
+Keywords=gestures;touchpad;swipe;

@@ -1,0 +1,93 @@
+# ============================================================================
+# SANCHALA OS - External Display Hotplug Rules
+# ============================================================================
+# Location: /etc/udev/rules.d/90-sanchala-display-hotplug.rules
+# Purpose: Automatic display detection and configuration
+# ============================================================================
+
+# ===========================================
+# DRM (Direct Rendering Manager) HOTPLUG
+# ===========================================
+# Detect display connect/disconnect via DRM subsystem
+ACTION=="change", SUBSYSTEM=="drm", ENV{HOTPLUG}=="1", RUN+="/usr/bin/systemctl --no-block start sanchala-display-hotplug.service"
+
+# ===========================================
+# HDMI HOTPLUG
+# ===========================================
+# HDMI display connection
+ACTION=="change", SUBSYSTEM=="drm", KERNEL=="card*", ENV{DISPLAY_CONNECTOR}=="HDMI*", RUN+="/usr/bin/sanchala-display-notify hotplug HDMI"
+
+# ===========================================
+# DISPLAYPORT HOTPLUG
+# ===========================================
+# DisplayPort (including USB-C DP Alt Mode)
+ACTION=="change", SUBSYSTEM=="drm", KERNEL=="card*", ENV{DISPLAY_CONNECTOR}=="DP*", RUN+="/usr/bin/sanchala-display-notify hotplug DisplayPort"
+
+# ===========================================
+# USB-C DISPLAYPORT ALT MODE
+# ===========================================
+# USB-C to DisplayPort
+ACTION=="add|remove", SUBSYSTEM=="typec", ATTR{supports_usb_power_delivery}=="*", RUN+="/usr/bin/systemctl --no-block start sanchala-display-hotplug.service"
+
+# USB-C Alt Mode detection
+ACTION=="change", SUBSYSTEM=="typec", ATTR{mode}=="displayport", RUN+="/usr/bin/sanchala-display-notify hotplug USB-C-DP"
+
+# ===========================================
+# THUNDERBOLT DISPLAYS
+# ===========================================
+# Thunderbolt display connection (handled in thunderbolt rules, but backup here)
+ACTION=="add", SUBSYSTEM=="drm", ENV{ID_PATH}=="*thunderbolt*", RUN+="/usr/bin/systemctl --no-block start sanchala-display-hotplug.service"
+
+# ===========================================
+# VGA/DVI (Legacy)
+# ===========================================
+# VGA connector (rarely hot-pluggable, but handle it)
+ACTION=="change", SUBSYSTEM=="drm", KERNEL=="card*", ENV{DISPLAY_CONNECTOR}=="VGA*", RUN+="/usr/bin/sanchala-display-notify hotplug VGA"
+
+# DVI connector
+ACTION=="change", SUBSYSTEM=="drm", KERNEL=="card*", ENV{DISPLAY_CONNECTOR}=="DVI*", RUN+="/usr/bin/sanchala-display-notify hotplug DVI"
+
+# ===========================================
+# DDC/CI MONITOR CONTROL
+# ===========================================
+# Allow ddcutil to control external monitors
+SUBSYSTEM=="i2c-dev", ACTION=="add", ATTR{name}=="*DDC*", MODE="0660", GROUP="i2c"
+SUBSYSTEM=="i2c-dev", ACTION=="add", ATTR{name}=="*ddc*", MODE="0660", GROUP="i2c"
+
+# i2c access for monitor control
+KERNEL=="i2c-[0-9]*", GROUP="i2c", MODE="0660"
+
+# ===========================================
+# BACKLIGHT CONTROL FOR EXTERNAL DISPLAYS
+# ===========================================
+# External display backlight (if supported)
+ACTION=="add", SUBSYSTEM=="backlight", ATTR{type}=="raw", RUN+="/bin/chgrp video /sys/class/backlight/%k/brightness"
+ACTION=="add", SUBSYSTEM=="backlight", ATTR{type}=="raw", RUN+="/bin/chmod g+w /sys/class/backlight/%k/brightness"
+
+# ===========================================
+# MULTI-GPU DISPLAY HANDLING
+# ===========================================
+# Intel + NVIDIA (Optimus) - trigger hybrid graphics handler
+ACTION=="change", SUBSYSTEM=="drm", ENV{HOTPLUG}=="1", DRIVERS=="i915", ENV{SANCHALA_HYBRID_GPU}="intel"
+ACTION=="change", SUBSYSTEM=="drm", ENV{HOTPLUG}=="1", DRIVERS=="nvidia", ENV{SANCHALA_HYBRID_GPU}="nvidia"
+
+# AMD + NVIDIA - trigger handler
+ACTION=="change", SUBSYSTEM=="drm", ENV{HOTPLUG}=="1", DRIVERS=="amdgpu", ENV{SANCHALA_HYBRID_GPU}="amd"
+
+# ===========================================
+# KMS (Kernel Mode Setting) EVENTS
+# ===========================================
+# Force KDE/Wayland to reconfigure on display change
+ACTION=="change", SUBSYSTEM=="drm", ENV{HOTPLUG}=="1", TAG+="systemd", ENV{SYSTEMD_WANTS}+="sanchala-display-hotplug.service"
+
+# ===========================================
+# EDID HANDLING
+# ===========================================
+# Reload EDID when display connects (for problematic displays)
+# ACTION=="add", SUBSYSTEM=="drm", KERNEL=="card*-*", RUN+="/usr/bin/sanchala-edid-reload %k"
+
+# ===========================================
+# PROJECTOR DETECTION
+# ===========================================
+# Common projector resolutions/identifiers
+ACTION=="change", SUBSYSTEM=="drm", ENV{HOTPLUG}=="1", RUN+="/usr/bin/sanchala-display-notify check-projector"

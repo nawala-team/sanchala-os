@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+TOR_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/sanchala/tor"
+case "${1:-status}" in
+  status) [[ -d "$TOR_DIR" ]] && echo "Installed: Yes" || echo "Installed: No"; pgrep tor >/dev/null && echo "Running" || echo "Stopped" ;;
+  install) mkdir -p "$TOR_DIR"; curl -L https://www.torproject.org/dist/torbrowser/13.0/tor-browser-linux-x86_64-13.0.tar.xz -o /tmp/tor.xz; tar -xf /tmp/tor.xz -C "$TOR_DIR" --strip-components=1; rm /tmp/tor.xz ;;
+  launch) [[ -d "$TOR_DIR" ]] || "$0" install; cd "$TOR_DIR" && ./start-tor-browser.desktop ;;
+  new-circuit) killall -HUP tor 2>/dev/null || systemctl reload tor 2>/dev/null ;;
+  *) echo "Usage: sanchala-tor-browser {status|install|launch|new-circuit}" ;;
+esac

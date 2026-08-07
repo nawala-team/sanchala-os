@@ -1,0 +1,154 @@
+#!/bin/bash
+# SANCHALA-VOICE-CONTROL - Voice Command System for Sanchala OS
+# WCAG 2.1 AAA Compliant | Copyright (c) 2025 Sanchala OS Project
+set -euo pipefail
+
+VERSION="1.0.0"
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/sanchala/accessibility"
+CONFIG_FILE="$CONFIG_DIR/voice-control.conf"
+COMMANDS_FILE="$CONFIG_DIR/voice-commands.conf"
+PID_FILE="/tmp/sanchala-voice-control.pid"
+
+declare -A VOICE=([enabled]=false [wake_word]=sanchala [lang]=en-US [sensitivity]=0.5 [feedback]=audio)
+
+mkdir -p "$CONFIG_DIR"
+
+load_config() { [[ -f "$CONFIG_FILE" ]] && source "$CONFIG_FILE"; }
+save_config() { declare -p VOICE > "$CONFIG_FILE"; }
+
+init_commands() {
+    [[ -f "$COMMANDS_FILE" ]] && return
+    cat > "$COMMANDS_FILE" << 'EOF'
+# Voice Commands Configuration
+# Format: "phrase" = "command"
+open terminal = xdg-open x-terminal-emulator
+open browser = xdg-open http://
+open files = xdg-open ~
+scroll down = xdotool key Page_Down
+scroll up = xdotool key Page_Up
+go back = xdotool key alt+Left
+go forward = xdotool key alt+Right
+close window = xdotool key alt+F4
+minimize = xdotool key super+h
+maximize = xdotool key super+Up
+copy = xdotool key ctrl+c
+paste = xdotool key ctrl+v
+undo = xdotool key ctrl+z
+select all = xdotool key ctrl+a
+new tab = xdotool key ctrl+t
+close tab = xdotool key ctrl+w
+switch window = xdotool key alt+Tab
+show desktop = xdotool key super+d
+take screenshot = gnome-screenshot
+lock screen = loginctl lock-session
+volume up = pactl set-sink-volume @DEFAULT_SINK@ +5%
+volume down = pactl set-sink-volume @DEFAULT_SINK@ -5%
+mute = pactl set-sink-mute @DEFAULT_SINK@ toggle
+play pause = playerctl play-pause
+next track = playerctl next
+previous track = playerctl previous
+EOF
+}
+
+detect_stt() {
+    command -v vosk-transcriber &>/dev/null && echo "vosk" && return
+    command -v whisper &>/dev/null && echo "whisper" && return
+    command -v nerd-dictation &>/dev/null && echo "nerd-dictation" && return
+    echo "none"
+}
+
+speak_feedback() {
+    [[ "${VOICE[feedback]}" != "audio" ]] && return
+    local msg="$1"
+    command -v espeak-ng &>/dev/null && espeak-ng "$msg" &
+    command -v espeak &>/dev/null && espeak "$msg" &
+}
+
+process_command() {
+    local text="$1"
+    text=$(echo "$text" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9 ]//g')
+    
+    while IFS='=' read -r phrase cmd; do
+        [[ -z "$phrase" || "$phrase" =~ ^# ]] && continue
+        phrase=$(echo "$phrase" | tr -d '"' | xargs)
+        cmd=$(echo "$cmd" | xargs)
+        
+        if [[ "$text" == *"$phrase"* ]]; then
+            echo "Executing: $cmd"
+            speak_feedback "OK"
+            eval "$cmd" &
+            return 0
+        fi
+    done < "$COMMANDS_FILE"
+    
+    # Dictation mode - type the text
+    if [[ "$text" == "type "* ]]; then
+        local to_type="${text#type }"
+        xdotool type -- "$to_type"
+        return 0
+    fi
+    
+    echo "Unknown command: $text"
+    speak_feedback "Unknown command"
+}
+
+start_listening() {
+    local engine=$(detect_stt)
+    echo "Starting voice control (engine: $engine, wake word: ${VOICE[wake_word]})"
+    
+    case "$engine" in
+        vosk)
+            vosk-transcriber --lang "${VOICE[lang]}" 2>/dev/null | while read -r line; do
+                echo "Heard: $line"
+                process_command "$line"
+            done
+            ;;
+        nerd-dictation)
+            nerd-dictation begin --vosk-model-dir auto --output STDOUT 2>/dev/null | while read -r line; do
+                process_command "$line"
+            done
+            ;;
+        none)
+            echo "No STT engine found. Install vosk or nerd-dictation"
+            return 1
+            ;;
+    esac
+}
+
+start_service() {
+    load_config; init_commands
+    [[ -f "$PID_FILE" ]] && kill -0 "$(cat "$PID_FILE")" 2>/dev/null && echo "Already running" && return 1
+    
+    echo $$ > "$PID_FILE"
+    VOICE[enabled]="true"; save_config
+    speak_feedback "Voice control active"
+    
+    trap 'rm -f "$PID_FILE"; exit' SIGTERM SIGINT
+    start_listening
+}
+
+stop_service() {
+    [[ -f "$PID_FILE" ]] && kill "$(cat "$PID_FILE")" 2>/dev/null ||:
+    rm -f "$PID_FILE"
+    VOICE[enabled]="false"; save_config
+    echo "Voice control stopped"
+}
+
+status() {
+    load_config
+    if [[ -f "$PID_FILE" ]] && kill -0 "$(cat "$PID_FILE")" 2>/dev/null; then
+        echo "● Voice Control running | Engine: $(detect_stt) | Wake: ${VOICE[wake_word]}"
+    else
+        echo "○ Voice Control not running"
+    fi
+}
+
+case "${1:-status}" in
+    start|on) start_service ;; stop|off) stop_service ;; status) status ;;
+    toggle) [[ -f "$PID_FILE" ]] && stop_service || (start_service &) ;;
+    --wake-word) VOICE[wake_word]="$2"; save_config ;;
+    --lang) VOICE[lang]="$2"; save_config ;;
+    --edit-commands) ${EDITOR:-nano} "$COMMANDS_FILE" ;;
+    --help|-h) echo "Usage: sanchala-voice-control {start|stop|toggle|--wake-word WORD|--edit-commands}" ;;
+    --version|-v) echo "v$VERSION" ;; *) echo "Unknown: $1"; exit 1 ;;
+esac

@@ -1,0 +1,20 @@
+[Unit]
+Description=Sanchala Backup - Cloud Sync Service
+Documentation=man:rclone(1)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/sanchala-backup cloud sync
+User=root
+Nice=19
+IOSchedulingClass=idle
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=sanchala-cloud-sync
+
+[Install]
+WantedBy=multi-user.target

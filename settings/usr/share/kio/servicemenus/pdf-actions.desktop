@@ -1,0 +1,49 @@
+[Desktop Entry]
+Type=Service
+ServiceTypes=KonqPopupMenu/Plugin
+MimeType=application/pdf;
+Actions=pdfCompress;pdfMerge;pdfSplit;pdfToImages;pdfExtractText
+X-KDE-Priority=TopLevel
+X-KDE-StartupNotify=false
+X-KDE-Submenu=PDF Actions
+X-KDE-Submenu-Icon=application-pdf
+
+[Desktop Action pdfCompress]
+Name=Compress PDF
+Name[es]=Comprimir PDF
+Name[fr]=Compresser le PDF
+Name[de]=PDF komprimieren
+Icon=application-pdf
+Exec=sh -c 'gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook -dNOPAUSE -dQUIET -dBATCH -sOutputFile="${f%%.*}_compressed.pdf" "%f" && kdialog --passivepopup "PDF compressed!" 3'
+
+[Desktop Action pdfMerge]
+Name=Merge with Another PDF...
+Name[es]=Unir con otro PDF...
+Name[fr]=Fusionner avec un autre PDF...
+Name[de]=Mit anderem PDF zusammenführen...
+Icon=document-import
+Exec=sh -c 'OTHER=$(kdialog --getopenfilename ~ "application/pdf") && pdfunite "%f" "$OTHER" "${f%%.*}_merged.pdf" && kdialog --passivepopup "PDFs merged!" 3'
+
+[Desktop Action pdfSplit]
+Name=Split Pages...
+Name[es]=Dividir páginas...
+Name[fr]=Diviser les pages...
+Name[de]=Seiten aufteilen...
+Icon=document-split
+Exec=sh -c 'PAGES=$(kdialog --inputbox "Page range (e.g., 1-5):" "1-5") && pdfseparate -f ${PAGES%-*} -l ${PAGES#*-} "%f" "${f%%.*}_page_%d.pdf" && kdialog --passivepopup "PDF split!" 3'
+
+[Desktop Action pdfToImages]
+Name=Convert to Images (PNG)
+Name[es]=Convertir a imágenes (PNG)
+Name[fr]=Convertir en images (PNG)
+Name[de]=In Bilder konvertieren (PNG)
+Icon=image-x-generic
+Exec=sh -c 'pdftoppm -png "%f" "${f%%.*}_page" && kdialog --passivepopup "Converted to images!" 3'
+
+[Desktop Action pdfExtractText]
+Name=Extract Text
+Name[es]=Extraer texto
+Name[fr]=Extraire le texte
+Name[de]=Text extrahieren
+Icon=text-x-generic
+Exec=sh -c 'pdftotext "%f" "${f%%.*}.txt" && kdialog --passivepopup "Text extracted!" 3'

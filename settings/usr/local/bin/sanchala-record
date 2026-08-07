@@ -1,0 +1,130 @@
+#!/bin/bash
+# ============================================
+# SANCHALA OS - Screen Recording Tool
+# ============================================
+# PipeWire-based screen recording for Wayland
+# Usage: sanchala-record [--region|--window|--screen]
+# ============================================
+
+set -euo pipefail
+
+RECORDINGS_DIR="${HOME}/Videos/Recordings"
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/sanchala"
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+mkdir -p "$RECORDINGS_DIR"
+
+usage() {
+    cat << EOF
+SANCHALA OS - Screen Recording Tool
+
+Usage: $(basename "$0") [OPTIONS]
+
+Options:
+    -r, --region        Record selected region
+    -w, --window        Record active window
+    -s, --screen        Record full screen (default)
+    -a, --audio         Include audio
+    -f, --fps NUM       Frame rate (default: 60)
+    -o, --output FILE   Output filename
+    -q, --quality NUM   Quality 1-10 (default: 8)
+    --stop              Stop current recording
+    -h, --help          Show this help
+
+Examples:
+    $(basename "$0")                 # Record full screen
+    $(basename "$0") -r -a           # Record region with audio
+    $(basename "$0") --stop          # Stop recording
+EOF
+    exit 0
+}
+
+check_deps() {
+    local missing=()
+    command -v wf-recorder >/dev/null 2>&1 || missing+=("wf-recorder")
+    command -v slurp >/dev/null 2>&1 || missing+=("slurp")
+    command -v notify-send >/dev/null 2>&1 || missing+=("libnotify")
+    
+    if [[ ${#missing[@]} -gt 0 ]]; then
+        echo -e "${RED}Missing: ${missing[*]}${NC}" >&2
+        exit 1
+    fi
+}
+
+notify() {
+    notify-send -i "media-record" -a "Sanchala Record" "$1" "$2"
+}
+
+stop_recording() {
+    if pkill -SIGINT wf-recorder 2>/dev/null; then
+        echo -e "${GREEN}✓ Recording stopped${NC}"
+        notify "Recording Stopped" "Video saved to $RECORDINGS_DIR"
+    else
+        echo -e "${RED}No recording in progress${NC}"
+    fi
+    exit 0
+}
+
+main() {
+    local mode="screen" include_audio=false fps=60 quality=8
+    local output="$RECORDINGS_DIR/Recording_$(date +%Y-%m-%d_%H-%M-%S).mp4"
+    local geometry=""
+    
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -r|--region) mode="region"; shift ;;
+            -w|--window) mode="window"; shift ;;
+            -s|--screen) mode="screen"; shift ;;
+            -a|--audio) include_audio=true; shift ;;
+            -f|--fps) fps="$2"; shift 2 ;;
+            -o|--output) output="$2"; shift 2 ;;
+            -q|--quality) quality="$2"; shift 2 ;;
+            --stop) stop_recording ;;
+            -h|--help) usage ;;
+            *) shift ;;
+        esac
+    done
+    
+    check_deps
+    
+    # Check if already recording
+    pgrep -x wf-recorder >/dev/null && { echo -e "${RED}Already recording${NC}"; exit 1; }
+    
+    # Get geometry for region/window
+    case "$mode" in
+        region)
+            echo -e "${BLUE}Select region to record...${NC}"
+            geometry=$(slurp 2>/dev/null) || { echo "Cancelled"; exit 0; }
+            ;;
+        window)
+            # Use slurp with window selection
+            geometry=$(slurp -o 2>/dev/null) || { echo "Cancelled"; exit 0; }
+            ;;
+    esac
+    
+    # Build wf-recorder command
+    local cmd="wf-recorder -f \"$output\" -r $fps"
+    [[ -n "$geometry" ]] && cmd+=" -g \"$geometry\""
+    [[ "$include_audio" == true ]] && cmd+=" -a"
+    
+    # CRF quality (lower = better, 15-25 typical)
+    local crf=$((28 - quality * 2))
+    cmd+=" -c libx264 -p crf=$crf -p preset=fast"
+    
+    echo -e "${GREEN}● Recording started${NC}"
+    echo -e "  Output: $output"
+    echo -e "  Press Ctrl+C or run '$(basename "$0") --stop' to finish"
+    
+    notify "Recording Started" "Recording to $output"
+    
+    eval "$cmd"
+    
+    echo -e "${GREEN}✓ Recording saved: $output${NC}"
+    notify "Recording Complete" "Saved: $(basename "$output")"
+}
+
+main "$@"

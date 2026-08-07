@@ -1,0 +1,40 @@
+#!/bin/bash
+# Sanchala Hotspot - WiFi Hotspot Manager
+set -euo pipefail
+
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/sanchala/hotspot"
+CONFIG_FILE="$CONFIG_DIR/hotspot.conf"
+mkdir -p "$CONFIG_DIR"
+
+declare -A CONFIG=([ssid]="Sanchala-Hotspot" [password]="" [band]="bg" [channel]="6" [interface]="wlan0")
+
+load_config() { [[ -f "$CONFIG_FILE" ]] && while IFS='=' read -r k v; do [[ -n "$k" && ! "$k" =~ ^# ]] && CONFIG[$k]="$v"; done < "$CONFIG_FILE"; }
+save_config() { printf '%s=%s\n' "${!CONFIG[@]}" "${CONFIG[@]}" | paste -d'=' - - > "$CONFIG_FILE"; }
+
+is_active() { nmcli -t -f TYPE con show --active 2>/dev/null | grep -q wifi; }
+
+start_hotspot() {
+    local ssid="${1:-${CONFIG[ssid]}}" pass="${2:-${CONFIG[password]}}"
+    [[ -z "$ssid" ]] && { echo "SSID required"; return 1; }
+    local cmd=(nmcli device wifi hotspot ssid "$ssid")
+    [[ -n "$pass" ]] && cmd+=(password "$pass")
+    "${cmd[@]}" && echo "Hotspot started: $ssid"
+}
+
+stop_hotspot() { nmcli con down Hotspot 2>/dev/null; echo "Hotspot stopped"; }
+
+status() {
+    echo "=== Sanchala Hotspot ==="
+    is_active && echo "Status: ACTIVE" || echo "Status: INACTIVE"
+    echo "SSID: ${CONFIG[ssid]}"
+}
+
+load_config
+case "${1:-status}" in
+    start) start_hotspot "$2" "${3:-}" ;;
+    stop) stop_hotspot ;;
+    toggle) is_active && stop_hotspot || start_hotspot ;;
+    status) status ;;
+    gui) exec sanchala-hotspot-gui ;;
+    *) status ;;
+esac

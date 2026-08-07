@@ -1,0 +1,59 @@
+#!/usr/bin/env python3
+"""Sanchala Continuity - Seamless handoff between devices"""
+import json,secrets,socket
+from datetime import datetime,timedelta
+from pathlib import Path
+
+class Continuity:
+    def __init__(self):
+        self.base=Path(__file__).parent
+        self.sessions=self.base/"sessions";self.sessions.mkdir(parents=True,exist_ok=True)
+        self.handoff=self.base/"handoff";self.handoff.mkdir(exist_ok=True)
+        self.data=self.base/"lib/state.json";self.base.joinpath("lib").mkdir(exist_ok=True)
+        self.state=json.load(open(self.data))if self.data.exists()else{"devices":{},"active":{}}
+    def _save(self):json.dump(self.state,open(self.data,'w'),indent=2)
+    def register_device(self,aid,device):
+        if aid not in self.state["devices"]:self.state["devices"][aid]={}
+        did=device.get("id")or secrets.token_hex(8)
+        self.state["devices"][aid][did]={"id":did,"name":device.get("name",socket.gethostname()),
+            "type":device.get("type","desktop"),"last_seen":datetime.now().isoformat(),"online":True}
+        self._save();return{"success":True,"device_id":did}
+    def start_activity(self,aid,did,activity):
+        sid=f"ACT-{secrets.token_hex(6)}"
+        self.state["active"][sid]={"aid":aid,"source":did,"app":activity.get("app"),
+            "data":activity.get("data",{}),"url":activity.get("url"),
+            "started":datetime.now().isoformat(),"handoff_ready":True}
+        self._save();return{"success":True,"session_id":sid}
+    def get_handoff(self,aid,did):
+        available=[]
+        for sid,act in self.state["active"].items():
+            if act["aid"]==aid and act["source"]!=did and act["handoff_ready"]:
+                available.append({"session_id":sid,"app":act["app"],"source":act["source"]})
+        return{"available":available}
+    def handoff_to(self,sid,target_did):
+        if sid not in self.state["active"]:return{"success":False,"error":"Session not found"}
+        act=self.state["active"][sid]
+        json.dump({"session":sid,"target":target_did,"data":act["data"],"url":act.get("url"),
+            "time":datetime.now().isoformat()},open(self.handoff/f"{sid}_{target_did}.json",'w'),indent=2)
+        return{"success":True,"app":act["app"],"data":act["data"]}
+    def end_activity(self,sid):
+        if sid in self.state["active"]:del self.state["active"][sid];self._save()
+        return{"success":True}
+    def nearby_devices(self,aid):
+        return[d for d in self.state["devices"].get(aid,{}).values()if d.get("online")]
+
+if __name__=="__main__":
+    import argparse;p=argparse.ArgumentParser();s=p.add_subparsers(dest="c")
+    r=s.add_parser("register");r.add_argument("--account-id",required=True);r.add_argument("--name")
+    st=s.add_parser("start");st.add_argument("--account-id",required=True);st.add_argument("--device-id",required=True);st.add_argument("--app",required=True)
+    g=s.add_parser("get");g.add_argument("--account-id",required=True);g.add_argument("--device-id",required=True)
+    h=s.add_parser("handoff");h.add_argument("--session-id",required=True);h.add_argument("--target",required=True)
+    n=s.add_parser("nearby");n.add_argument("--account-id",required=True)
+    s.add_parser("status");a=p.parse_args();cont=Continuity()
+    if a.c=="register":print(json.dumps(cont.register_device(a.account_id,{"name":a.name}),indent=2))
+    elif a.c=="start":print(json.dumps(cont.start_activity(a.account_id,a.device_id,{"app":a.app}),indent=2))
+    elif a.c=="get":print(json.dumps(cont.get_handoff(a.account_id,a.device_id),indent=2))
+    elif a.c=="handoff":print(json.dumps(cont.handoff_to(a.session_id,a.target),indent=2))
+    elif a.c=="nearby":print(json.dumps(cont.nearby_devices(a.account_id),indent=2))
+    elif a.c=="status":print(f"Continuity\nDevices: {sum(len(d)for d in cont.state['devices'].values())}\nActive: {len(cont.state['active'])}")
+    else:p.print_help()

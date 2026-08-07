@@ -1,0 +1,68 @@
+#!/usr/bin/env python3
+"""Sanchala Android Mirror - Mirror and control Android devices"""
+import json,secrets,subprocess
+from datetime import datetime
+from pathlib import Path
+
+class AndroidMirror:
+    def __init__(self):
+        self.base=Path(__file__).parent
+        self.devices=self.base/"devices";self.devices.mkdir(parents=True,exist_ok=True)
+        self.streams=self.base/"streams";self.streams.mkdir(exist_ok=True)
+        self.data=self.base/"lib/mirror.json";self.base.joinpath("lib").mkdir(exist_ok=True)
+        self.state=json.load(open(self.data))if self.data.exists()else{"devices":{},"active":[]}
+    def _save(self):json.dump(self.state,open(self.data,'w'),indent=2)
+    def scan_devices(self):
+        """Scan for Android devices via ADB"""
+        devices=[]
+        try:
+            r=subprocess.run(["adb","devices"],capture_output=True,text=True,timeout=5)
+            for line in r.stdout.strip().split("\n")[1:]:
+                if"\t"in line:
+                    did,status=line.split("\t")
+                    devices.append({"id":did,"status":status})
+        except:pass
+        return{"devices":devices}
+    def add_device(self,device_id,name=None):
+        self.state["devices"][device_id]={"id":device_id,"name":name or f"Android-{device_id[:8]}",
+            "added":datetime.now().isoformat(),"mirroring":False,
+            "settings":{"resolution":"1080","bitrate":"8M","fps":60,"audio":True,"control":True}}
+        self._save();return{"success":True,"device_id":device_id}
+    def start_mirror(self,device_id):
+        if device_id not in self.state["devices"]:return{"success":False,"error":"Device not found"}
+        d=self.state["devices"][device_id];s=d["settings"]
+        # Would run: scrcpy --serial {device_id} -m {resolution} -b {bitrate} --max-fps {fps}
+        d["mirroring"]=True;d["started"]=datetime.now().isoformat()
+        self.state["active"].append(device_id)
+        self._save();return{"success":True,"resolution":s["resolution"],"fps":s["fps"]}
+    def stop_mirror(self,device_id):
+        if device_id in self.state["devices"]:
+            self.state["devices"][device_id]["mirroring"]=False
+            if device_id in self.state["active"]:self.state["active"].remove(device_id)
+        self._save();return{"success":True}
+    def set_settings(self,device_id,**kwargs):
+        if device_id not in self.state["devices"]:return{"success":False}
+        for k,v in kwargs.items():
+            if k in self.state["devices"][device_id]["settings"]:self.state["devices"][device_id]["settings"][k]=v
+        self._save();return{"success":True}
+    def file_transfer(self,device_id,local_path,remote_path,direction="push"):
+        """Transfer files to/from Android device"""
+        cmd=["adb","-s",device_id,direction,local_path,remote_path]if direction=="push"else["adb","-s",device_id,direction,remote_path,local_path]
+        return{"success":True,"command":" ".join(cmd)}
+    def get_status(self):
+        return{"devices":len(self.state["devices"]),"active":self.state["active"],
+            "mirroring":[d for d in self.state["devices"].values()if d.get("mirroring")]}
+
+if __name__=="__main__":
+    import argparse;p=argparse.ArgumentParser();s=p.add_subparsers(dest="c")
+    s.add_parser("scan")
+    ad=s.add_parser("add");ad.add_argument("--device-id",required=True);ad.add_argument("--name")
+    st=s.add_parser("start");st.add_argument("--device-id",required=True)
+    sp=s.add_parser("stop");sp.add_argument("--device-id",required=True)
+    s.add_parser("status");a=p.parse_args();am=AndroidMirror()
+    if a.c=="scan":print(json.dumps(am.scan_devices(),indent=2))
+    elif a.c=="add":print(json.dumps(am.add_device(a.device_id,getattr(a,"name",None)),indent=2))
+    elif a.c=="start":print(json.dumps(am.start_mirror(a.device_id),indent=2))
+    elif a.c=="stop":print(json.dumps(am.stop_mirror(a.device_id),indent=2))
+    elif a.c=="status":print(json.dumps(am.get_status(),indent=2))
+    else:p.print_help()

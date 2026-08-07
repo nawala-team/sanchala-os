@@ -1,0 +1,21 @@
+# Sanchala Cloud - Rclone Configuration Templates
+# Google Drive Template
+
+[gdrive_template]
+type = drive
+scope = drive
+# OAuth tokens managed by sanchala-cloud-auth
+# token = {"access_token":"...","token_type":"Bearer","refresh_token":"...","expiry":"..."}
+
+# Performance optimizations
+chunk_size = 64M
+upload_cutoff = 64M
+use_trash = true
+skip_gdocs = false
+shared_with_me = false
+
+# Team Drive support (optional)
+# team_drive = <team_drive_id>
+
+# Service account (for advanced users)
+# service_account_file = /path/to/service-account.json

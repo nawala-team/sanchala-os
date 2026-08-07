@@ -1,0 +1,57 @@
+# SPDX-License-Identifier: GPL-3.0
+# Sanchala OS - Snapper Configuration for Root Subvolume
+# Location: /etc/snapper/configs/root
+
+# Subvolume to snapshot
+SUBVOLUME="/"
+
+# Filesystem type
+FSTYPE="btrfs"
+
+# Fraction or absolute size of filesystem space to use for snapshots
+SPACE_LIMIT="0.5"
+
+# Fraction or absolute size of free filesystem space to keep
+FREE_LIMIT="0.2"
+
+# Users allowed to work with config
+ALLOW_USERS=""
+
+# Groups allowed to work with config
+ALLOW_GROUPS="wheel"
+
+# Sync users and groups from ALLOW_USERS and ALLOW_GROUPS to .snapshots directory
+SYNC_ACL="yes"
+
+# Create hourly snapshots
+TIMELINE_CREATE="yes"
+
+# Cleanup old snapshots
+TIMELINE_CLEANUP="yes"
+
+# Limits for timeline cleanup (keep N snapshots)
+TIMELINE_MIN_AGE="1800"
+TIMELINE_LIMIT_HOURLY="5"
+TIMELINE_LIMIT_DAILY="7"
+TIMELINE_LIMIT_WEEKLY="4"
+TIMELINE_LIMIT_MONTHLY="6"
+TIMELINE_LIMIT_YEARLY="2"
+
+# Cleanup empty pre-post-pairs
+EMPTY_PRE_POST_CLEANUP="yes"
+
+# Limits for number cleanup
+NUMBER_CLEANUP="yes"
+NUMBER_MIN_AGE="1800"
+NUMBER_LIMIT="50"
+NUMBER_LIMIT_IMPORTANT="10"
+
+# Background comparison
+BACKGROUND_COMPARISON="yes"
+
+# Empty pre-post pair minimum age
+EMPTY_PRE_POST_MIN_AGE="1800"
+
+# Qgroup for accurate space tracking (auto-detected)
+QGROUP=""
+

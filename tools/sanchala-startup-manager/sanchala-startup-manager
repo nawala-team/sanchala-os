@@ -1,0 +1,88 @@
+#!/bin/bash
+# Sanchala Startup Manager - Manage autostart applications
+set -euo pipefail
+
+AUTOSTART_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/autostart"
+SYSTEM_AUTOSTART="/etc/xdg/autostart"
+mkdir -p "$AUTOSTART_DIR"
+
+list_entries() {
+    echo "=== User Autostart ==="
+    for f in "$AUTOSTART_DIR"/*.desktop 2>/dev/null; do
+        [[ -f "$f" ]] || continue
+        name=$(grep -m1 "^Name=" "$f" | cut -d= -f2)
+        hidden=$(grep -m1 "^Hidden=" "$f" | cut -d= -f2)
+        [[ "$hidden" == "true" ]] && status="[disabled]" || status="[enabled]"
+        echo "  $status $name ($(basename "$f"))"
+    done
+    echo
+    echo "=== System Autostart ==="
+    for f in "$SYSTEM_AUTOSTART"/*.desktop 2>/dev/null; do
+        [[ -f "$f" ]] || continue
+        name=$(grep -m1 "^Name=" "$f" | cut -d= -f2)
+        echo "  [system] $name"
+    done
+}
+
+enable_entry() {
+    local name="$1"
+    local file="$AUTOSTART_DIR/$name"
+    [[ "$name" != *.desktop ]] && file="$AUTOSTART_DIR/$name.desktop"
+    if [[ -f "$file" ]]; then
+        sed -i 's/^Hidden=true/Hidden=false/' "$file"
+        echo "Enabled: $name"
+    else
+        echo "Not found: $name"
+    fi
+}
+
+disable_entry() {
+    local name="$1"
+    local file="$AUTOSTART_DIR/$name"
+    [[ "$name" != *.desktop ]] && file="$AUTOSTART_DIR/$name.desktop"
+    if [[ -f "$file" ]]; then
+        if grep -q "^Hidden=" "$file"; then
+            sed -i 's/^Hidden=.*/Hidden=true/' "$file"
+        else
+            echo "Hidden=true" >> "$file"
+        fi
+        echo "Disabled: $name"
+    else
+        echo "Not found: $name"
+    fi
+}
+
+add_entry() {
+    local name="$1" exec="$2"
+    cat > "$AUTOSTART_DIR/$name.desktop" << ENTRY
+[Desktop Entry]
+Type=Application
+Name=$name
+Exec=$exec
+Hidden=false
+X-GNOME-Autostart-enabled=true
+ENTRY
+    echo "Added: $name"
+}
+
+remove_entry() {
+    local name="$1"
+    local file="$AUTOSTART_DIR/$name"
+    [[ "$name" != *.desktop ]] && file="$AUTOSTART_DIR/$name.desktop"
+    if [[ -f "$file" ]]; then
+        rm "$file"
+        echo "Removed: $name"
+    else
+        echo "Not found: $name"
+    fi
+}
+
+case "${1:-list}" in
+    list|-l) list_entries ;;
+    enable|-e) enable_entry "$2" ;;
+    disable|-d) disable_entry "$2" ;;
+    add|-a) add_entry "$2" "$3" ;;
+    remove|-r) remove_entry "$2" ;;
+    gui) exec sanchala-startup-manager-gui ;;
+    *) echo "Usage: $0 {list|enable|disable|add|remove|gui}" ;;
+esac

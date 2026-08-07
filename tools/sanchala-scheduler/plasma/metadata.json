@@ -1,0 +1,18 @@
+{
+    "KPlugin": {
+        "Id": "org.sanchala.scheduler",
+        "Name": "Task Scheduler",
+        "Name[id]": "Penjadwal Tugas",
+        "Description": "Quick access to scheduled tasks",
+        "Icon": "chronometer",
+        "Category": "System Information",
+        "Authors": [
+            {
+                "Name": "Sanchala OS Team"
+            }
+        ],
+        "License": "GPL-3.0"
+    },
+    "X-Plasma-API": "declarativeappletscript",
+    "X-Plasma-MainScript": "ui/main.qml"
+}

@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Sanchala Network Settings
+Comment=Configure network connections
+Exec=sanchala-network-settings-gui
+Icon=preferences-system-network
+Type=Application
+Categories=Settings;Network;
+Keywords=network;wifi;ethernet;connections;

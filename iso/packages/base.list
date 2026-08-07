@@ -1,0 +1,58 @@
+# ============================================
+# SANCHALA OS - Base System Packages
+# ============================================
+
+# Core System
+base
+base-devel
+linux-hardened
+linux-hardened-headers
+linux-firmware
+
+# Boot
+grub
+efibootmgr
+os-prober
+
+# Filesystem
+btrfs-progs
+dosfstools
+e2fsprogs
+ntfs-3g
+exfatprogs
+
+# Encryption
+cryptsetup
+
+# Hardware
+usbutils
+pciutils
+
+# Network Core
+networkmanager
+iwd
+
+# Essential Tools
+sudo
+nano
+vim
+neovim
+htop
+wget
+curl
+git
+unzip
+zip
+
+# Shell
+zsh
+zsh-completions
+zsh-syntax-highlighting
+zsh-autosuggestions
+
+# Man pages
+man-db
+man-pages
+
+# Time
+ntp

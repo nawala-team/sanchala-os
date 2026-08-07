@@ -1,0 +1,20 @@
+[Unit]
+Description=Sanchala AI Daemon
+Documentation=man:sanchala-aid(1)
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/sanchala-aid --daemon
+Restart=on-failure
+RestartSec=5
+
+# Security hardening
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=yes
+ReadWritePaths=%h/.config/sanchala-ai %h/.local/share/sanchala-ai %h/.cache/sanchala-ai
+
+[Install]
+WantedBy=default.target

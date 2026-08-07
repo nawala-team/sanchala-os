@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Sanchala News
+Comment=News Reader
+Exec=sanchala-news
+Icon=internet-news-reader
+Terminal=false
+Type=Application
+Categories=Network;News;

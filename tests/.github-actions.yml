@@ -1,0 +1,63 @@
+# SANCHALA OS - Test Framework CI Configuration
+# ══════════════════════════════════════════════════════════════════════════════
+
+name: Zero Bug Test Suite
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install pyyaml
+          sudo apt-get install -y shellcheck
+      
+      - name: Run Unit Tests
+        run: |
+          chmod +x tests/run-all-tests.sh
+          ./tests/run-all-tests.sh --unit --ci
+      
+      - name: Run Security Tests
+        run: ./tests/run-all-tests.sh --security --ci
+      
+      - name: Run Integration Tests
+        run: ./tests/run-all-tests.sh --integration --ci
+      
+      - name: Run Static Analysis
+        run: |
+          chmod +x tests/framework/static-analysis.sh
+          ./tests/framework/static-analysis.sh
+      
+      - name: Upload Test Reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-reports
+          path: tests/reports/
+
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Security Audit
+        run: ./tests/run-all-tests.sh --security --ci
+
+  accessibility-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Accessibility Tests
+        run: ./tests/run-all-tests.sh --accessibility --ci

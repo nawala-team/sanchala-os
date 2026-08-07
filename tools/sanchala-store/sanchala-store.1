@@ -1,0 +1,72 @@
+.TH SANCHALA-STORE 1 "August 2026" "Sanchala OS" "User Commands"
+.SH NAME
+sanchala-store \- Application center for Sanchala OS
+.SH SYNOPSIS
+.B sanchala-store
+[\fIOPTIONS\fR] [\fICOMMAND\fR] [\fIARGS\fR]
+.SH DESCRIPTION
+.B sanchala-store
+is the graphical application center for discovering, installing, and
+managing applications on Sanchala OS. It supports Flatpak (primary),
+system packages via Pacman, and AUR packages.
+.SH COMMANDS
+.TP
+.B search \fIQUERY\fR
+Search for applications
+.TP
+.B install \fIAPP\fR
+Install an application
+.TP
+.B remove \fIAPP\fR
+Remove an application
+.TP
+.B update \fR[\fIAPP\fR]
+Update application(s)
+.TP
+.B info \fIAPP\fR
+Show application details
+.TP
+.B list \fR[\fB--installed\fR|\fB--updates\fR]
+List applications
+.TP
+.B launch \fIAPP\fR
+Launch an application
+.TP
+.B categories
+List application categories
+.SH OPTIONS
+.TP
+.B \-\-flatpak
+Prefer Flatpak source
+.TP
+.B \-\-system
+Prefer system package
+.TP
+.B \-\-json
+Output in JSON format
+.TP
+.B \-h, \-\-help
+Show help message
+.SH EXAMPLES
+.TP
+Search for editors:
+.B sanchala-store search "text editor"
+.TP
+Install GIMP:
+.B sanchala-store install gimp
+.TP
+List installed apps:
+.B sanchala-store list --installed
+.SH FILES
+.TP
+.I /etc/sanchala/store/store.toml
+Configuration file
+.TP
+.I ~/.local/share/sanchala-store/
+User data and cache
+.SH SEE ALSO
+.BR flatpak (1),
+.BR pacman (8),
+.BR sanchala-permissions (1)
+.SH AUTHOR
+Sanchala OS Team <dev@sanchala.id>

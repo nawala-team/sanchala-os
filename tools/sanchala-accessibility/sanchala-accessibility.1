@@ -1,0 +1,48 @@
+.TH SANCHALA-ACCESSIBILITY 1 "August 2026" "Sanchala OS" "User Commands"
+.SH NAME
+sanchala-accessibility \- Accessibility tools for Sanchala OS
+.SH SYNOPSIS
+.B sanchala-accessibility
+[\fIOPTIONS\fR] [\fICOMMAND\fR]
+.SH DESCRIPTION
+.B sanchala-accessibility
+manages accessibility features including screen reader, magnification,
+high contrast modes, and keyboard navigation.
+.SH COMMANDS
+.TP
+.B status
+Show accessibility status
+.TP
+.B reader \fR[\fBon\fR|\fBoff\fR]
+Toggle screen reader (Orca)
+.TP
+.B magnifier \fR[\fBon\fR|\fBoff\fR|\fILEVEL\fR]
+Toggle/set magnification
+.TP
+.B contrast \fR[\fBnormal\fR|\fBhigh\fR|\fBinvert\fR]
+Set contrast mode
+.TP
+.B keyboard
+Configure keyboard accessibility
+.TP
+.B cursor
+Configure cursor size and visibility
+.SH OPTIONS
+.TP
+.B \-\-json
+Output in JSON format
+.TP
+.B \-h, \-\-help
+Show help message
+.SH FILES
+.TP
+.I /etc/sanchala/accessibility/
+System configuration
+.TP
+.I ~/.config/sanchala/accessibility.toml
+User preferences
+.SH SEE ALSO
+.BR orca (1),
+.BR sanchala-voice (1)
+.SH AUTHOR
+Sanchala OS Team <dev@sanchala.id>

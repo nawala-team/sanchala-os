@@ -1,0 +1,94 @@
+#!/usr/bin/env python3
+"""Sanchala Driver Manager GUI"""
+import sys, subprocess
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+
+class DriverManager(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Sanchala Driver Manager")
+        self.setMinimumSize(550, 450)
+        self.init_ui()
+        self.scan_hardware()
+    
+    def init_ui(self):
+        w = QWidget()
+        self.setCentralWidget(w)
+        layout = QVBoxLayout(w)
+        
+        # GPU section
+        gpu_grp = QGroupBox("Graphics Driver")
+        gpu_l = QVBoxLayout(gpu_grp)
+        self.gpu_label = QLabel("Detecting...")
+        gpu_l.addWidget(self.gpu_label)
+        self.gpu_combo = QComboBox()
+        self.gpu_combo.addItems(["Open Source (Mesa)", "NVIDIA Proprietary", "NVIDIA (nouveau)"])
+        gpu_l.addWidget(self.gpu_combo)
+        layout.addWidget(gpu_grp)
+        
+        # Devices list
+        devices_grp = QGroupBox("Hardware Devices")
+        devices_l = QVBoxLayout(devices_grp)
+        self.devices_list = QTreeWidget()
+        self.devices_list.setHeaderLabels(["Device", "Driver", "Status"])
+        self.devices_list.setAlternatingRowColors(True)
+        devices_l.addWidget(self.devices_list)
+        layout.addWidget(devices_grp)
+        
+        # Buttons
+        btn_row = QHBoxLayout()
+        scan_btn = QPushButton("Rescan")
+        scan_btn.clicked.connect(self.scan_hardware)
+        btn_row.addWidget(scan_btn)
+        apply_btn = QPushButton("Apply Changes")
+        apply_btn.clicked.connect(self.apply_changes)
+        btn_row.addWidget(apply_btn)
+        btn_row.addStretch()
+        layout.addLayout(btn_row)
+    
+    def scan_hardware(self):
+        self.devices_list.clear()
+        # Detect GPU
+        try:
+            lspci = subprocess.check_output(["lspci", "-nn"], text=True)
+            for line in lspci.split("\n"):
+                if any(x in line.lower() for x in ["vga", "3d", "display"]):
+                    self.gpu_label.setText(line.split(":", 2)[-1].strip()[:60])
+                    break
+        except: pass
+        
+        # List devices
+        try:
+            lspci = subprocess.check_output(["lspci", "-k"], text=True)
+            current_dev = None
+            driver = ""
+            for line in lspci.split("\n"):
+                if line and not line.startswith("\t"):
+                    if current_dev:
+                        item = QTreeWidgetItem([current_dev[:50], driver, "OK" if driver else "No driver"])
+                        self.devices_list.addTopLevelItem(item)
+                    current_dev = line.split(":", 2)[-1].strip() if ":" in line else line
+                    driver = ""
+                elif "Kernel driver" in line:
+                    driver = line.split(":")[-1].strip()
+        except: pass
+    
+    def apply_changes(self):
+        choice = self.gpu_combo.currentText()
+        if "NVIDIA Proprietary" in choice:
+            result = subprocess.run(["pkexec", "pacman", "-S", "nvidia", "nvidia-utils", "--noconfirm"],
+                                   capture_output=True, text=True)
+            if result.returncode == 0:
+                QMessageBox.information(self, "Success", "NVIDIA drivers installed. Please reboot.")
+            else:
+                QMessageBox.warning(self, "Error", result.stderr)
+        else:
+            QMessageBox.information(self, "Info", "Open source drivers are used by default.")
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    w = DriverManager()
+    w.show()
+    sys.exit(app.exec())

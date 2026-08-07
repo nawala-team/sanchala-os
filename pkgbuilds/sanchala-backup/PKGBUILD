@@ -1,0 +1,87 @@
+# Maintainer: Sanchala OS Team <dev@sanchala.id>
+pkgname=sanchala-backup
+pkgver=1.0.0
+pkgrel=1
+pkgdesc="Time Machine-like backup tool for Sanchala OS"
+arch=('x86_64')
+url="https://sanchala.id"
+license=('GPL3')
+depends=(
+    'snapper'
+    'grub-btrfs'
+    'btrfs-progs'
+    'restic'
+    'rclone'
+    'bash'
+)
+optdepends=(
+    'qt6-base: GUI support'
+    'qt6-declarative: GUI support'
+)
+backup=(
+    'etc/sanchala/backup.toml'
+    'etc/default/grub-btrfs/config'
+)
+source=()
+sha256sums=()
+
+package() {
+    # CLI tool
+    install -Dm755 "$srcdir/sanchala-backup" \
+        "$pkgdir/usr/bin/sanchala-backup"
+    install -Dm755 "$srcdir/sanchala-backup-hook" \
+        "$pkgdir/usr/bin/sanchala-backup-hook"
+    
+    # Library files
+    install -dm755 "$pkgdir/usr/lib/sanchala-backup"
+    install -Dm644 "$srcdir/lib/"*.sh \
+        "$pkgdir/usr/lib/sanchala-backup/"
+    
+    # Configuration
+    install -Dm644 "$srcdir/backup.toml" \
+        "$pkgdir/etc/sanchala/backup.toml"
+    install -Dm644 "$srcdir/grub-btrfs-config" \
+        "$pkgdir/etc/default/grub-btrfs/config"
+    
+    # Pacman hooks
+    install -Dm644 "$srcdir/00-snapper-pre.hook" \
+        "$pkgdir/etc/pacman.d/hooks/00-snapper-pre.hook"
+    install -Dm644 "$srcdir/99-snapper-post.hook" \
+        "$pkgdir/etc/pacman.d/hooks/99-snapper-post.hook"
+    
+    # Systemd units
+    install -Dm644 "$srcdir/grub-btrfsd.service" \
+        "$pkgdir/usr/lib/systemd/system/grub-btrfsd.service"
+    install -Dm644 "$srcdir/sanchala-snapshot-timeline.service" \
+        "$pkgdir/usr/lib/systemd/system/sanchala-snapshot-timeline.service"
+    install -Dm644 "$srcdir/sanchala-snapshot-timeline.timer" \
+        "$pkgdir/usr/lib/systemd/system/sanchala-snapshot-timeline.timer"
+    install -Dm644 "$srcdir/sanchala-snapshot-cleanup.service" \
+        "$pkgdir/usr/lib/systemd/system/sanchala-snapshot-cleanup.service"
+    install -Dm644 "$srcdir/sanchala-snapshot-cleanup.timer" \
+        "$pkgdir/usr/lib/systemd/system/sanchala-snapshot-cleanup.timer"
+    install -Dm644 "$srcdir/sanchala-remote-backup.service" \
+        "$pkgdir/usr/lib/systemd/system/sanchala-remote-backup.service"
+    install -Dm644 "$srcdir/sanchala-remote-backup.timer" \
+        "$pkgdir/usr/lib/systemd/system/sanchala-remote-backup.timer"
+    install -Dm644 "$srcdir/sanchala-cloud-sync.service" \
+        "$pkgdir/usr/lib/systemd/system/sanchala-cloud-sync.service"
+    install -Dm644 "$srcdir/sanchala-cloud-sync.timer" \
+        "$pkgdir/usr/lib/systemd/system/sanchala-cloud-sync.timer"
+    
+    # Desktop entry
+    install -Dm644 "$srcdir/sanchala-backup.desktop" \
+        "$pkgdir/usr/share/applications/sanchala-backup.desktop"
+}
+
+post_install() {
+    echo ">>> Enabling grub-btrfsd for GRUB snapshot integration..."
+    systemctl enable grub-btrfsd.service
+    
+    echo ">>> Enabling snapshot timers..."
+    systemctl enable sanchala-snapshot-timeline.timer
+    systemctl enable sanchala-snapshot-cleanup.timer
+    
+    echo ">>> Regenerating GRUB configuration..."
+    grub-mkconfig -o /boot/grub/grub.cfg
+}

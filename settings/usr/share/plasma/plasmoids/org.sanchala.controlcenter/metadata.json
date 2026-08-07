@@ -1,0 +1,24 @@
+{
+    "KPlugin": {
+        "Id": "org.sanchala.controlcenter",
+        "Name": "Sanchala Control Center",
+        "Description": "macOS-style unified quick settings panel",
+        "Icon": "preferences-system",
+        "Authors": [
+            {
+                "Name": "Sanchala Team",
+                "Email": "team@sanchala.id"
+            }
+        ],
+        "Category": "System Information",
+        "License": "GPL-3.0",
+        "Version": "1.0.0",
+        "Website": "https://sanchala.id"
+    },
+    "X-Plasma-API": "declarativeappletscript",
+    "X-Plasma-MainScript": "ui/main.qml",
+    "X-Plasma-Provides": ["org.kde.plasma.systemtray"],
+    "X-Plasma-NotificationArea": true,
+    "X-Plasma-NotificationAreaCategory": "SystemServices",
+    "KPackageStructure": "Plasma/Applet"
+}

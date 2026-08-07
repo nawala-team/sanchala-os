@@ -1,0 +1,21 @@
+[Protocol]
+exec=kio_gdrive
+protocol=gdrive
+input=none
+output=filesystem
+listing=Name,Type,Size,Date,AccessDate,MimeType
+reading=true
+writing=true
+makedir=true
+deleting=true
+moving=true
+linking=false
+Icon=google-drive
+maxInstances=10
+maxInstancesPerHost=10
+defaultMimetype=inode/directory
+Class=:internet
+ProxiedBy=gdrive
+X-Plasma-Protocol=true
+Description=Google Drive
+Description[id]=Google Drive

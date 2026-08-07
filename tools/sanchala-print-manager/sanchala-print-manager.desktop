@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Sanchala Print Manager
+Comment=Manage printers and print jobs
+Exec=sanchala-print-manager --gui
+Icon=printer
+Terminal=false
+Type=Application
+Categories=System;Settings;HardwareSettings;
+Keywords=print;printer;cups;

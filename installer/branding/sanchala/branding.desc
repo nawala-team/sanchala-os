@@ -1,0 +1,33 @@
+---
+componentName: sanchala
+welcomeStyleCalamares: true
+welcomeExpandingLogo: true
+
+strings:
+    productName:         "Sanchala OS"
+    shortProductName:    "Sanchala"
+    version:             "1.0 Gati"
+    shortVersion:        "1.0"
+    versionedName:       "Sanchala OS 1.0 Gati"
+    shortVersionedName:  "Sanchala 1.0"
+    bootloaderEntryName: "Sanchala"
+    productUrl:          "https://sanchala.id"
+    supportUrl:          "https://forum.sanchala.id"
+    knownIssuesUrl:      "https://github.com/dansiapa/sanchala-os/issues"
+    releaseNotesUrl: ""
+    donateUrl:           "https://sanchala.id/donate"
+
+images:
+    productBanner:       "banner.png"
+    productIcon:         "icon.png"
+    productLogo:         "logo.png"
+    productWallpaper:    "wallpaper.png"
+    productWelcome:      "welcome.png"
+
+slideshow:               "show.qml"
+
+style:
+    sidebarBackground:   "#1A237E"
+    sidebarText:         "#FFFFFF"
+    sidebarTextSelect:   "#536DFE"
+    sidebarTextHighlight:"#FFB300"

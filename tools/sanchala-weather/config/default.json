@@ -1,0 +1,13 @@
+{
+  "units": "metric",
+  "locations": [],
+  "default": 0,
+  "update_interval": 30,
+  "show_humidity": true,
+  "show_wind": true,
+  "show_uv": true,
+  "notifications": {
+    "enabled": true,
+    "severe_weather": true
+  }
+}

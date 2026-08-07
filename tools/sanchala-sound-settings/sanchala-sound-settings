@@ -1,0 +1,43 @@
+#!/bin/bash
+# Sanchala Sound Settings - Audio Configuration
+set -euo pipefail
+
+get_volume() {
+    pactl get-sink-volume @DEFAULT_SINK@ 2>/dev/null | grep -oP '\d+%' | head -1
+}
+
+set_volume() {
+    pactl set-sink-volume @DEFAULT_SINK@ "$1%" && echo "Volume: $1%"
+}
+
+get_mute() {
+    pactl get-sink-mute @DEFAULT_SINK@ 2>/dev/null | grep -oP '(yes|no)'
+}
+
+toggle_mute() {
+    pactl set-sink-mute @DEFAULT_SINK@ toggle && echo "Mute toggled"
+}
+
+list_sinks() {
+    echo "=== Output Devices ==="
+    pactl list sinks short 2>/dev/null | while read -r id name _; do
+        echo "  [$id] $name"
+    done
+}
+
+list_sources() {
+    echo "=== Input Devices ==="
+    pactl list sources short 2>/dev/null | while read -r id name _; do
+        [[ "$name" != *.monitor ]] && echo "  [$id] $name"
+    done
+}
+
+case "${1:-status}" in
+    status) echo "Volume: $(get_volume)"; echo "Muted: $(get_mute)" ;;
+    volume|-v) set_volume "$2" ;;
+    mute|-m) toggle_mute ;;
+    sinks) list_sinks ;;
+    sources) list_sources ;;
+    gui) exec sanchala-sound-settings-gui ;;
+    *) echo "Usage: $0 {status|volume|mute|sinks|sources|gui}" ;;
+esac

@@ -1,0 +1,10 @@
+{
+    "name": "Sanchala Presentation",
+    "version": "2.0.0",
+    "description": "Terminal slide presentation tool",
+    "category": "Productivity",
+    "icon": "📽️",
+    "launch": "./presentation.sh",
+    "author": "Sanchala OS",
+    "features": ["Create presentations", "Slide navigation", "Markdown support", "Export to file", "ASCII slides"]
+}

@@ -1,0 +1,52 @@
+# ============================================
+# SANCHALA OS - Dolphin Keyboard Shortcuts
+# ============================================
+# Standard Linux file manager shortcuts
+# ============================================
+
+[Shortcuts]
+# Navigation
+Go Back=Alt+Left
+Go Forward=Alt+Right
+Go Up=Alt+Up
+Go Home=Alt+Home
+Go to Location=Ctrl+L
+
+# View
+Toggle Split View=F3
+Toggle Preview Panel=F11
+Toggle Information Panel=F12
+Toggle Terminal Panel=F4
+Zoom In=Ctrl++
+Zoom Out=Ctrl+-
+Icons View=Ctrl+1
+Compact View=Ctrl+2
+Details View=Ctrl+3
+Show Hidden Files=Ctrl+H
+
+# File Operations
+New Folder=Ctrl+Shift+N
+New Tab=Ctrl+T
+Close Tab=Ctrl+W
+Duplicate Tab=Ctrl+D
+Rename=F2
+Delete=Del
+Move to Trash=Ctrl+Del
+Properties=Alt+Return
+Copy=Ctrl+C
+Cut=Ctrl+X
+Paste=Ctrl+V
+Select All=Ctrl+A
+Invert Selection=Ctrl+Shift+I
+
+# Search
+Find File=Ctrl+F
+Filter=Ctrl+I
+
+# Tools
+Open Terminal=Shift+F4
+Create Archive=Ctrl+Shift+A
+
+# Bookmarks
+Add Bookmark=Ctrl+B
+Edit Bookmarks=Ctrl+Shift+B

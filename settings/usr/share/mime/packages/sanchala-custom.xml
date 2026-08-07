@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ============================================
+  SANCHALA OS - Custom MIME Types
+  ============================================
+  Defines custom file types specific to Sanchala OS
+  and its applications.
+  ============================================
+-->
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+
+  <!-- ==================== -->
+  <!-- Sanchala Config Files -->
+  <!-- ==================== -->
+  
+  <mime-type type="application/x-sanchala-config">
+    <comment>Sanchala Configuration File</comment>
+    <comment xml:lang="id">Berkas Konfigurasi Sanchala</comment>
+    <icon name="sanchala-config"/>
+    <glob pattern="*.sanchala"/>
+    <glob pattern="*.sanc"/>
+    <magic priority="50">
+      <match type="string" value="# Sanchala Config" offset="0"/>
+    </magic>
+  </mime-type>
+
+  <mime-type type="application/x-sanchala-theme">
+    <comment>Sanchala Theme Package</comment>
+    <comment xml:lang="id">Paket Tema Sanchala</comment>
+    <icon name="sanchala-theme"/>
+    <glob pattern="*.santheme"/>
+    <sub-class-of type="application/zip"/>
+  </mime-type>
+
+  <mime-type type="application/x-sanchala-backup">
+    <comment>Sanchala Backup Archive</comment>
+    <comment xml:lang="id">Arsip Cadangan Sanchala</comment>
+    <icon name="sanchala-backup"/>
+    <glob pattern="*.sanbackup"/>
+    <glob pattern="*.sbak"/>
+    <sub-class-of type="application/x-compressed-tar"/>
+  </mime-type>
+
+  <mime-type type="application/x-sanchala-shortcut">
+    <comment>Sanchala Custom Shortcut</comment>
+    <comment xml:lang="id">Pintasan Kustom Sanchala</comment>
+    <icon name="sanchala-shortcut"/>
+    <glob pattern="*.sanshortcut"/>
+    <magic priority="50">
+      <match type="string" value="[SanchalaShortcut]" offset="0"/>
+    </magic>
+  </mime-type>
+
+  <!-- ==================== -->
+  <!-- Sanchala Guardian Files -->
+  <!-- ==================== -->
+
+  <mime-type type="application/x-sanchala-policy">
+    <comment>Sanchala Security Policy</comment>
+    <comment xml:lang="id">Kebijakan Keamanan Sanchala</comment>
+    <icon name="sanchala-security"/>
+    <glob pattern="*.sanpolicy"/>
+    <glob pattern="*.spol"/>
+  </mime-type>
+
+  <mime-type type="application/x-sanchala-audit-log">
+    <comment>Sanchala Audit Log</comment>
+    <comment xml:lang="id">Log Audit Sanchala</comment>
+    <icon name="sanchala-audit"/>
+    <glob pattern="*.sanaudit"/>
+    <glob pattern="*.slog"/>
+  </mime-type>
+
+  <!-- ==================== -->
+  <!-- Sanchala TCC Files -->
+  <!-- ==================== -->
+
+  <mime-type type="application/x-sanchala-permission">
+    <comment>Sanchala Permission Definition</comment>
+    <comment xml:lang="id">Definisi Izin Sanchala</comment>
+    <icon name="sanchala-permission"/>
+    <glob pattern="*.sanperm"/>
+  </mime-type>
+
+  <!-- ==================== -->
+  <!-- Sanchala Extensions -->
+  <!-- ==================== -->
+
+  <mime-type type="application/x-sanchala-extension">
+    <comment>Sanchala Extension Package</comment>
+    <comment xml:lang="id">Paket Ekstensi Sanchala</comment>
+    <icon name="sanchala-extension"/>
+    <glob pattern="*.sanext"/>
+    <glob pattern="*.sext"/>
+    <sub-class-of type="application/zip"/>
+  </mime-type>
+
+  <mime-type type="application/x-sanchala-widget">
+    <comment>Sanchala Desktop Widget</comment>
+    <comment xml:lang="id">Widget Desktop Sanchala</comment>
+    <icon name="sanchala-widget"/>
+    <glob pattern="*.sanwidget"/>
+    <glob pattern="*.swgt"/>
+    <sub-class-of type="application/zip"/>
+  </mime-type>
+
+  <!-- ==================== -->
+  <!-- Sanchala Project Files -->
+  <!-- ==================== -->
+
+  <mime-type type="application/x-sanchala-project">
+    <comment>Sanchala Project File</comment>
+    <comment xml:lang="id">Berkas Proyek Sanchala</comment>
+    <icon name="sanchala-project"/>
+    <glob pattern="*.sanproj"/>
+    <magic priority="50">
+      <match type="string" value="[SanchalaProject]" offset="0"/>
+    </magic>
+  </mime-type>
+
+  <mime-type type="application/x-sanchala-workspace">
+    <comment>Sanchala Workspace</comment>
+    <comment xml:lang="id">Ruang Kerja Sanchala</comment>
+    <icon name="sanchala-workspace"/>
+    <glob pattern="*.sanwork"/>
+  </mime-type>
+
+</mime-info>

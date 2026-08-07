@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Login Settings
+Comment=Configure login screen and auto-login options
+GenericName=Login Configuration
+Exec=sanchala-login-settings
+Icon=preferences-system-login
+Type=Application
+Categories=Settings;System;
+Keywords=login;sddm;greeter;auto-login;
+StartupNotify=true

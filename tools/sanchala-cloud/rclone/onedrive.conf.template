@@ -1,0 +1,18 @@
+# Sanchala Cloud - Rclone Configuration Templates
+# Microsoft OneDrive Template
+
+[onedrive_template]
+type = onedrive
+# OAuth tokens managed by sanchala-cloud-auth
+# token = {"access_token":"...","token_type":"Bearer","refresh_token":"...","expiry":"..."}
+
+# Drive type: personal | business | sharepoint
+drive_type = personal
+# drive_id = <drive_id>
+
+# Performance
+chunk_size = 10M
+no_versions = false
+
+# For SharePoint sites
+# site_url = https://yourcompany.sharepoint.com/sites/YourSite

@@ -1,0 +1,22 @@
+# ============================================
+# SANCHALA OS - Accessibility Settings Panel Spec
+# ============================================
+# KCM Module Specification for System Settings
+# ============================================
+
+[Desktop Entry]
+Type=Service
+X-KDE-ServiceTypes=KCModule
+X-KDE-Library=kcm_sanchala_accessibility
+X-KDE-ParentApp=kcontrol
+X-KDE-System-Settings-Parent-Category=accessibility
+X-KDE-Weight=10
+
+Name=Accessibility
+Name[hi]=पहुँच-योग्यता
+Comment=Configure accessibility features for Sanchala OS
+Comment[hi]=संचला ओएस के लिए पहुँच-योग्यता सुविधाएं कॉन्फ़िगर करें
+
+Icon=preferences-desktop-accessibility
+
+X-KDE-Keywords=accessibility,screen reader,orca,high contrast,large text,cursor,keyboard,magnifier,sticky keys,a11y

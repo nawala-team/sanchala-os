@@ -1,0 +1,84 @@
+#!/usr/bin/env python3
+"""Sanchala Music - Music Player"""
+import sys, json
+from pathlib import Path
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+
+class MusicApp(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Sanchala Music")
+        self.setMinimumSize(900, 600)
+        self.data_dir = Path.home() / ".local/share/sanchala/music"
+        self.data_dir.mkdir(parents=True, exist_ok=True)
+        self.playing = False
+        self.init_ui()
+    
+    def init_ui(self):
+        self.setStyleSheet("QMainWindow{background:qlineargradient(x1:0,y1:0,x2:1,y2:1,stop:0 #1a1a2e,stop:1 #16213e);}QLabel{color:#fff;}QPushButton{background:#ffffff20;color:#fff;border:none;padding:10px;border-radius:6px;}QPushButton:hover{background:#ffffff40;}")
+        c = QWidget(); self.setCentralWidget(c); m = QHBoxLayout(c)
+        
+        # Sidebar
+        side = QVBoxLayout()
+        for item in ["🏠 Home", "🔍 Search", "📚 Library", "❤️ Liked", "📻 Radio", "➕ Create Playlist"]:
+            b = QPushButton(item); b.setStyleSheet("text-align:left;padding-left:15px;"); side.addWidget(b)
+        side.addStretch()
+        side.addWidget(QLabel("📁 Playlists"))
+        for pl in ["Favorites", "Workout", "Chill", "Focus"]:
+            b = QPushButton(f"  🎵 {pl}"); b.setStyleSheet("text-align:left;"); side.addWidget(b)
+        m.addLayout(side, 1)
+        
+        # Main content
+        main = QVBoxLayout()
+        main.addWidget(QLabel("🎵 Recently Played"))
+        
+        scroll = QScrollArea(); scroll.setWidgetResizable(True); scroll.setStyleSheet("border:none;")
+        gw = QWidget(); grid = QGridLayout(gw)
+        
+        albums = [("Chill Vibes", "Various", "🎧"), ("Electronic Dreams", "DJ Mix", "🎹"), ("Acoustic Sessions", "Studio", "🎸"), ("Jazz Nights", "Jazz Band", "🎷"), ("Pop Hits 2024", "Top Artists", "🎤"), ("Classical", "Orchestra", "🎻")]
+        for i, (name, artist, icon) in enumerate(albums):
+            card = QPushButton(); card.setFixedSize(140, 170)
+            card.setText(f"{icon}\n\n{name}\n{artist}")
+            card.setStyleSheet("background:#ffffff15;border-radius:10px;")
+            card.clicked.connect(lambda _, n=name: self.play_album(n))
+            grid.addWidget(card, i // 3, i % 3)
+        scroll.setWidget(gw)
+        main.addWidget(scroll)
+        m.addLayout(main, 3)
+        
+        # Now playing bar (bottom)
+        self.np = QFrame(); self.np.setStyleSheet("background:#0a0a15;border-radius:10px;padding:10px;")
+        npl = QHBoxLayout(self.np)
+        self.np_art = QLabel("🎵"); self.np_art.setStyleSheet("font-size:32px;")
+        npl.addWidget(self.np_art)
+        info = QVBoxLayout()
+        self.np_title = QLabel("No track playing"); self.np_artist = QLabel(""); self.np_artist.setStyleSheet("color:#888;")
+        info.addWidget(self.np_title); info.addWidget(self.np_artist)
+        npl.addLayout(info)
+        npl.addStretch()
+        for icon in ["⏮️", "▶️", "⏭️"]:
+            b = QPushButton(icon); b.setFixedSize(44, 44)
+            if icon == "▶️": b.clicked.connect(self.toggle); self.play_btn = b
+            npl.addWidget(b)
+        self.progress = QSlider(Qt.Orientation.Horizontal); self.progress.setFixedWidth(200)
+        npl.addWidget(self.progress)
+        npl.addWidget(QLabel("🔊"))
+        vol = QSlider(Qt.Orientation.Horizontal); vol.setFixedWidth(80); vol.setValue(70)
+        npl.addWidget(vol)
+        
+        outer = QVBoxLayout(); outer.addLayout(m); outer.addWidget(self.np)
+        w = QWidget(); w.setLayout(outer); self.setCentralWidget(w)
+    
+    def play_album(self, name):
+        self.np_title.setText(f"Track 1 - {name}")
+        self.np_artist.setText(name)
+        self.playing = True; self.play_btn.setText("⏸️")
+    
+    def toggle(self):
+        self.playing = not self.playing
+        self.play_btn.setText("⏸️" if self.playing else "▶️")
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv); w = MusicApp(); w.show(); sys.exit(app.exec())

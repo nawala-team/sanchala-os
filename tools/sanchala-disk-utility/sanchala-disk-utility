@@ -1,0 +1,99 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: GPL-3.0
+# Sanchala Disk Utility - Disk Management Tool
+
+set -euo pipefail
+VERSION="1.0.0"
+
+RED='\033[0;31m' GREEN='\033[0;32m' YELLOW='\033[1;33m'
+BLUE='\033[0;34m' NC='\033[0m'
+
+info() { echo -e "${BLUE}ℹ${NC} $1"; }
+ok() { echo -e "${GREEN}✓${NC} $1"; }
+err() { echo -e "${RED}✗${NC} $1" >&2; }
+root() { [[ $EUID -eq 0 ]] || { err "Root required"; exit 1; }; }
+
+show_help() {
+    cat << 'EOF'
+SANCHALA DISK UTILITY
+
+USAGE: sanchala-disk-utility <COMMAND> [ARGS]
+
+COMMANDS:
+    list              List disks and partitions
+    info <DEV>        Show disk information  
+    smart <DEV>       Show SMART health
+    mount <DEV>       Mount partition
+    unmount <DEV>     Unmount partition
+    format <DEV> <FS> Format (ext4,btrfs,xfs,ntfs,fat32)
+    benchmark [PATH]  Run benchmark
+    trim              TRIM all SSDs
+    health            Health summary
+    --gui             Launch GUI
+EOF
+}
+
+cmd_list() {
+    echo -e "${BLUE}═══ Disks ═══${NC}"
+    lsblk -o NAME,SIZE,TYPE,FSTYPE,MOUNTPOINT,MODEL 2>/dev/null
+    echo -e "\n${BLUE}═══ Usage ═══${NC}"
+    df -h --output=source,size,used,avail,pcent,target 2>/dev/null | grep -E "^/dev|^Filesystem"
+}
+
+cmd_info() {
+    local d="$1"; [[ -b "$d" ]] || { err "Invalid: $d"; return 1; }
+    echo -e "${BLUE}═══ $d ═══${NC}"
+    lsblk -o NAME,SIZE,TYPE,FSTYPE,LABEL,UUID "$d" 2>/dev/null
+    fdisk -l "$d" 2>/dev/null | head -15
+}
+
+cmd_smart() {
+    root; smartctl -H "$1" 2>/dev/null; smartctl -A "$1" 2>/dev/null | head -25
+}
+
+cmd_mount() {
+    local d="$1" m="/mnt/$(basename "$1")"
+    udisksctl mount -b "$d" 2>/dev/null && ok "Mounted" || { root; mkdir -p "$m"; mount "$d" "$m" && ok "Mounted at $m"; }
+}
+
+cmd_unmount() {
+    udisksctl unmount -b "$1" 2>/dev/null && ok "Unmounted" || { root; umount "$1" && ok "Unmounted"; }
+}
+
+cmd_format() {
+    local d="$1" fs="$2"; root
+    [[ -b "$d" ]] || { err "Invalid: $d"; return 1; }
+    read -rp "DESTROY all data on $d? Type 'yes': " c; [[ "$c" == "yes" ]] || return
+    case "$fs" in
+        ext4) mkfs.ext4 -F "$d" ;; btrfs) mkfs.btrfs -f "$d" ;;
+        xfs) mkfs.xfs -f "$d" ;; ntfs) mkfs.ntfs -f "$d" ;;
+        fat32|vfat) mkfs.vfat -F 32 "$d" ;; *) err "Unknown: $fs"; return 1 ;;
+    esac && ok "Formatted as $fs"
+}
+
+cmd_bench() {
+    local f="${1:-.}/bench_$$"
+    info "Write test..."; dd if=/dev/zero of="$f" bs=1M count=512 conv=fdatasync 2>&1 | tail -1
+    info "Read test..."; dd if="$f" of=/dev/null bs=1M 2>&1 | tail -1
+    rm -f "$f"; ok "Done"
+}
+
+cmd_trim() { root; fstrim -av && ok "TRIM complete"; }
+
+cmd_health() {
+    for d in /dev/sd? /dev/nvme?n?; do
+        [[ -b "$d" ]] || continue
+        local s="?" m=$(lsblk -no MODEL "$d" 2>/dev/null | head -1)
+        smartctl -H "$d" 2>/dev/null | grep -q PASSED && s="OK"
+        printf "%-12s %-25s %s\n" "$d" "${m:0:25}" "$s"
+    done
+}
+
+case "${1:-list}" in
+    list|ls) cmd_list ;; info) cmd_info "${2:?}" ;; smart) cmd_smart "${2:?}" ;;
+    mount) cmd_mount "${2:?}" ;; unmount|umount) cmd_unmount "${2:?}" ;;
+    format) cmd_format "${2:?}" "${3:?}" ;; benchmark|bench) cmd_bench "${2:-.}" ;;
+    trim) cmd_trim ;; health) cmd_health ;;
+    --gui) exec "$(dirname "$0")/sanchala-disk-utility-gui" ;;
+    -h|--help) show_help ;; *) err "Unknown: $1"; show_help; exit 1 ;;
+esac

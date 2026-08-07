@@ -1,0 +1,39 @@
+{
+  "name": "sanchala-ssh-manager",
+  "version": "1.0.0",
+  "description": "Secure SSH connection and key management",
+  "author": "Sanchala OS Team",
+  "license": "GPL-3.0",
+  "category": "Network",
+  "settings": {
+    "defaultPort": 22,
+    "connectionTimeout": 30,
+    "keepAliveInterval": 60,
+    "compression": true,
+    "strictHostKeyChecking": "ask",
+    "preferredAuthentications": ["publickey", "keyboard-interactive", "password"]
+  },
+  "security": {
+    "keyTypes": ["ed25519", "rsa", "ecdsa"],
+    "defaultKeyType": "ed25519",
+    "keyBits": 4096,
+    "agentForwarding": false,
+    "x11Forwarding": false
+  },
+  "sessions": {
+    "saveHistory": true,
+    "maxHistory": 100,
+    "autoReconnect": true,
+    "multiplexing": true
+  },
+  "tunnels": {
+    "localForwarding": true,
+    "remoteForwarding": true,
+    "dynamicForwarding": true
+  },
+  "ui": {
+    "terminal": "default",
+    "fontSize": 12,
+    "colorScheme": "solarized-dark"
+  }
+}

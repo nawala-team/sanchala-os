@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Airdrop
+Comment=Transfer files wirelessly to nearby devices
+Exec=sanchala-airdrop
+Icon=document-send
+Terminal=false
+Type=Application
+Categories=Network;FileTransfer;
+Keywords=airdrop;transfer;wireless;share;send;receive;
+StartupNotify=true
+MimeType=application/octet-stream;

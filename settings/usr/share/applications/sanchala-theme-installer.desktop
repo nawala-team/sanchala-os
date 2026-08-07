@@ -1,0 +1,15 @@
+[Desktop Entry]
+Version=1.0
+Name=Sanchala Theme Installer
+Name[id]=Pemasang Tema Sanchala
+Comment=Install Sanchala theme packages
+Comment[id]=Pasang paket tema Sanchala
+GenericName=Theme Installer
+Exec=/usr/lib/sanchala/theme-installer %f
+Terminal=false
+Type=Application
+Icon=sanchala-theme
+Categories=Settings;DesktopSettings;
+MimeType=application/x-sanchala-theme;
+NoDisplay=true
+StartupNotify=true

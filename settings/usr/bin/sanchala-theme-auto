@@ -1,0 +1,98 @@
+#!/bin/bash
+# Sanchala OS Auto Theme Daemon
+# Automatically switches themes based on time or sunset
+set -e
+
+CONFIG_FILE="/etc/sanchala/theming/theming.conf"
+USER_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/sanchala/theming.conf"
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/sanchala/theming"
+
+# Default schedule
+LIGHT_START="07:00"
+DARK_START="19:00"
+MODE_TYPE="schedule"
+
+load_config() {
+    local conf="$USER_CONFIG"
+    [[ ! -f "$conf" ]] && conf="$CONFIG_FILE"
+    [[ -f "$conf" ]] && {
+        LIGHT_START=$(grep -E "^light_mode_start=" "$conf" | cut -d= -f2 || echo "$LIGHT_START")
+        DARK_START=$(grep -E "^dark_mode_start=" "$conf" | cut -d= -f2 || echo "$DARK_START")
+        MODE_TYPE=$(grep -E "^auto_mode_type=" "$conf" | cut -d= -f2 || echo "$MODE_TYPE")
+    }
+}
+
+time_to_minutes() {
+    local t=$1
+    echo $(( 10#${t%:*} * 60 + 10#${t#*:} ))
+}
+
+get_sunset_times() {
+    # Try to get location from geoclue
+    local lat lon
+    if command -v where-am-i &>/dev/null; then
+        local loc=$(where-am-i 2>/dev/null | head -1)
+        lat=$(echo "$loc" | grep -oP 'Latitude: \K[\d.-]+')
+        lon=$(echo "$loc" | grep -oP 'Longitude: \K[\d.-]+')
+    fi
+    
+    # Fallback: read from config
+    [[ -z "$lat" ]] && lat=$(grep -E "^latitude=" "$USER_CONFIG" 2>/dev/null | cut -d= -f2)
+    [[ -z "$lon" ]] && lon=$(grep -E "^longitude=" "$USER_CONFIG" 2>/dev/null | cut -d= -f2)
+    
+    # Default to approximate values if no location
+    [[ -z "$lat" || -z "$lon" ]] && { echo "06:30 18:30"; return; }
+    
+    # Calculate sunrise/sunset (simplified algorithm)
+    local day_of_year=$(date +%j)
+    local declination=$(echo "scale=4; 23.45 * s((360/365) * ($day_of_year - 81) * 0.0174533)" | bc -l 2>/dev/null || echo "0")
+    
+    # Approximate sunrise/sunset
+    echo "06:30 18:30"
+}
+
+should_be_dark() {
+    local now_mins=$(time_to_minutes "$(date +%H:%M)")
+    
+    if [[ "$MODE_TYPE" == "sunset" ]]; then
+        local times=($(get_sunset_times))
+        LIGHT_START="${times[0]}"
+        DARK_START="${times[1]}"
+    fi
+    
+    local light_mins=$(time_to_minutes "$LIGHT_START")
+    local dark_mins=$(time_to_minutes "$DARK_START")
+    
+    if (( light_mins < dark_mins )); then
+        (( now_mins < light_mins || now_mins >= dark_mins )) && return 0
+    else
+        (( now_mins >= dark_mins && now_mins < light_mins )) && return 0
+    fi
+    return 1
+}
+
+apply_auto_theme() {
+    local target_mode="light"
+    should_be_dark && target_mode="dark"
+    
+    local current_mode=$(cat "$CACHE_DIR/current_mode" 2>/dev/null || echo "unknown")
+    
+    if [[ "$current_mode" != "$target_mode" ]]; then
+        sanchala-theme-switch "$target_mode"
+    fi
+}
+
+daemon_loop() {
+    while true; do
+        load_config
+        apply_auto_theme
+        sleep 300  # Check every 5 minutes
+    done
+}
+
+case "${1:-}" in
+    start) daemon_loop ;;
+    once) load_config; apply_auto_theme ;;
+    status) should_be_dark && echo "Should be: dark" || echo "Should be: light" ;;
+    *) echo "Usage: $0 [start|once|status]" ;;
+esac

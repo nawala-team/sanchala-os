@@ -1,0 +1,21 @@
+{
+    "KPlugin": {
+        "Id": "org.sanchala.nowplaying",
+        "Name": "Sanchala Now Playing",
+        "Description": "Elegant media player widget with album art",
+        "Icon": "media-playback-start",
+        "Authors": [
+            {
+                "Name": "Sanchala Team",
+                "Email": "team@sanchala.id"
+            }
+        ],
+        "Category": "Multimedia",
+        "License": "GPL-3.0",
+        "Version": "1.0.0",
+        "Website": "https://sanchala.id"
+    },
+    "X-Plasma-API": "declarativeappletscript",
+    "X-Plasma-MainScript": "ui/main.qml",
+    "KPackageStructure": "Plasma/Applet"
+}

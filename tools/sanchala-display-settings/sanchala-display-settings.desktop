@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Sanchala Display Settings
+Comment=Configure display resolution and brightness
+Exec=sanchala-display-settings-gui
+Icon=preferences-desktop-display
+Type=Application
+Categories=Settings;HardwareSettings;
+Keywords=display;monitor;screen;resolution;brightness;

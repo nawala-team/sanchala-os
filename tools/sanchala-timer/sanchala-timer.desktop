@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Sanchala Timer
+Comment=Timer and Stopwatch
+Exec=sanchala-timer
+Icon=timer
+Terminal=false
+Type=Application
+Categories=Utility;Clock;

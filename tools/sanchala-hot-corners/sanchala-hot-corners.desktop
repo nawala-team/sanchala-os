@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Hot Corners
+Comment=Configure screen corner actions
+Exec=sanchala-hot-corners status
+Icon=preferences-desktop
+Terminal=false
+Type=Application
+Categories=Settings;DesktopSettings;
+Keywords=hot;corners;screen;

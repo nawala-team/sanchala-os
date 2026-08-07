@@ -1,0 +1,180 @@
+# Sanchala OS Tips Database
+# Contextual tips and tricks shown to users
+
+# ============== GETTING STARTED ==============
+
+[[tips]]
+id = "keyboard-super"
+title = "Quick App Launcher"
+content = "Press the Super key to instantly open the app launcher and search for anything."
+category = "keyboard"
+context = ["first_login"]
+priority = 10
+icon = "input-keyboard"
+
+[[tips]]
+id = "super-tab"
+title = "Switch Windows Fast"
+content = "Press Super+Tab to see all open windows. Keep holding Super and press Tab to cycle through them."
+category = "keyboard"
+context = ["first_week"]
+priority = 9
+icon = "window-duplicate"
+
+[[tips]]
+id = "workspaces-intro"
+title = "Virtual Desktops"
+content = "Use Super+1, Super+2, etc. to switch between workspaces. Drag windows to the screen edge to move them."
+category = "productivity"
+context = ["first_week"]
+priority = 8
+icon = "preferences-desktop-virtual-workspaces"
+
+# ============== PRODUCTIVITY ==============
+
+[[tips]]
+id = "split-view"
+title = "Split Screen"
+content = "Drag a window to the left or right edge to snap it to half the screen. Great for multitasking!"
+category = "productivity"
+context = ["first_week", "app_open:dolphin"]
+priority = 7
+icon = "view-split-left-right"
+action = { label = "Try it", type = "show_settings", target = "window-behavior" }
+
+[[tips]]
+id = "krunner"
+title = "Universal Search"
+content = "Press Alt+Space for KRunner - search apps, calculate math, convert units, and more."
+category = "productivity"
+context = ["first_week"]
+priority = 8
+icon = "search"
+
+[[tips]]
+id = "clipboard-history"
+title = "Clipboard History"
+content = "Press Super+V to see your clipboard history. Never lose copied text again!"
+category = "productivity"
+context = ["first_week"]
+priority = 7
+icon = "edit-paste"
+
+[[tips]]
+id = "dolphin-tabs"
+title = "File Manager Tabs"
+content = "Press Ctrl+T in Dolphin to open a new tab. Drag files between tabs to move them."
+category = "productivity"
+context = ["app_open:org.kde.dolphin"]
+priority = 6
+icon = "system-file-manager"
+
+[[tips]]
+id = "dolphin-split"
+title = "Split View in Files"
+content = "Press F3 in Dolphin to split the view. Compare folders or drag files between locations easily."
+category = "productivity"
+context = ["app_open:org.kde.dolphin"]
+priority = 6
+icon = "view-split-left-right"
+
+# ============== SECURITY ==============
+
+[[tips]]
+id = "privacy-dashboard"
+title = "Check Your Privacy Score"
+content = "Open Privacy Dashboard to see your privacy score and audit which apps accessed sensitive data."
+category = "privacy"
+context = ["first_week"]
+priority = 9
+icon = "preferences-system-privacy"
+action = { label = "Open Dashboard", type = "open_app", target = "id.sanchala.Privacy" }
+
+[[tips]]
+id = "guardian-scan"
+title = "Security Checkup"
+content = "Run a security scan in Sanchala Guardian to check for vulnerabilities and outdated software."
+category = "security"
+context = ["first_week", "scheduled:weekly"]
+priority = 8
+icon = "security-high"
+action = { label = "Open Guardian", type = "open_app", target = "id.sanchala.Guardian" }
+
+[[tips]]
+id = "app-permissions"
+title = "App Permissions"
+content = "Apps need your permission to access camera, microphone, and location. Check Settings > Privacy > Permissions."
+category = "privacy"
+context = ["first_week"]
+priority = 7
+icon = "preferences-desktop-user"
+
+[[tips]]
+id = "firewall-apps"
+title = "Per-App Firewall"
+content = "Control which apps can access the internet. Open Sanchala Guardian > Firewall to manage rules."
+category = "security"
+context = ["first_week"]
+priority = 6
+icon = "network-firewall"
+
+# ============== CUSTOMIZATION ==============
+
+[[tips]]
+id = "accent-color"
+title = "Personalize Your Accent"
+content = "Change your accent color in Settings > Appearance > Colors to match your style."
+category = "customization"
+context = ["first_week"]
+priority = 5
+icon = "color-picker"
+action = { label = "Open Settings", type = "show_settings", target = "colors" }
+
+[[tips]]
+id = "dark-mode-schedule"
+title = "Automatic Dark Mode"
+content = "Set dark mode to activate automatically at sunset. Go to Settings > Appearance > Theme."
+category = "customization"
+context = ["first_week"]
+priority = 5
+icon = "weather-clear-night"
+
+[[tips]]
+id = "dock-customize"
+title = "Customize Your Dock"
+content = "Right-click the dock to access settings. Change position, size, and behavior."
+category = "customization"
+context = ["idle"]
+priority = 4
+icon = "preferences-desktop-icons"
+
+# ============== ADVANCED ==============
+
+[[tips]]
+id = "terminal-yakuake"
+title = "Drop-Down Terminal"
+content = "Press F12 for a quick drop-down terminal (Yakuake). Press again to hide it."
+category = "advanced"
+context = ["app_open:konsole", "app_open:yakuake"]
+priority = 6
+icon = "utilities-terminal"
+
+[[tips]]
+id = "kde-connect"
+title = "Connect Your Phone"
+content = "Install KDE Connect on your phone to share files, sync notifications, and control media."
+category = "productivity"
+context = ["first_week"]
+priority = 7
+icon = "kdeconnect"
+action = { label = "Set Up", type = "open_app", target = "org.kde.kdeconnect" }
+learn_more_url = "https://kdeconnect.kde.org"
+
+[[tips]]
+id = "flatpak-apps"
+title = "Sandboxed Apps"
+content = "Apps from Sanchala Store run in secure sandboxes. They can only access what you allow."
+category = "security"
+context = ["app_open:id.sanchala.Store"]
+priority = 5
+icon = "package-x-generic"

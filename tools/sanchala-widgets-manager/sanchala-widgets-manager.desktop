@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Widgets Manager
+Comment=Add and configure desktop widgets
+GenericName=Widget Manager
+Exec=sanchala-widgets-manager
+Icon=preferences-desktop-plasma
+Type=Application
+Categories=Settings;DesktopSettings;
+Keywords=widgets;plasmoids;desktop;customize;
+StartupNotify=true

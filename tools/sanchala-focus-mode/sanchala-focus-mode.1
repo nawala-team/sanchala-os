@@ -1,0 +1,41 @@
+.TH SANCHALA-FOCUS-MODE 1 "2024" "Sanchala OS" "User Commands"
+.SH NAME
+sanchala-focus-mode \- Distraction-free productivity mode
+.SH SYNOPSIS
+.B sanchala-focus-mode
+[\fIcommand\fR] [\fIoptions\fR]
+.SH DESCRIPTION
+Block distractions and enable Do Not Disturb for focused work sessions.
+Supports Pomodoro technique and custom focus modes.
+.SH COMMANDS
+.TP
+.B start \fI[mode]\fR
+Start focus session (work, study, meeting, personal)
+.TP
+.B stop
+End current focus session
+.TP
+.B toggle
+Toggle focus mode on/off
+.TP
+.B status
+Show current focus status
+.TP
+.B pomodoro
+Start a 25-minute Pomodoro session
+.TP
+.B modes
+List available focus modes
+.SH OPTIONS
+.TP
+.B \-d, \-\-duration \fIminutes\fR
+Set custom duration for focus session
+.SH EXAMPLES
+.TP
+Start work focus:
+.B sanchala-focus-mode start work
+.TP
+Start 45-minute session:
+.B sanchala-focus-mode start -d 45
+.SH AUTHOR
+Sanchala OS Team

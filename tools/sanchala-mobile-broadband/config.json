@@ -1,0 +1,38 @@
+{
+  "name": "sanchala-mobile-broadband",
+  "version": "1.0.0",
+  "description": "Manage mobile/cellular data connections",
+  "author": "Sanchala OS Team",
+  "category": "Network",
+  "settings": {
+    "enabled": true,
+    "autoConnect": false,
+    "roamingEnabled": false,
+    "dataLimit": 0,
+    "dataWarning": 0,
+    "billingCycle": 1,
+    "apn": {
+      "name": "",
+      "apn": "",
+      "username": "",
+      "password": "",
+      "authType": "pap",
+      "protocol": "ipv4v6"
+    },
+    "preferredNetwork": "auto",
+    "allowedNetworks": ["5g", "lte", "3g", "2g"],
+    "hotspot": {
+      "enabled": false,
+      "ssid": "Sanchala Hotspot",
+      "security": "wpa2",
+      "maxClients": 10
+    },
+    "usageHistory": true,
+    "notifications": {
+      "limitReached": true,
+      "warningReached": true,
+      "roaming": true
+    }
+  },
+  "permissions": ["network", "modem", "notifications"]
+}

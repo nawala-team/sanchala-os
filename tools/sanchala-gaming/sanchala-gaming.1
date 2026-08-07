@@ -1,0 +1,43 @@
+.TH SANCHALA-GAMING 1 "August 2026" "Sanchala OS" "User Commands"
+.SH NAME
+sanchala-gaming \- Gaming optimization and launcher for Sanchala OS
+.SH SYNOPSIS
+.B sanchala-gaming
+[\fIOPTIONS\fR] [\fICOMMAND\fR]
+.SH DESCRIPTION
+.B sanchala-gaming
+optimizes system performance for gaming and provides a unified game
+launcher integrating Steam, Lutris, and native games.
+.SH COMMANDS
+.TP
+.B mode \fR[\fBon\fR|\fBoff\fR|\fBstatus\fR]
+Toggle gaming mode (performance optimizations)
+.TP
+.B launch \fIGAME\fR
+Launch a game
+.TP
+.B library
+Show game library
+.TP
+.B wine \fR[\fBstatus\fR|\fBinstall\fR]
+Manage Wine/Proton
+.TP
+.B drivers
+Check graphics driver status
+.SH OPTIONS
+.TP
+.B \-\-json
+Output in JSON format
+.TP
+.B \-h, \-\-help
+Show help message
+.SH FILES
+.TP
+.I /etc/sanchala/gaming/gaming.toml
+Configuration file
+.SH SEE ALSO
+.BR gamemoded (8),
+.BR steam (1),
+.BR lutris (1)
+.SH AUTHOR
+Sanchala OS Team <dev@sanchala.id>

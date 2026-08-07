@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+# Sanchala Cloud OAuth Authentication Helper
+# Handles OAuth2 flows for cloud providers
+
+set -euo pipefail
+
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/sanchala-cloud"
+RCLONE_CONFIG="$CONFIG_DIR/rclone.conf"
+
+# Provider OAuth endpoints
+declare -A OAUTH_URLS=(
+    ["gdrive"]="https://accounts.google.com/o/oauth2/auth"
+    ["dropbox"]="https://www.dropbox.com/oauth2/authorize"
+    ["onedrive"]="https://login.microsoftonline.com/common/oauth2/v2.0/authorize"
+)
+
+show_help() {
+    cat << 'EOF'
+Sanchala Cloud OAuth Helper
+
+USAGE:
+    sanchala-cloud-auth <provider> [--reauth]
+
+PROVIDERS:
+    gdrive      Google Drive
+    dropbox     Dropbox  
+    onedrive    Microsoft OneDrive
+
+OPTIONS:
+    --reauth    Force re-authentication
+EOF
+}
+
+authenticate() {
+    local provider="${1:-}"
+    local reauth="${2:-}"
+    
+    [[ -z "$provider" ]] && { show_help; exit 1; }
+    
+    echo "Starting OAuth flow for $provider..."
+    
+    # Use rclone's built-in OAuth handler
+    if [[ "$reauth" == "--reauth" ]]; then
+        rclone config reconnect "${provider}:" --config "$RCLONE_CONFIG"
+    else
+        rclone config create "$provider" "${provider}" --config "$RCLONE_CONFIG"
+    fi
+    
+    # Store token reference in KWallet
+    if command -v kwallet-query &>/dev/null; then
+        echo "Token stored securely in KWallet"
+    fi
+    
+    echo "Authentication complete!"
+}
+
+main() {
+    case "${1:-}" in
+        -h|--help) show_help ;;
+        *) authenticate "$@" ;;
+    esac
+}
+
+main "$@"

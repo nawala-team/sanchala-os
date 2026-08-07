@@ -1,0 +1,58 @@
+# Sanchala OS Log Rotation Configuration
+# /etc/logrotate.d/sanchala
+
+# Sanchala Cleaner logs
+/var/log/sanchala/cleaner.log {
+    weekly
+    rotate 4
+    compress
+    delaycompress
+    missingok
+    notifempty
+    create 0640 root root
+}
+
+# Sanchala Updater logs
+/var/log/sanchala/updater.log {
+    weekly
+    rotate 4
+    compress
+    delaycompress
+    missingok
+    notifempty
+    create 0640 root root
+}
+
+# Sanchala Backup logs
+/var/log/sanchala/backup.log {
+    weekly
+    rotate 8
+    compress
+    delaycompress
+    missingok
+    notifempty
+    create 0640 root root
+}
+
+# Sanchala Guardian (security) logs
+/var/log/sanchala/guardian.log {
+    daily
+    rotate 14
+    compress
+    delaycompress
+    missingok
+    notifempty
+    create 0640 root root
+}
+
+# Sanchala general logs
+/var/log/sanchala/*.log {
+    weekly
+    rotate 4
+    compress
+    delaycompress
+    missingok
+    notifempty
+    create 0640 root root
+    sharedscripts
+}

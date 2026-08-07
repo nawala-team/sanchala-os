@@ -1,0 +1,113 @@
+# ============================================================================
+# SANCHALA OS - Audit Rules Configuration
+# ============================================================================
+# Version: 2.0
+# Install to: /etc/audit/rules.d/sanchala.rules
+# ============================================================================
+
+# Delete all existing rules
+-D
+
+# Set buffer size (increase for busy systems)
+-b 8192
+
+# Failure mode: 1=printk, 2=panic
+-f 1
+
+# ============================================================================
+# SELF-AUDITING (Audit config protection)
+# ============================================================================
+-w /etc/audit/ -p wa -k audit_config
+-w /etc/libaudit.conf -p wa -k audit_config
+-w /etc/audisp/ -p wa -k audit_config
+
+# ============================================================================
+# AUTHENTICATION & AUTHORIZATION
+# ============================================================================
+# Login/logout events
+-w /var/log/lastlog -p wa -k logins
+-w /var/run/faillock/ -p wa -k logins
+-w /var/log/tallylog -p wa -k logins
+
+# PAM configuration
+-w /etc/pam.d/ -p wa -k pam_config
+-w /etc/security/ -p wa -k pam_config
+
+# Password/group changes
+-w /etc/passwd -p wa -k identity
+-w /etc/shadow -p wa -k identity
+-w /etc/group -p wa -k identity
+-w /etc/gshadow -p wa -k identity
+-w /etc/sudoers -p wa -k sudoers
+-w /etc/sudoers.d/ -p wa -k sudoers
+
+# ============================================================================
+# PRIVILEGE ESCALATION
+# ============================================================================
+# Sudo usage
+-a always,exit -F path=/usr/bin/sudo -F perm=x -k privilege_escalation
+-a always,exit -F path=/usr/bin/su -F perm=x -k privilege_escalation
+-a always,exit -F path=/usr/bin/pkexec -F perm=x -k privilege_escalation
+
+# Setuid/setgid execution
+-a always,exit -F arch=b64 -S execve -C uid!=euid -F euid=0 -k setuid_exec
+-a always,exit -F arch=b64 -S execve -C gid!=egid -F egid=0 -k setgid_exec
+
+# Capability changes
+-a always,exit -F arch=b64 -S capset -k capability_change
+
+# ============================================================================
+# SYSTEM ADMINISTRATION
+# ============================================================================
+# Systemd changes
+-w /etc/systemd/ -p wa -k systemd_config
+-w /usr/lib/systemd/ -p wa -k systemd_config
+
+# Kernel module loading
+-a always,exit -F arch=b64 -S init_module -S finit_module -k module_load
+-a always,exit -F arch=b64 -S delete_module -k module_unload
+-w /etc/modprobe.d/ -p wa -k modprobe_config
+
+# Kernel parameters
+-w /etc/sysctl.conf -p wa -k sysctl_config
+-w /etc/sysctl.d/ -p wa -k sysctl_config
+
+# ============================================================================
+# NETWORK CONFIGURATION
+# ============================================================================
+-w /etc/hosts -p wa -k network_config
+-w /etc/hostname -p wa -k network_config
+-w /etc/resolv.conf -p wa -k network_config
+-w /etc/NetworkManager/ -p wa -k network_config
+-a always,exit -F arch=b64 -S sethostname -S setdomainname -k hostname_change
+
+# Firewall
+-w /etc/nftables.conf -p wa -k firewall_config
+-w /etc/firewalld/ -p wa -k firewall_config
+
+# ============================================================================
+# FILE SYSTEM MONITORING
+# ============================================================================
+# Critical directories
+-w /boot/ -p wa -k boot_changes
+-w /etc/fstab -p wa -k mount_config
+
+# Mount operations
+-a always,exit -F arch=b64 -S mount -S umount2 -k mount_ops
+
+# File deletion in critical areas
+-a always,exit -F arch=b64 -S unlink -S unlinkat -S rename -S renameat -F dir=/etc -k etc_changes
+-a always,exit -F arch=b64 -S unlink -S unlinkat -S rename -S renameat -F dir=/boot -k boot_changes
+
+# ============================================================================
+# SECURITY TOOLS
+# ============================================================================
+-w /usr/bin/aa-status -p x -k apparmor_tools
+-w /usr/bin/aa-enforce -p x -k apparmor_tools
+-w /etc/apparmor/ -p wa -k apparmor_config
+-w /etc/apparmor.d/ -p wa -k apparmor_config
+
+# ============================================================================
+# MAKE RULES IMMUTABLE (Uncomment for production)
+# ============================================================================
+# -e 2

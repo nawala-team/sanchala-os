@@ -1,0 +1,99 @@
+# ============================================================================
+# SANCHALA OS - Thunderbolt/USB4 Security & Configuration
+# ============================================================================
+# Location: /etc/udev/rules.d/85-sanchala-thunderbolt.rules
+# Purpose: Secure Thunderbolt device handling with user-controlled auth
+# ============================================================================
+
+# ===========================================
+# THUNDERBOLT SECURITY LEVELS
+# ===========================================
+# Security levels:
+#   none    - No security, all devices auto-authorized (INSECURE)
+#   user    - User must authorize devices (RECOMMENDED for desktops)
+#   secure  - User authorize + key verification (RECOMMENDED for laptops)
+#   dponly  - Only DisplayPort, no PCIe tunneling (most secure)
+#
+# Sanchala OS Default: "user" mode for balance of security and usability
+
+# ===========================================
+# THUNDERBOLT CONTROLLER SETUP
+# ===========================================
+# Set security level on controller initialization
+ACTION=="add", SUBSYSTEM=="thunderbolt", ATTR{security}=="*", ATTR{security}="user"
+
+# Enable controller power management
+ACTION=="add", SUBSYSTEM=="thunderbolt", KERNEL=="domain*", ATTR{boot_acl}="1"
+
+# ===========================================
+# DEVICE AUTHORIZATION
+# ===========================================
+# Pre-authorized devices list (by UUID)
+# Users can add trusted devices to /etc/sanchala/thunderbolt-authorized.conf
+
+# Auto-authorize Thunderbolt docks (common vendors)
+# CalDigit
+ACTION=="add", SUBSYSTEM=="thunderbolt", ATTR{vendor}=="0x*", ATTR{device_name}=="*CalDigit*", RUN+="/usr/bin/sh -c 'echo 1 > /sys%p/authorized'"
+
+# OWC
+ACTION=="add", SUBSYSTEM=="thunderbolt", ATTR{device_name}=="*OWC*", RUN+="/usr/bin/sh -c 'echo 1 > /sys%p/authorized'"
+
+# ===========================================
+# DISPLAYPORT TUNNELING
+# ===========================================
+# Always allow DisplayPort (video output)
+ACTION=="add", SUBSYSTEM=="thunderbolt", ATTR{rx_lanes}=="*", ATTR{authorized}=="0", TEST=="dp", RUN+="/usr/bin/sh -c 'echo 1 > /sys%p/authorized 2>/dev/null || true'"
+
+# ===========================================
+# USB4 SUPPORT
+# ===========================================
+# USB4 devices (backwards compatible with TB3)
+ACTION=="add", SUBSYSTEM=="thunderbolt", ENV{ID_USB4}=="1", TAG+="usb4"
+
+# ===========================================
+# EGPU SUPPORT
+# ===========================================
+# External GPUs - require manual authorization for security
+# (DMA attack vector - user must explicitly approve)
+ACTION=="add", SUBSYSTEM=="thunderbolt", ATTR{device}=="*GPU*", ENV{SANCHALA_TB_EGPU}="1"
+ACTION=="add", SUBSYSTEM=="thunderbolt", ATTR{device}=="*Graphics*", ENV{SANCHALA_TB_EGPU}="1"
+
+# Notify user when eGPU detected
+ACTION=="add", SUBSYSTEM=="thunderbolt", ENV{SANCHALA_TB_EGPU}=="1", RUN+="/usr/bin/sanchala-notify 'eGPU Detected' 'Thunderbolt GPU requires authorization in System Settings'"
+
+# ===========================================
+# THUNDERBOLT NETWORKING
+# ===========================================
+# Thunderbolt networking (peer-to-peer)
+ACTION=="add", SUBSYSTEM=="thunderbolt", ATTR{nvm_authenticate_on_disconnect}=="*", RUN+="/usr/bin/systemctl start thunderbolt-net@%k.service"
+
+# ===========================================
+# HOT-PLUG HANDLING
+# ===========================================
+# Re-scan PCIe bus when Thunderbolt device connects
+ACTION=="add", SUBSYSTEM=="thunderbolt", ATTR{authorized}=="1", RUN+="/usr/bin/sh -c 'echo 1 > /sys/bus/pci/rescan 2>/dev/null || true'"
+
+# Trigger display reconfiguration for TB displays
+ACTION=="add|change", SUBSYSTEM=="thunderbolt", ENV{ID_THUNDERBOLT_DISPLAYPORT}=="1", RUN+="/usr/bin/systemctl --no-block restart sanchala-display-hotplug.service"
+
+# ===========================================
+# POWER MANAGEMENT
+# ===========================================
+# Enable runtime PM for Thunderbolt controller
+ACTION=="add", SUBSYSTEM=="thunderbolt", KERNEL=="domain*", ATTR{power/control}="auto"
+
+# Keep active devices powered
+ACTION=="add", SUBSYSTEM=="thunderbolt", ATTR{authorized}=="1", ATTR{power/control}="on"
+
+# ===========================================
+# SECURITY LOGGING
+# ===========================================
+# Log all Thunderbolt device connections for security audit
+ACTION=="add", SUBSYSTEM=="thunderbolt", RUN+="/usr/bin/logger -t thunderbolt 'Device connected: %E{DEVNAME} vendor=%E{ID_VENDOR} name=%s{device_name}'"
+ACTION=="remove", SUBSYSTEM=="thunderbolt", RUN+="/usr/bin/logger -t thunderbolt 'Device disconnected: %E{DEVNAME}'"
+
+# ===========================================
+# BOLTCTL INTEGRATION
+# ===========================================
+# Trigger boltd for device management
+ACTION=="add|remove|change", SUBSYSTEM=="thunderbolt", TAG+="bolt"

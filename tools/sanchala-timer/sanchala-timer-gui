@@ -1,0 +1,124 @@
+#!/usr/bin/env python3
+"""Sanchala Timer - Timer and Stopwatch"""
+import sys
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+
+class TimerApp(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Sanchala Timer")
+        self.setFixedSize(400, 500)
+        self.elapsed = 0
+        self.remaining = 0
+        self.running = False
+        self.mode = "stopwatch"
+        self.init_ui()
+    
+    def init_ui(self):
+        self.setStyleSheet("QMainWindow{background:#0f0f23;}QLabel{color:#fff;}QPushButton{background:#1a1a3e;color:#fff;border:none;padding:15px;border-radius:10px;font-size:16px;}QPushButton:hover{background:#2a2a5e;}")
+        c = QWidget(); self.setCentralWidget(c); m = QVBoxLayout(c)
+        m.setContentsMargins(30,30,30,30)
+        
+        # Mode tabs
+        tabs = QHBoxLayout()
+        self.sw_btn = QPushButton("⏱️ Stopwatch"); self.sw_btn.setCheckable(True); self.sw_btn.setChecked(True)
+        self.tm_btn = QPushButton("⏳ Timer"); self.tm_btn.setCheckable(True)
+        self.sw_btn.clicked.connect(lambda: self.set_mode("stopwatch"))
+        self.tm_btn.clicked.connect(lambda: self.set_mode("timer"))
+        tabs.addWidget(self.sw_btn); tabs.addWidget(self.tm_btn)
+        m.addLayout(tabs)
+        
+        m.addStretch()
+        
+        # Display
+        self.display = QLabel("00:00:00")
+        self.display.setStyleSheet("font-size:64px;font-weight:bold;font-family:monospace;")
+        self.display.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        m.addWidget(self.display)
+        
+        self.ms_display = QLabel(".000")
+        self.ms_display.setStyleSheet("font-size:24px;color:#666;font-family:monospace;")
+        self.ms_display.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        m.addWidget(self.ms_display)
+        
+        m.addStretch()
+        
+        # Timer presets
+        self.presets = QWidget()
+        pl = QHBoxLayout(self.presets)
+        for mins in [1, 5, 10, 15, 30]:
+            b = QPushButton(f"{mins}m"); b.clicked.connect(lambda _, m=mins: self.set_timer(m*60))
+            pl.addWidget(b)
+        self.presets.hide()
+        m.addWidget(self.presets)
+        
+        # Controls
+        ctrl = QHBoxLayout()
+        self.start_btn = QPushButton("▶️ Start"); self.start_btn.setStyleSheet("background:#27ae60;")
+        self.start_btn.clicked.connect(self.toggle)
+        self.reset_btn = QPushButton("🔄 Reset"); self.reset_btn.clicked.connect(self.reset)
+        self.lap_btn = QPushButton("🏁 Lap"); self.lap_btn.clicked.connect(self.lap)
+        ctrl.addWidget(self.reset_btn); ctrl.addWidget(self.start_btn); ctrl.addWidget(self.lap_btn)
+        m.addLayout(ctrl)
+        
+        # Laps
+        self.laps = QListWidget()
+        self.laps.setStyleSheet("background:#1a1a3e;border-radius:10px;color:#fff;max-height:120px;")
+        m.addWidget(self.laps)
+        
+        # Timer
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.tick)
+    
+    def set_mode(self, mode):
+        self.mode = mode
+        self.sw_btn.setChecked(mode == "stopwatch")
+        self.tm_btn.setChecked(mode == "timer")
+        self.presets.setVisible(mode == "timer")
+        self.lap_btn.setVisible(mode == "stopwatch")
+        self.reset()
+    
+    def set_timer(self, secs):
+        self.remaining = secs * 1000
+        self.update_display()
+    
+    def toggle(self):
+        self.running = not self.running
+        if self.running:
+            self.start_btn.setText("⏸️ Pause"); self.start_btn.setStyleSheet("background:#e67e22;")
+            self.timer.start(10)
+        else:
+            self.start_btn.setText("▶️ Start"); self.start_btn.setStyleSheet("background:#27ae60;")
+            self.timer.stop()
+    
+    def reset(self):
+        self.running = False; self.elapsed = 0; self.remaining = 0
+        self.timer.stop(); self.laps.clear()
+        self.start_btn.setText("▶️ Start"); self.start_btn.setStyleSheet("background:#27ae60;")
+        self.update_display()
+    
+    def tick(self):
+        if self.mode == "stopwatch":
+            self.elapsed += 10
+        else:
+            self.remaining -= 10
+            if self.remaining <= 0:
+                self.remaining = 0; self.toggle()
+                QMessageBox.information(self, "Timer", "⏰ Time's up!")
+        self.update_display()
+    
+    def update_display(self):
+        ms = self.elapsed if self.mode == "stopwatch" else self.remaining
+        s = ms // 1000; m = s // 60; h = m // 60
+        self.display.setText(f"{h:02d}:{m%60:02d}:{s%60:02d}")
+        self.ms_display.setText(f".{ms%1000:03d}")
+    
+    def lap(self):
+        if self.elapsed > 0:
+            ms = self.elapsed; s = ms // 1000; m = s // 60
+            self.laps.insertItem(0, f"Lap {self.laps.count()+1}: {m:02d}:{s%60:02d}.{ms%1000:03d}")
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv); w = TimerApp(); w.show(); sys.exit(app.exec())

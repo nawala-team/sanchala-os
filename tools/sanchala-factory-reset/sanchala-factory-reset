@@ -1,0 +1,105 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: GPL-3.0
+# Sanchala Factory Reset - System Reset Tool
+set -euo pipefail
+VERSION="1.0.0"
+PROGRAM_NAME="sanchala-factory-reset"
+BACKUP_DIR="/var/lib/sanchala/factory-reset/backups"
+RED="\033[0;31m" GREEN="\033[0;32m" YELLOW="\033[1;33m" BLUE="\033[0;34m" NC="\033[0m" BOLD="\033[1m"
+print_info() { echo -e "${BLUE}i $1${NC}"; }
+print_success() { echo -e "${GREEN}ok $1${NC}"; }
+print_error() { echo -e "${RED}x $1${NC}"; }
+check_root() { [[ $EUID -eq 0 ]] || { print_error "Root required"; exit 1; }; }
+init_dirs() { mkdir -p "$BACKUP_DIR" 2>/dev/null || true; }
+confirm() { echo -e "${RED}${BOLD}WARNING: $1${NC}"; read -p "Type YES: " r; [[ "$r" == "YES" ]] || { echo "Cancelled"; exit 0; }; }
+show_help() {
+cat << HELP
+SANCHALA FACTORY RESET - System Reset Tool
+USAGE: sanchala-factory-reset <COMMAND>
+COMMANDS:
+  full              Complete factory reset (DESTRUCTIVE)
+  soft              Reset configs, keep user data
+  user <USER>       Reset specific user
+  settings          Reset system settings
+  preview           Show what would be reset
+  backup            Create backup before reset
+  restore <NAME>    Restore from backup
+  list-backups      List backups
+OPTIONS:
+  --keep-users      Preserve user accounts
+  --backup-first    Backup before reset
+  --confirm         Skip confirmation
+  --reboot          Reboot after reset
+  -h, --help        Show this help
+HELP
+}
+cmd_preview() {
+    echo -e "${BOLD}Reset Preview:${NC}"
+    echo "Configs: /etc/sanchala/*"
+    echo "User data: /home/*/(.config|.local|.cache)"
+}
+cmd_backup() {
+    local name="backup-$(date +%Y%m%d-%H%M%S)"
+    local path="$BACKUP_DIR/$name"
+    mkdir -p "$path"
+    print_info "Creating backup: $name"
+    tar -czf "$path/etc.tar.gz" -C / etc/sanchala 2>/dev/null || true
+    for h in /home/*; do [[ -d "$h" ]] && tar -czf "$path/$(basename "$h").tar.gz" -C /home "$(basename "$h")" 2>/dev/null || true; done
+    echo "date=$(date -Iseconds)" > "$path/manifest"
+    print_success "Backup: $path"
+}
+cmd_list_backups() { echo "Backups:"; ls -1 "$BACKUP_DIR" 2>/dev/null || echo "None"; }
+cmd_restore() {
+    local path="$BACKUP_DIR/$1"
+    [[ -d "$path" ]] || { print_error "Not found: $1"; exit 1; }
+    confirm "Restore $1?"
+    [[ -f "$path/etc.tar.gz" ]] && tar -xzf "$path/etc.tar.gz" -C /
+    print_success "Restored"
+}
+cmd_full() {
+    local keep_users=false backup_first=false reboot=false confirmed=false
+    while [[ $# -gt 0 ]]; do
+        case "$1" in --keep-users) keep_users=true;; --backup-first) backup_first=true;; --reboot) reboot=true;; --confirm) confirmed=true;; esac; shift
+    done
+    $confirmed || confirm "FULL RESET - ALL DATA ERASED"
+    $backup_first && cmd_backup
+    print_info "Full factory reset..."
+    rm -rf /etc/sanchala/* 2>/dev/null || true
+    if ! $keep_users; then
+        for h in /home/*; do
+            [[ -d "$h" ]] || continue
+            rm -rf "$h"/.config "$h"/.local "$h"/.cache 2>/dev/null || true
+            cp -r /etc/skel/. "$h/" 2>/dev/null || true
+            chown -R "$(basename "$h")" "$h" 2>/dev/null || true
+        done
+    fi
+    print_success "Factory reset done"
+    $reboot && { sleep 3; reboot; }
+}
+cmd_soft() { confirm "Soft reset?"; rm -rf /etc/sanchala/* 2>/dev/null; for h in /home/*; do rm -rf "$h"/.cache 2>/dev/null; done; print_success "Soft reset done"; }
+cmd_user() {
+    local user="$1" home="/home/$1"
+    [[ -d "$home" ]] || { print_error "User not found"; exit 1; }
+    confirm "Reset user $user?"
+    rm -rf "$home"/.config "$home"/.local "$home"/.cache 2>/dev/null || true
+    cp -r /etc/skel/. "$home/" 2>/dev/null || true
+    chown -R "$user" "$home"
+    print_success "User $user reset"
+}
+cmd_settings() { confirm "Reset settings?"; rm -rf /etc/sanchala/* 2>/dev/null; for h in /home/*; do rm -rf "$h"/.config/dconf 2>/dev/null; done; print_success "Settings reset"; }
+main() {
+    case "${1:-help}" in
+        full) check_root; init_dirs; shift; cmd_full "$@" ;;
+        soft) check_root; cmd_soft ;;
+        user) check_root; shift; cmd_user "$@" ;;
+        settings) check_root; cmd_settings ;;
+        preview) cmd_preview ;;
+        backup) check_root; init_dirs; cmd_backup ;;
+        restore) check_root; init_dirs; shift; cmd_restore "$@" ;;
+        list-backups) init_dirs; cmd_list_backups ;;
+        -h|--help|help) show_help ;;
+        --version) echo "$PROGRAM_NAME $VERSION" ;;
+        *) print_error "Unknown: $1"; exit 1 ;;
+    esac
+}
+main "$@"

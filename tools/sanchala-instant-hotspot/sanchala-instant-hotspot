@@ -1,0 +1,58 @@
+#!/usr/bin/env python3
+"""Sanchala Instant Hotspot - Auto-connect to trusted device hotspots"""
+import json,secrets,subprocess
+from datetime import datetime
+from pathlib import Path
+
+class InstantHotspot:
+    def __init__(self):
+        self.base=Path(__file__).parent
+        self.clients=self.base/"clients";self.clients.mkdir(parents=True,exist_ok=True)
+        self.config_dir=self.base/"config";self.config_dir.mkdir(exist_ok=True)
+        self.data=self.base/"lib/hotspots.json";self.base.joinpath("lib").mkdir(exist_ok=True)
+        self.state=json.load(open(self.data))if self.data.exists()else{"hotspots":{},"trusted":[]}
+    def _save(self):json.dump(self.state,open(self.data,'w'),indent=2)
+    def create_hotspot(self,aid,config=None):
+        hid=f"HS-{secrets.token_hex(4).upper()}"
+        pw=secrets.token_urlsafe(12)
+        self.state["hotspots"][hid]={"id":hid,"aid":aid,"ssid":f"Sanchala-{hid[-4:]}",
+            "password":pw,"security":"WPA3","band":config.get("band","5GHz")if config else"5GHz",
+            "created":datetime.now().isoformat(),"active":False,"clients":[]}
+        self._save();return{"success":True,"hotspot_id":hid,"ssid":self.state["hotspots"][hid]["ssid"],"password":pw}
+    def start(self,hid):
+        if hid not in self.state["hotspots"]:return{"success":False,"error":"Not found"}
+        self.state["hotspots"][hid]["active"]=True;self.state["hotspots"][hid]["started"]=datetime.now().isoformat()
+        self._save();return{"success":True,"ssid":self.state["hotspots"][hid]["ssid"]}
+    def stop(self,hid):
+        if hid in self.state["hotspots"]:self.state["hotspots"][hid]["active"]=False;self._save()
+        return{"success":True}
+    def trust_device(self,aid,device_id):
+        self.state["trusted"].append({"aid":aid,"device":device_id,"added":datetime.now().isoformat()})
+        self._save();return{"success":True}
+    def scan_trusted(self,aid):
+        trusted=[t["device"]for t in self.state["trusted"]if t["aid"]==aid]
+        available=[h for h in self.state["hotspots"].values()if h["aid"]==aid and h["active"]]
+        return{"trusted_count":len(trusted),"available_hotspots":available}
+    def auto_connect(self,aid):
+        avail=self.scan_trusted(aid)["available_hotspots"]
+        if not avail:return{"success":False,"error":"No hotspots available"}
+        best=avail[0];return{"success":True,"connecting_to":best["ssid"],"security":best["security"]}
+    def get_clients(self,hid):
+        if hid not in self.state["hotspots"]:return[]
+        return self.state["hotspots"][hid].get("clients",[])
+
+if __name__=="__main__":
+    import argparse;p=argparse.ArgumentParser();s=p.add_subparsers(dest="c")
+    cr=s.add_parser("create");cr.add_argument("--account-id",required=True)
+    st=s.add_parser("start");st.add_argument("--hotspot-id",required=True)
+    sp=s.add_parser("stop");sp.add_argument("--hotspot-id",required=True)
+    sc=s.add_parser("scan");sc.add_argument("--account-id",required=True)
+    ac=s.add_parser("connect");ac.add_argument("--account-id",required=True)
+    s.add_parser("status");a=p.parse_args();hs=InstantHotspot()
+    if a.c=="create":print(json.dumps(hs.create_hotspot(a.account_id),indent=2))
+    elif a.c=="start":print(json.dumps(hs.start(a.hotspot_id),indent=2))
+    elif a.c=="stop":print(json.dumps(hs.stop(a.hotspot_id),indent=2))
+    elif a.c=="scan":print(json.dumps(hs.scan_trusted(a.account_id),indent=2))
+    elif a.c=="connect":print(json.dumps(hs.auto_connect(a.account_id),indent=2))
+    elif a.c=="status":print(f"Instant Hotspot\nHotspots: {len(hs.state['hotspots'])}\nActive: {len([h for h in hs.state['hotspots'].values()if h.get('active')])}")
+    else:p.print_help()

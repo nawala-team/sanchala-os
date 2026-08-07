@@ -1,0 +1,94 @@
+#!/bin/bash
+# SANCHALA-REDUCE-MOTION - Motion Reduction for Sanchala OS
+# WCAG 2.1 AAA Compliant | Copyright (c) 2025 Sanchala OS Project
+set -euo pipefail
+
+VERSION="1.0.0"
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/sanchala/accessibility"
+CONFIG_FILE="$CONFIG_DIR/reduce-motion.conf"
+
+declare -A MOTION=([enabled]=false [animations]=none [transitions]=instant [parallax]=false [autoplay]=false)
+
+mkdir -p "$CONFIG_DIR"
+
+load_config() { [[ -f "$CONFIG_FILE" ]] && source "$CONFIG_FILE"; }
+save_config() { declare -p MOTION > "$CONFIG_FILE"; }
+
+apply_gnome() {
+    gsettings set org.gnome.desktop.interface enable-animations "$([[ "${MOTION[enabled]}" == "true" ]] && echo false || echo true)" 2>/dev/null ||:
+}
+
+apply_kde() {
+    local anim=$([[ "${MOTION[enabled]}" == "true" ]] && echo 0 || echo 1)
+    kwriteconfig5 --file kdeglobals --group KDE --key AnimationDurationFactor "$anim" 2>/dev/null ||:
+    qdbus org.kde.KWin /KWin reconfigure 2>/dev/null ||:
+}
+
+apply_gtk() {
+    local gtk_settings="$HOME/.config/gtk-3.0/settings.ini"
+    mkdir -p "$(dirname "$gtk_settings")"
+    if [[ "${MOTION[enabled]}" == "true" ]]; then
+        grep -q "gtk-enable-animations" "$gtk_settings" 2>/dev/null && \
+            sed -i 's/gtk-enable-animations=.*/gtk-enable-animations=false/' "$gtk_settings" || \
+            echo "gtk-enable-animations=false" >> "$gtk_settings"
+    else
+        sed -i 's/gtk-enable-animations=.*/gtk-enable-animations=true/' "$gtk_settings" 2>/dev/null ||:
+    fi
+}
+
+apply_css_override() {
+    local css_file="$CONFIG_DIR/reduce-motion.css"
+    cat > "$css_file" << 'CSS'
+/* WCAG 2.1 AAA Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+* {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+}
+video, .animated, .parallax { animation-play-state: paused !important; }
+CSS
+    echo "CSS override: $css_file"
+}
+
+enable_reduce_motion() {
+    MOTION[enabled]="true"; save_config
+    echo "Enabling reduced motion..."
+    apply_gnome; apply_kde; apply_gtk; apply_css_override
+    
+    # Set environment variable for apps
+    export PREFERS_REDUCED_MOTION=1
+    echo "export PREFERS_REDUCED_MOTION=1" >> "$HOME/.profile" 2>/dev/null ||:
+    echo "Reduced motion enabled"
+}
+
+disable_reduce_motion() {
+    MOTION[enabled]="false"; save_config
+    gsettings set org.gnome.desktop.interface enable-animations true 2>/dev/null ||:
+    kwriteconfig5 --file kdeglobals --group KDE --key AnimationDurationFactor 1 2>/dev/null ||:
+    sed -i '/PREFERS_REDUCED_MOTION/d' "$HOME/.profile" 2>/dev/null ||:
+    echo "Reduced motion disabled"
+}
+
+status() {
+    load_config
+    local gnome_anim=$(gsettings get org.gnome.desktop.interface enable-animations 2>/dev/null || echo "N/A")
+    echo "Reduce Motion: ${MOTION[enabled]} | GNOME animations: $gnome_anim"
+    echo "Transitions: ${MOTION[transitions]} | Autoplay: ${MOTION[autoplay]}"
+}
+
+case "${1:-status}" in
+    enable|on) enable_reduce_motion ;; disable|off) disable_reduce_motion ;; status) status ;;
+    toggle) [[ "${MOTION[enabled]}" == "true" ]] && disable_reduce_motion || enable_reduce_motion ;;
+    --transitions) MOTION[transitions]="$2"; save_config ;;
+    --autoplay) MOTION[autoplay]="$2"; save_config ;;
+    --help|-h) echo "Usage: sanchala-reduce-motion {enable|disable|toggle|status}" ;;
+    --version|-v) echo "v$VERSION" ;; *) echo "Unknown: $1"; exit 1 ;;
+esac

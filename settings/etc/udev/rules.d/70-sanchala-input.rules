@@ -1,0 +1,87 @@
+# ============================================================================
+# SANCHALA OS - udev Rules for Input Devices
+# ============================================================================
+# Location: /etc/udev/rules.d/70-sanchala-input.rules
+# Permissions and settings for touchpads, tablets, etc.
+# ============================================================================
+
+# ============================================================================
+# TOUCHPAD DEVICES
+# ============================================================================
+
+# Grant input group access to touchpad devices
+SUBSYSTEM=="input", KERNEL=="event*", ATTR{name}=="*[Tt]ouchpad*", GROUP="input", MODE="0660"
+SUBSYSTEM=="input", KERNEL=="event*", ATTR{name}=="*[Tt]rackpad*", GROUP="input", MODE="0660"
+
+# Apple Magic Trackpad (USB and Bluetooth)
+SUBSYSTEM=="input", ATTR{id/vendor}=="05ac", ATTR{id/product}=="030e", GROUP="input", MODE="0660"
+SUBSYSTEM=="input", ATTR{id/vendor}=="05ac", ATTR{id/product}=="0265", GROUP="input", MODE="0660"
+
+# Precision touchpads (HID multitouch)
+SUBSYSTEM=="input", KERNEL=="event*", ATTR{name}=="*Precision*", GROUP="input", MODE="0660"
+
+# ============================================================================
+# TOUCHSCREEN DEVICES
+# ============================================================================
+
+SUBSYSTEM=="input", KERNEL=="event*", ATTR{name}=="*[Tt]ouchscreen*", GROUP="input", MODE="0660"
+SUBSYSTEM=="input", KERNEL=="event*", ATTR{name}=="*[Tt]ouch [Ss]creen*", GROUP="input", MODE="0660"
+
+# Wacom touch devices
+SUBSYSTEM=="input", ATTR{id/vendor}=="056a", GROUP="input", MODE="0660"
+
+# ============================================================================
+# GRAPHICS TABLET / STYLUS DEVICES
+# ============================================================================
+
+# Wacom tablets (all models)
+KERNEL=="hidraw*", ATTRS{idVendor}=="056a", GROUP="input", MODE="0660"
+SUBSYSTEM=="usb", ATTR{idVendor}=="056a", GROUP="input", MODE="0666"
+
+# Huion tablets
+KERNEL=="hidraw*", ATTRS{idVendor}=="256c", GROUP="input", MODE="0660"
+SUBSYSTEM=="usb", ATTR{idVendor}=="256c", GROUP="input", MODE="0666"
+
+# XP-Pen tablets
+KERNEL=="hidraw*", ATTRS{idVendor}=="28bd", GROUP="input", MODE="0660"
+SUBSYSTEM=="usb", ATTR{idVendor}=="28bd", GROUP="input", MODE="0666"
+
+# Gaomon tablets
+KERNEL=="hidraw*", ATTRS{idVendor}=="256c", GROUP="input", MODE="0660"
+
+# ============================================================================
+# TRACKPOINT / POINTING STICK
+# ============================================================================
+
+SUBSYSTEM=="input", KERNEL=="event*", ATTR{name}=="*TrackPoint*", GROUP="input", MODE="0660"
+SUBSYSTEM=="input", KERNEL=="event*", ATTR{name}=="*PointStick*", GROUP="input", MODE="0660"
+
+# ============================================================================
+# GAMING DEVICES
+# ============================================================================
+
+# Logitech gaming mice
+SUBSYSTEM=="usb", ATTR{idVendor}=="046d", MODE="0666", GROUP="input"
+
+# Razer devices
+SUBSYSTEM=="usb", ATTR{idVendor}=="1532", MODE="0666", GROUP="input"
+
+# SteelSeries
+SUBSYSTEM=="usb", ATTR{idVendor}=="1038", MODE="0666", GROUP="input"
+
+# Corsair
+SUBSYSTEM=="usb", ATTR{idVendor}=="1b1c", MODE="0666", GROUP="input"
+
+# ============================================================================
+# POWER MANAGEMENT FOR INPUT DEVICES
+# ============================================================================
+
+# Keep USB input devices active (no autosuspend for HID)
+ACTION=="add", SUBSYSTEM=="usb", ATTR{bInterfaceClass}=="03", TEST=="power/control", ATTR{power/control}="on"
+
+# ============================================================================
+# LIBINPUT INTEGRATION
+# ============================================================================
+
+# Tag input devices for libinput
+SUBSYSTEM=="input", KERNEL=="event*", ENV{ID_INPUT}=="1", TAG+="uaccess"

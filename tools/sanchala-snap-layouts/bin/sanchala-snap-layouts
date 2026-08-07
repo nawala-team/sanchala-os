@@ -1,0 +1,133 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0
+# Sanchala Snap Layouts - Windows 11-style window snapping
+"""Snap windows to predefined layouts with keyboard or mouse"""
+
+import sys, json, argparse, subprocess
+from pathlib import Path
+
+VERSION = "1.0.0"
+CONFIG_DIR = Path.home() / ".config" / "sanchala" / "snap-layouts"
+
+LAYOUTS = {
+    "half-left": {"zones": [{"x": 0, "y": 0, "w": 50, "h": 100}]},
+    "half-right": {"zones": [{"x": 50, "y": 0, "w": 50, "h": 100}]},
+    "half-top": {"zones": [{"x": 0, "y": 0, "w": 100, "h": 50}]},
+    "half-bottom": {"zones": [{"x": 0, "y": 50, "w": 100, "h": 50}]},
+    "quarter-tl": {"zones": [{"x": 0, "y": 0, "w": 50, "h": 50}]},
+    "quarter-tr": {"zones": [{"x": 50, "y": 0, "w": 50, "h": 50}]},
+    "quarter-bl": {"zones": [{"x": 0, "y": 50, "w": 50, "h": 50}]},
+    "quarter-br": {"zones": [{"x": 50, "y": 50, "w": 50, "h": 50}]},
+    "thirds-left": {"zones": [{"x": 0, "y": 0, "w": 33, "h": 100}]},
+    "thirds-center": {"zones": [{"x": 33, "y": 0, "w": 34, "h": 100}]},
+    "thirds-right": {"zones": [{"x": 67, "y": 0, "w": 33, "h": 100}]},
+    "two-thirds-left": {"zones": [{"x": 0, "y": 0, "w": 67, "h": 100}]},
+    "two-thirds-right": {"zones": [{"x": 33, "y": 0, "w": 67, "h": 100}]},
+}
+
+class SnapConfig:
+    def __init__(self):
+        CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+        self.file = CONFIG_DIR / "config.json"
+        self.data = self._load()
+    
+    def _load(self):
+        defaults = {"enabled": True, "show_zones": True, "gap": 10,
+                    "animation": True, "custom_layouts": {}}
+        if self.file.exists():
+            try: defaults.update(json.load(open(self.file)))
+            except: pass
+        return defaults
+    
+    def save(self):
+        with open(self.file, 'w') as f: json.dump(self.data, f, indent=2)
+
+def get_screen_geometry():
+    try:
+        r = subprocess.run(["xdpyinfo"], capture_output=True, text=True)
+        for line in r.stdout.split('\n'):
+            if 'dimensions:' in line:
+                dims = line.split()[1].split('x')
+                return int(dims[0]), int(dims[1])
+    except: pass
+    return 1920, 1080
+
+def snap_window(layout: str):
+    if layout not in LAYOUTS:
+        print(f"❌ Unknown layout: {layout}")
+        return False
+    
+    config = SnapConfig()
+    gap = config.data["gap"]
+    zone = LAYOUTS[layout]["zones"][0]
+    
+    w, h = get_screen_geometry()
+    x = int(zone["x"] * w / 100) + gap
+    y = int(zone["y"] * h / 100) + gap
+    width = int(zone["w"] * w / 100) - gap * 2
+    height = int(zone["h"] * h / 100) - gap * 2
+    
+    # Remove maximized state first
+    subprocess.run(["wmctrl", "-r", ":ACTIVE:", "-b", "remove,maximized_vert,maximized_horz"])
+    # Move and resize
+    subprocess.run(["wmctrl", "-r", ":ACTIVE:", "-e", f"0,{x},{y},{width},{height}"])
+    return True
+
+def cmd_snap(args):
+    if snap_window(args.layout):
+        print(f"✅ Snapped to: {args.layout}")
+        return 0
+    return 1
+
+def cmd_list(args):
+    print(f"\n📐 Snap Layouts\n" + "━"*40)
+    print("\n  Halves:")
+    print("    half-left, half-right, half-top, half-bottom")
+    print("\n  Quarters:")
+    print("    quarter-tl, quarter-tr, quarter-bl, quarter-br")
+    print("\n  Thirds:")
+    print("    thirds-left, thirds-center, thirds-right")
+    print("    two-thirds-left, two-thirds-right")
+    print()
+    return 0
+
+def cmd_left(args): return 0 if snap_window("half-left") else 1
+def cmd_right(args): return 0 if snap_window("half-right") else 1
+def cmd_maximize(args):
+    subprocess.run(["wmctrl", "-r", ":ACTIVE:", "-b", "toggle,maximized_vert,maximized_horz"])
+    return 0
+def cmd_center(args):
+    w, h = get_screen_geometry()
+    width, height = int(w * 0.6), int(h * 0.7)
+    x, y = (w - width) // 2, (h - height) // 2
+    subprocess.run(["wmctrl", "-r", ":ACTIVE:", "-b", "remove,maximized_vert,maximized_horz"])
+    subprocess.run(["wmctrl", "-r", ":ACTIVE:", "-e", f"0,{x},{y},{width},{height}"])
+    return 0
+
+def cmd_gap(args):
+    config = SnapConfig()
+    config.data["gap"] = args.pixels
+    config.save()
+    print(f"✅ Gap set to: {args.pixels}px")
+    return 0
+
+def main():
+    p = argparse.ArgumentParser(prog="sanchala-snap-layouts", description="📐 Snap Layouts")
+    p.add_argument("--version", action="version", version=f"%(prog)s {VERSION}")
+    sub = p.add_subparsers(dest="cmd")
+    
+    s = sub.add_parser("snap", help="Snap to layout"); s.add_argument("layout")
+    sub.add_parser("list", help="List layouts")
+    sub.add_parser("left", help="Snap left")
+    sub.add_parser("right", help="Snap right")
+    sub.add_parser("maximize", help="Toggle maximize")
+    sub.add_parser("center", help="Center window")
+    s = sub.add_parser("gap", help="Set gap"); s.add_argument("pixels", type=int)
+    
+    args = p.parse_args()
+    cmds = {"snap": cmd_snap, "list": cmd_list, "left": cmd_left, "right": cmd_right,
+            "maximize": cmd_maximize, "center": cmd_center, "gap": cmd_gap}
+    if args.cmd in cmds: return cmds[args.cmd](args)
+    return cmd_list(args)
+
+if __name__ == "__main__": sys.exit(main())

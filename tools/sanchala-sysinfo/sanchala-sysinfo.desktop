@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Sanchala System Info
+Comment=View system information
+Exec=sanchala-sysinfo-gui
+Icon=computer
+Type=Application
+Categories=System;Monitor;
+Keywords=system;info;hardware;cpu;memory;

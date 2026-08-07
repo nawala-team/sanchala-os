@@ -1,0 +1,101 @@
+#!/bin/bash
+# SANCHALA-READING-MODE - Distraction-Free Reading for Sanchala OS
+# WCAG 2.1 AAA Compliant | Copyright (c) 2025 Sanchala OS Project
+set -euo pipefail
+
+VERSION="1.0.0"
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/sanchala/accessibility"
+CONFIG_FILE="$CONFIG_DIR/reading-mode.conf"
+
+declare -A READING=([enabled]=false [font]=OpenDyslexic [font_size]=18 [line_height]=1.8 [letter_spacing]=0.05 [word_spacing]=0.2 [width]=70 [theme]=sepia [ruler]=false [mask]=false)
+
+mkdir -p "$CONFIG_DIR"
+
+load_config() { [[ -f "$CONFIG_FILE" ]] && source "$CONFIG_FILE"; }
+save_config() { declare -p READING > "$CONFIG_FILE"; }
+
+generate_css() {
+    local css_file="$CONFIG_DIR/reading-mode.css"
+    local bg fg
+    case "${READING[theme]}" in
+        sepia) bg="#F4ECD8" fg="#5B4636" ;;
+        dark) bg="#1E1E1E" fg="#E0E0E0" ;;
+        light) bg="#FFFFFF" fg="#333333" ;;
+        cream) bg="#FFFEF0" fg="#2D2D2D" ;;
+    esac
+    
+    cat > "$css_file" << CSS
+/* WCAG 2.1 AAA Reading Mode */
+body, article, main, .content, .post, .entry {
+    font-family: "${READING[font]}", "OpenDyslexic", "Lexie Readable", Georgia, serif !important;
+    font-size: ${READING[font_size]}px !important;
+    line-height: ${READING[line_height]} !important;
+    letter-spacing: ${READING[letter_spacing]}em !important;
+    word-spacing: ${READING[word_spacing]}em !important;
+    max-width: ${READING[width]}ch !important;
+    margin: 0 auto !important;
+    padding: 2rem !important;
+    background: $bg !important;
+    color: $fg !important;
+    text-align: left !important;
+}
+/* Hide distractions */
+header, footer, nav, aside, .sidebar, .ads, .comments, .social, .related,
+[class*="banner"], [class*="popup"], [class*="modal"], [id*="ad"] {
+    display: none !important;
+}
+/* Improve readability */
+p { margin-bottom: 1.5em !important; text-indent: 0 !important; }
+h1, h2, h3, h4, h5, h6 { margin-top: 2em !important; line-height: 1.3 !important; }
+a { color: inherit !important; text-decoration: underline !important; }
+img { max-width: 100% !important; height: auto !important; margin: 1em 0 !important; }
+/* Focus indicator */
+:focus { outline: 3px solid #0066CC !important; outline-offset: 2px !important; }
+CSS
+    echo "$css_file"
+}
+
+apply_gtk_reading() {
+    local font="${READING[font]} ${READING[font_size]}"
+    gsettings set org.gnome.desktop.interface document-font-name "$font" 2>/dev/null ||:
+    gsettings set org.gnome.desktop.interface text-scaling-factor 1.2 2>/dev/null ||:
+}
+
+enable_reading_mode() {
+    load_config
+    READING[enabled]="true"; save_config
+    
+    local css=$(generate_css)
+    apply_gtk_reading
+    
+    echo "Reading mode enabled"
+    echo "  Font: ${READING[font]} ${READING[font_size]}px"
+    echo "  Theme: ${READING[theme]}"
+    echo "  Line height: ${READING[line_height]}"
+    echo "  CSS: $css"
+}
+
+disable_reading_mode() {
+    READING[enabled]="false"; save_config
+    gsettings reset org.gnome.desktop.interface text-scaling-factor 2>/dev/null ||:
+    echo "Reading mode disabled"
+}
+
+status() {
+    load_config
+    echo "Reading Mode: ${READING[enabled]}"
+    echo "  Font: ${READING[font]} ${READING[font_size]}px | Theme: ${READING[theme]}"
+    echo "  Line height: ${READING[line_height]} | Width: ${READING[width]}ch"
+}
+
+case "${1:-status}" in
+    enable|on) enable_reading_mode ;; disable|off) disable_reading_mode ;; status) status ;;
+    toggle) [[ "${READING[enabled]}" == "true" ]] && disable_reading_mode || enable_reading_mode ;;
+    --font) READING[font]="$2"; save_config ;;
+    --font-size) READING[font_size]="$2"; save_config ;;
+    --line-height) READING[line_height]="$2"; save_config ;;
+    --theme) READING[theme]="$2"; save_config ;;
+    --width) READING[width]="$2"; save_config ;;
+    --help|-h) echo "Usage: sanchala-reading-mode {enable|disable|toggle|--font NAME|--font-size N|--theme sepia|dark|light}" ;;
+    --version|-v) echo "v$VERSION" ;; *) echo "Unknown: $1"; exit 1 ;;
+esac

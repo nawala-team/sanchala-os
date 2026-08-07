@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Sanchala Mouse Settings
+Comment=Configure mouse and touchpad
+Exec=sanchala-mouse-settings-gui
+Icon=preferences-desktop-mouse
+Type=Application
+Categories=Settings;HardwareSettings;
+Keywords=mouse;touchpad;pointer;cursor;

@@ -1,0 +1,135 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0
+# Sanchala Accent Color - System-wide accent color customization
+"""Set accent color that applies across the entire desktop"""
+
+import sys, json, argparse, subprocess, re
+from pathlib import Path
+
+VERSION = "1.0.0"
+CONFIG_DIR = Path.home() / ".config" / "sanchala" / "accent-color"
+
+PRESET_COLORS = {
+    "blue": "#3daee9", "purple": "#9b59b6", "pink": "#e91e63",
+    "red": "#e74c3c", "orange": "#e67e22", "yellow": "#f1c40f",
+    "green": "#27ae60", "teal": "#1abc9c", "cyan": "#00bcd4",
+    "graphite": "#7f8c8d"
+}
+
+class AccentConfig:
+    def __init__(self):
+        CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+        self.file = CONFIG_DIR / "config.json"
+        self.data = self._load()
+    
+    def _load(self):
+        defaults = {"color": "#3daee9", "name": "blue", "auto_from_wallpaper": False}
+        if self.file.exists():
+            try: defaults.update(json.load(open(self.file)))
+            except: pass
+        return defaults
+    
+    def save(self):
+        with open(self.file, 'w') as f: json.dump(self.data, f, indent=2)
+
+def hex_to_rgb(h):
+    h = h.lstrip('#')
+    return tuple(int(h[i:i+2], 16) for i in (0, 2, 4))
+
+def apply_color(color: str):
+    r, g, b = hex_to_rgb(color)
+    
+    # Apply to KDE Plasma
+    subprocess.run(["plasma-apply-colorscheme", "--accent-color", color], capture_output=True)
+    
+    # Apply to GTK
+    gtk_css = Path.home() / ".config/gtk-3.0/gtk.css"
+    gtk_css.parent.mkdir(parents=True, exist_ok=True)
+    css = f"""
+@define-color accent_color {color};
+@define-color accent_bg_color {color};
+@define-color selected_bg_color {color};
+"""
+    gtk_css.write_text(css)
+    
+    # Apply to KWin decoration
+    subprocess.run(["kwriteconfig5", "--file", "kdeglobals", "--group", "General",
+                   "--key", "AccentColor", f"{r},{g},{b}"], capture_output=True)
+    
+    # Reload
+    subprocess.run(["qdbus", "org.kde.KWin", "/KWin", "reconfigure"], capture_output=True)
+
+def cmd_set(args):
+    config = AccentConfig()
+    color = args.color
+    
+    # Check if it's a preset name
+    if color.lower() in PRESET_COLORS:
+        name = color.lower()
+        color = PRESET_COLORS[name]
+    elif re.match(r'^#[0-9a-fA-F]{6}$', color):
+        name = "custom"
+    else:
+        print(f"❌ Invalid color. Use hex (#RRGGBB) or preset name")
+        return 1
+    
+    config.data["color"] = color
+    config.data["name"] = name
+    config.save()
+    apply_color(color)
+    
+    r, g, b = hex_to_rgb(color)
+    print(f"\n\033[48;2;{r};{g};{b}m{'':^20}\033[0m")
+    print(f"✅ Accent color: {name} ({color})\n")
+    return 0
+
+def cmd_presets(args):
+    config = AccentConfig()
+    print(f"\n🎨 Accent Color Presets\n" + "━"*40)
+    for name, color in PRESET_COLORS.items():
+        r, g, b = hex_to_rgb(color)
+        marker = "●" if name == config.data["name"] else "○"
+        print(f"  {marker} \033[48;2;{r};{g};{b}m  \033[0m {name:10} {color}")
+    print()
+    return 0
+
+def cmd_current(args):
+    config = AccentConfig()
+    color = config.data["color"]
+    r, g, b = hex_to_rgb(color)
+    print(f"\n🎨 Current Accent Color\n" + "━"*30)
+    print(f"  \033[48;2;{r};{g};{b}m{'':^10}\033[0m")
+    print(f"  Name:  {config.data['name']}")
+    print(f"  Color: {color}")
+    print()
+    return 0
+
+def cmd_auto(args):
+    config = AccentConfig()
+    if args.action == "on":
+        config.data["auto_from_wallpaper"] = True
+        print("✅ Auto accent from wallpaper: ON")
+    else:
+        config.data["auto_from_wallpaper"] = False
+        print("✅ Auto accent from wallpaper: OFF")
+    config.save()
+    return 0
+
+def main():
+    p = argparse.ArgumentParser(prog="sanchala-accent-color", description="🎨 Accent Color")
+    p.add_argument("--version", action="version", version=f"%(prog)s {VERSION}")
+    sub = p.add_subparsers(dest="cmd")
+    
+    s = sub.add_parser("set", help="Set accent color"); s.add_argument("color")
+    sub.add_parser("presets", help="List presets")
+    sub.add_parser("current", help="Show current")
+    s = sub.add_parser("auto", help="Auto from wallpaper"); s.add_argument("action", choices=["on","off"])
+    sub.add_parser("gui", help="Open settings")
+    
+    args = p.parse_args()
+    cmds = {"set": cmd_set, "presets": cmd_presets, "current": cmd_current, "auto": cmd_auto,
+            "gui": lambda a: subprocess.run(["kcmshell5", "kcm_colors"]) or 0}
+    if args.cmd in cmds: return cmds[args.cmd](args)
+    return cmd_presets(args)
+
+if __name__ == "__main__": sys.exit(main())

@@ -1,0 +1,96 @@
+#!/usr/bin/env python3
+"""Sanchala Chess - Chess Game"""
+import sys
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+
+class ChessBoard(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setMinimumSize(480, 480)
+        self.selected = None
+        self.turn = 'white'
+        self.board = [
+            ['♜','♞','♝','♛','♚','♝','♞','♜'],
+            ['♟','♟','♟','♟','♟','♟','♟','♟'],
+            ['','','','','','','',''],
+            ['','','','','','','',''],
+            ['','','','','','','',''],
+            ['','','','','','','',''],
+            ['♙','♙','♙','♙','♙','♙','♙','♙'],
+            ['♖','♘','♗','♕','♔','♗','♘','♖'],
+        ]
+    
+    def paintEvent(self, e):
+        p = QPainter(self); p.setRenderHint(QPainter.RenderHint.Antialiasing)
+        sz = min(self.width(), self.height()) // 8
+        for r in range(8):
+            for c in range(8):
+                x, y = c * sz, r * sz
+                color = QColor("#f0d9b5") if (r + c) % 2 == 0 else QColor("#b58863")
+                if self.selected == (r, c): color = QColor("#829769")
+                p.fillRect(x, y, sz, sz, color)
+                if self.board[r][c]:
+                    p.setFont(QFont("Sans", sz // 2))
+                    p.setPen(QColor("#000"))
+                    p.drawText(QRect(x, y, sz, sz), Qt.AlignmentFlag.AlignCenter, self.board[r][c])
+    
+    def mousePressEvent(self, e):
+        sz = min(self.width(), self.height()) // 8
+        c, r = int(e.pos().x() // sz), int(e.pos().y() // sz)
+        if 0 <= r < 8 and 0 <= c < 8:
+            if self.selected:
+                sr, sc = self.selected
+                if self.board[sr][sc]:
+                    self.board[r][c] = self.board[sr][sc]
+                    self.board[sr][sc] = ''
+                    self.turn = 'black' if self.turn == 'white' else 'white'
+                self.selected = None
+            elif self.board[r][c]:
+                self.selected = (r, c)
+            self.update()
+
+class ChessApp(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Sanchala Chess")
+        self.setMinimumSize(600, 550)
+        self.setStyleSheet("QMainWindow{background:#2c2c2c;}QLabel{color:#fff;}QPushButton{background:#3a3a3a;color:#fff;border:none;padding:10px;border-radius:6px;}QPushButton:hover{background:#4a4a4a;}")
+        c = QWidget(); self.setCentralWidget(c); m = QVBoxLayout(c)
+        
+        # Top bar
+        top = QHBoxLayout()
+        self.status = QLabel("♔ White's turn"); self.status.setStyleSheet("font-size:16px;")
+        top.addWidget(self.status); top.addStretch()
+        for txt in ["↩️ Undo", "🔄 New Game", "⚙️ Settings"]:
+            b = QPushButton(txt); top.addWidget(b)
+            if "New" in txt: b.clicked.connect(self.new_game)
+        m.addLayout(top)
+        
+        # Board
+        self.board = ChessBoard()
+        m.addWidget(self.board, 1)
+        
+        # Bottom
+        bot = QHBoxLayout()
+        bot.addWidget(QLabel("⏱️ 10:00")); bot.addStretch()
+        for d in ["Easy", "Medium", "Hard"]:
+            b = QPushButton(d); bot.addWidget(b)
+        bot.addStretch(); bot.addWidget(QLabel("⏱️ 10:00"))
+        m.addLayout(bot)
+    
+    def new_game(self):
+        self.board.board = [
+            ['♜','♞','♝','♛','♚','♝','♞','♜'],
+            ['♟','♟','♟','♟','♟','♟','♟','♟'],
+            ['','','','','','','',''],['','','','','','','',''],
+            ['','','','','','','',''],['','','','','','','',''],
+            ['♙','♙','♙','♙','♙','♙','♙','♙'],
+            ['♖','♘','♗','♕','♔','♗','♘','♖'],
+        ]
+        self.board.turn = 'white'; self.board.selected = None
+        self.board.update(); self.status.setText("♔ White's turn")
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv); w = ChessApp(); w.show(); sys.exit(app.exec())

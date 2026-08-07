@@ -1,0 +1,81 @@
+#!/usr/bin/env python3
+"""Sanchala Smart Home - Home Automation Control"""
+import sys, json
+from pathlib import Path
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+
+class SmartHomeApp(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Sanchala Smart Home")
+        self.setMinimumSize(900, 600)
+        self.data_dir = Path.home() / ".local/share/sanchala/smarthome"
+        self.data_dir.mkdir(parents=True, exist_ok=True)
+        self.devices = self.load()
+        self.init_ui()
+    
+    def init_ui(self):
+        self.setStyleSheet("QMainWindow{background:#1a1a2e;}QLabel{color:#eee;}QPushButton{background:#16213e;color:#eee;border:none;padding:12px;border-radius:10px;}QPushButton:hover{background:#1f4068;}")
+        c = QWidget(); self.setCentralWidget(c); m = QVBoxLayout(c)
+        
+        # Header
+        h = QHBoxLayout()
+        h.addWidget(QLabel("🏠 Smart Home")); h.addStretch()
+        h.addWidget(QLabel("🌡️ 23°C")); h.addWidget(QLabel("💨 45%"))
+        m.addLayout(h)
+        
+        # Rooms
+        rooms = QHBoxLayout()
+        for room in ["🛋️ Living Room", "🛏️ Bedroom", "🍳 Kitchen", "🚿 Bathroom", "🌳 Garden"]:
+            b = QPushButton(room); rooms.addWidget(b)
+        m.addLayout(rooms)
+        
+        # Device grid
+        scroll = QScrollArea(); scroll.setWidgetResizable(True); scroll.setStyleSheet("border:none;")
+        gw = QWidget(); self.grid = QGridLayout(gw)
+        
+        devices = [
+            {"name": "Living Room Light", "type": "light", "icon": "💡", "on": True},
+            {"name": "AC", "type": "climate", "icon": "❄️", "on": False, "temp": 24},
+            {"name": "TV", "type": "tv", "icon": "📺", "on": True},
+            {"name": "Smart Lock", "type": "lock", "icon": "🔒", "on": True},
+            {"name": "Camera", "type": "camera", "icon": "📷", "on": True},
+            {"name": "Speaker", "type": "speaker", "icon": "🔊", "on": False},
+            {"name": "Thermostat", "type": "climate", "icon": "🌡️", "on": True, "temp": 22},
+            {"name": "Robot Vacuum", "type": "vacuum", "icon": "🤖", "on": False},
+        ]
+        
+        for i, d in enumerate(devices):
+            card = QFrame(); card.setStyleSheet(f"background:{'#1f4068' if d['on'] else '#16213e'};border-radius:15px;padding:15px;")
+            cl = QVBoxLayout(card)
+            icon = QLabel(d["icon"]); icon.setStyleSheet("font-size:36px;"); icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            name = QLabel(d["name"]); name.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            status = QLabel("On" if d["on"] else "Off"); status.setStyleSheet(f"color:{'#4ade80' if d['on'] else '#888'};"); status.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            toggle = QPushButton("Toggle"); toggle.clicked.connect(lambda _, idx=i, dev=devices: self.toggle_device(idx, dev))
+            cl.addWidget(icon); cl.addWidget(name); cl.addWidget(status); cl.addWidget(toggle)
+            if d.get("temp"):
+                temp = QLabel(f"🌡️ {d['temp']}°C"); temp.setAlignment(Qt.AlignmentFlag.AlignCenter); cl.addWidget(temp)
+            self.grid.addWidget(card, i // 4, i % 4)
+        
+        scroll.setWidget(gw)
+        m.addWidget(scroll)
+        
+        # Quick actions
+        qa = QHBoxLayout()
+        qa.addWidget(QLabel("⚡ Quick Actions:"))
+        for act in ["🌙 Night Mode", "🏠 Away Mode", "🎉 Party Mode", "💤 Sleep Mode"]:
+            b = QPushButton(act); qa.addWidget(b)
+        m.addLayout(qa)
+    
+    def load(self):
+        f = self.data_dir / "devices.json"
+        return json.loads(f.read_text()) if f.exists() else []
+    
+    def toggle_device(self, idx, devices):
+        devices[idx]["on"] = not devices[idx]["on"]
+        self.statusBar().showMessage(f"Toggled {devices[idx]['name']}", 2000)
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv); w = SmartHomeApp(); w.show(); sys.exit(app.exec())

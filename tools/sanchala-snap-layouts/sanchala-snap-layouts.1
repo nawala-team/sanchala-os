@@ -1,0 +1,44 @@
+.TH SANCHALA-SNAP-LAYOUTS 1 "2024" "Sanchala OS" "User Commands"
+.SH NAME
+sanchala-snap-layouts \- Windows 11-style window snapping
+.SH SYNOPSIS
+.B sanchala-snap-layouts
+[\fIcommand\fR] [\fIlayout\fR]
+.SH DESCRIPTION
+Snap windows to predefined layouts with keyboard shortcuts or commands.
+.SH COMMANDS
+.TP
+.B snap \fIlayout\fR
+Snap active window to specified layout
+.TP
+.B left
+Snap to left half
+.TP
+.B right
+Snap to right half
+.TP
+.B maximize
+Toggle window maximize
+.TP
+.B center
+Center window on screen
+.TP
+.B list
+List all available layouts
+.TP
+.B gap \fIpixels\fR
+Set gap between windows
+.SH LAYOUTS
+half-left, half-right, half-top, half-bottom,
+quarter-tl, quarter-tr, quarter-bl, quarter-br,
+thirds-left, thirds-center, thirds-right,
+two-thirds-left, two-thirds-right
+.SH EXAMPLES
+.TP
+Snap to left half:
+.B sanchala-snap-layouts left
+.TP
+Snap to top-right quarter:
+.B sanchala-snap-layouts snap quarter-tr
+.SH AUTHOR
+Sanchala OS Team

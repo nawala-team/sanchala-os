@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Sanchala Barcode Scanner
+Comment=QR and Barcode Scanner
+Exec=sanchala-barcode-scanner
+Icon=qr-code
+Terminal=false
+Type=Application
+Categories=Utility;

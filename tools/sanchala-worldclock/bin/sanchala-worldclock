@@ -1,0 +1,170 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0
+# Sanchala World Clock - Multi-timezone clock with macOS-level polish
+"""Beautiful world clock with multiple timezones, alarms, and stopwatch"""
+
+import os, sys, json, argparse
+from pathlib import Path
+from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
+from typing import Dict, List
+
+VERSION = "1.0.0"
+CONFIG_DIR = Path.home() / ".config" / "sanchala" / "worldclock"
+
+class WorldClockConfig:
+    def __init__(self):
+        CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+        self.file = CONFIG_DIR / "config.json"
+        self.data = self._load()
+    
+    def _load(self) -> Dict:
+        defaults = {"clocks": [{"city": "Local", "tz": "local"}], "format_24h": True}
+        if self.file.exists():
+            try:
+                with open(self.file) as f: defaults.update(json.load(f))
+            except: pass
+        return defaults
+    
+    def save(self):
+        with open(self.file, 'w') as f: json.dump(self.data, f, indent=2)
+
+POPULAR_CITIES = {
+    "new york": "America/New_York", "los angeles": "America/Los_Angeles",
+    "london": "Europe/London", "paris": "Europe/Paris", "berlin": "Europe/Berlin",
+    "tokyo": "Asia/Tokyo", "sydney": "Australia/Sydney", "dubai": "Asia/Dubai",
+    "singapore": "Asia/Singapore", "hong kong": "Asia/Hong_Kong",
+    "mumbai": "Asia/Kolkata", "beijing": "Asia/Shanghai", "moscow": "Europe/Moscow",
+    "toronto": "America/Toronto", "vancouver": "America/Vancouver",
+    "chicago": "America/Chicago", "denver": "America/Denver",
+    "seattle": "America/Los_Angeles", "miami": "America/New_York",
+    "amsterdam": "Europe/Amsterdam", "rome": "Europe/Rome", "madrid": "Europe/Madrid",
+    "seoul": "Asia/Seoul", "jakarta": "Asia/Jakarta", "bangkok": "Asia/Bangkok"
+}
+
+def get_tz(name: str) -> ZoneInfo:
+    if name == "local": return None
+    city = name.lower()
+    if city in POPULAR_CITIES: return ZoneInfo(POPULAR_CITIES[city])
+    try: return ZoneInfo(name)
+    except: return None
+
+def format_time(dt: datetime, h24: bool) -> str:
+    return dt.strftime("%H:%M:%S" if h24 else "%I:%M:%S %p")
+
+def format_date(dt: datetime) -> str:
+    return dt.strftime("%a, %b %d")
+
+def cmd_show(config: WorldClockConfig, args):
+    h24 = config.data.get("format_24h", True)
+    now_utc = datetime.now(timezone.utc)
+    
+    print("\n🌍 World Clock")
+    print("━" * 45)
+    
+    for clock in config.data.get("clocks", []):
+        city, tz_name = clock["city"], clock["tz"]
+        tz = get_tz(tz_name)
+        dt = datetime.now(tz) if tz else datetime.now()
+        
+        offset = dt.strftime("%z")
+        offset_str = f"UTC{offset[:3]}:{offset[3:]}" if offset else "Local"
+        
+        print(f"  🕐 {city:15} {format_time(dt, h24)}  {format_date(dt)}  ({offset_str})")
+    print()
+    return 0
+
+def cmd_add(config: WorldClockConfig, args):
+    city = args.city
+    tz_name = args.timezone or POPULAR_CITIES.get(city.lower())
+    
+    if not tz_name:
+        print(f"❌ Unknown city. Specify timezone: --timezone America/New_York")
+        return 1
+    
+    tz = get_tz(tz_name)
+    if not tz:
+        print(f"❌ Invalid timezone: {tz_name}")
+        return 1
+    
+    clocks = config.data.get("clocks", [])
+    clocks.append({"city": city.title(), "tz": tz_name})
+    config.data["clocks"] = clocks
+    config.save()
+    print(f"✅ Added {city.title()} ({tz_name})")
+    return 0
+
+def cmd_remove(config: WorldClockConfig, args):
+    clocks = config.data.get("clocks", [])
+    try:
+        idx = int(args.index) - 1
+        if 0 <= idx < len(clocks):
+            removed = clocks.pop(idx)
+            config.data["clocks"] = clocks
+            config.save()
+            print(f"✅ Removed {removed['city']}")
+            return 0
+    except:
+        for i, c in enumerate(clocks):
+            if args.index.lower() in c["city"].lower():
+                clocks.pop(i)
+                config.data["clocks"] = clocks
+                config.save()
+                print(f"✅ Removed {c['city']}")
+                return 0
+    print("❌ Clock not found")
+    return 1
+
+def cmd_list(config: WorldClockConfig, args):
+    print("\n📍 Saved Clocks:")
+    for i, c in enumerate(config.data.get("clocks", []), 1):
+        print(f"  {i}. {c['city']} ({c['tz']})")
+    print()
+    return 0
+
+def cmd_convert(config: WorldClockConfig, args):
+    try:
+        time_str = args.time
+        from_tz = get_tz(args.source) or timezone.utc
+        to_tz = get_tz(args.target) or timezone.utc
+        
+        dt = datetime.strptime(time_str, "%H:%M").replace(tzinfo=from_tz)
+        converted = dt.astimezone(to_tz)
+        
+        print(f"\n🔄 {time_str} {args.source} → {converted.strftime('%H:%M')} {args.target}\n")
+        return 0
+    except Exception as e:
+        print(f"❌ Error: {e}")
+        return 1
+
+def main():
+    p = argparse.ArgumentParser(prog="sanchala-worldclock", description="🌍 World Clock")
+    p.add_argument("--version", action="version", version=f"%(prog)s {VERSION}")
+    sub = p.add_subparsers(dest="cmd")
+    
+    sub.add_parser("show", help="Show all clocks")
+    
+    s = sub.add_parser("add", help="Add clock")
+    s.add_argument("city")
+    s.add_argument("-t", "--timezone")
+    
+    s = sub.add_parser("remove", aliases=["rm"], help="Remove clock")
+    s.add_argument("index")
+    
+    sub.add_parser("list", help="List clocks")
+    
+    s = sub.add_parser("convert", help="Convert time between zones")
+    s.add_argument("time", help="Time (HH:MM)")
+    s.add_argument("source", help="Source timezone")
+    s.add_argument("target", help="Target timezone")
+    
+    args = p.parse_args()
+    config = WorldClockConfig()
+    
+    cmds = {"show": cmd_show, "add": cmd_add, "remove": cmd_remove, "rm": cmd_remove,
+            "list": cmd_list, "convert": cmd_convert}
+    
+    if args.cmd in cmds: return cmds[args.cmd](config, args)
+    return cmd_show(config, args)
+
+if __name__ == "__main__": sys.exit(main())

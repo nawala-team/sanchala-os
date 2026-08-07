@@ -1,0 +1,143 @@
+#!/bin/bash
+# Sanchala OS Accent Color Manager
+# Manages system-wide accent colors with wallpaper extraction support
+set -e
+
+CONFIG_FILE="/etc/sanchala/theming/theming.conf"
+USER_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/sanchala/theming.conf"
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/sanchala/theming"
+
+# Default accent
+ACCENT_COLOR="#3949AB"
+
+log() { logger -t "sanchala-accent" "$1"; }
+
+# Preset accent colors
+declare -A PRESETS=(
+    ["indigo"]="#3949AB"
+    ["blue"]="#536DFE"
+    ["navy"]="#1A237E"
+    ["amber"]="#FFB300"
+    ["green"]="#00C853"
+    ["red"]="#FF1744"
+    ["purple"]="#7C4DFF"
+    ["teal"]="#00BCD4"
+    ["pink"]="#E91E63"
+    ["orange"]="#FF5722"
+)
+
+hex_to_rgb() {
+    local hex="${1#\#}"
+    printf "%d,%d,%d" 0x${hex:0:2} 0x${hex:2:2} 0x${hex:4:2}
+}
+
+extract_wallpaper_color() {
+    local wallpaper="$1"
+    local algorithm="${2:-vibrant}"
+    
+    [[ ! -f "$wallpaper" ]] && { echo "$ACCENT_COLOR"; return; }
+    
+    if command -v magick &>/dev/null; then
+        # ImageMagick extraction
+        local color=$(magick "$wallpaper" -resize 100x100 -colors 8 -unique-colors txt:- | \
+            grep -oP '#[0-9A-Fa-f]{6}' | head -1)
+        [[ -n "$color" ]] && echo "$color" || echo "$ACCENT_COLOR"
+    elif command -v convert &>/dev/null; then
+        local color=$(convert "$wallpaper" -resize 100x100 -colors 8 -unique-colors txt:- | \
+            grep -oP '#[0-9A-Fa-f]{6}' | head -1)
+        [[ -n "$color" ]] && echo "$color" || echo "$ACCENT_COLOR"
+    else
+        echo "$ACCENT_COLOR"
+    fi
+}
+
+apply_accent_kde() {
+    local hex=$1
+    local rgb=$(hex_to_rgb "$hex")
+    log "Applying KDE accent: $hex"
+    
+    # Update color scheme accent
+    kwriteconfig5 --file kdeglobals --group General --key AccentColor "$rgb"
+    kwriteconfig5 --file kdeglobals --group Colors:Selection --key BackgroundNormal "$rgb"
+    kwriteconfig5 --file kdeglobals --group Colors:Button --key DecorationFocus "$rgb"
+    kwriteconfig5 --file kdeglobals --group Colors:View --key DecorationFocus "$rgb"
+    
+    # Reload
+    qdbus org.kde.KWin /KWin reconfigure 2>/dev/null || true
+}
+
+apply_accent_gtk() {
+    local hex=$1
+    log "Applying GTK accent: $hex"
+    
+    # GTK3 override
+    mkdir -p "$HOME/.config/gtk-3.0"
+    cat >> "$HOME/.config/gtk-3.0/gtk.css" << EOF
+@define-color accent_bg_color $hex;
+@define-color accent_color $hex;
+EOF
+
+    # GTK4 override
+    mkdir -p "$HOME/.config/gtk-4.0"
+    cat >> "$HOME/.config/gtk-4.0/gtk.css" << EOF
+@define-color accent_bg_color $hex;
+@define-color accent_color $hex;
+EOF
+
+    # gsettings for GNOME apps
+    command -v gsettings &>/dev/null && \
+        gsettings set org.gnome.desktop.interface accent-color "$hex" 2>/dev/null || true
+}
+
+set_accent() {
+    local color="$1"
+    
+    # Check if preset name
+    if [[ -n "${PRESETS[$color]}" ]]; then
+        color="${PRESETS[$color]}"
+    fi
+    
+    # Validate hex
+    if [[ ! "$color" =~ ^#[0-9A-Fa-f]{6}$ ]]; then
+        echo "Invalid color: $color"
+        echo "Use hex (#RRGGBB) or preset: ${!PRESETS[*]}"
+        exit 1
+    fi
+    
+    apply_accent_kde "$color"
+    apply_accent_gtk "$color"
+    
+    # Save
+    mkdir -p "$CACHE_DIR"
+    echo "$color" > "$CACHE_DIR/accent_color"
+    
+    # Emit signal
+    dbus-send --session --type=signal /org/sanchala/ThemeEngine \
+        org.sanchala.ThemeEngine.AccentChanged string:"$color" 2>/dev/null || true
+    
+    echo "Accent color set to: $color"
+}
+
+from_wallpaper() {
+    local wallpaper=$(kreadconfig5 --file plasmarc --group Wallpapers --key usersWallpapers 2>/dev/null | cut -d, -f1)
+    [[ -z "$wallpaper" ]] && wallpaper="/usr/share/wallpapers/sanchala/default.png"
+    
+    local color=$(extract_wallpaper_color "$wallpaper")
+    echo "Extracted color from wallpaper: $color"
+    set_accent "$color"
+}
+
+list_presets() {
+    echo "Available accent color presets:"
+    for name in "${!PRESETS[@]}"; do
+        printf "  %-10s %s\n" "$name" "${PRESETS[$name]}"
+    done
+}
+
+case "${1:-}" in
+    set) set_accent "${2:-$ACCENT_COLOR}" ;;
+    wallpaper) from_wallpaper ;;
+    list) list_presets ;;
+    current) cat "$CACHE_DIR/accent_color" 2>/dev/null || echo "$ACCENT_COLOR" ;;
+    *) echo "Usage: $0 [set <color>|wallpaper|list|current]" ;;
+esac

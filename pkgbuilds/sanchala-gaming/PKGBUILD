@@ -1,0 +1,87 @@
+# Maintainer: Sanchala OS Team <dev@sanchala.org>
+pkgname=sanchala-gaming
+pkgver=1.0.0
+pkgrel=1
+pkgdesc="Sanchala OS Gaming Integration - SteamOS-level experience"
+arch=('x86_64')
+url="https://sanchala.org"
+license=('GPL3')
+depends=(
+    'gamemode'
+    'lib32-gamemode'
+    'mangohud'
+    'lib32-mangohud'
+    'steam'
+    'wine-staging'
+    'winetricks'
+    'vulkan-icd-loader'
+    'lib32-vulkan-icd-loader'
+    'dxvk-bin'
+    'vkd3d'
+)
+optdepends=(
+    'gamescope: SteamOS session compositor'
+    'proton-ge-custom-bin: Enhanced Proton builds'
+    'lutris: Game launcher'
+    'heroic-games-launcher-bin: Epic/GOG launcher'
+    'sunshine: Game streaming server'
+    'moonlight-qt: Game streaming client'
+    'xpadneo-dkms: Xbox wireless controller'
+    'dualsensectl: DualSense controller'
+    'retroarch: Retro gaming emulation'
+    'obs-vkcapture: Vulkan game capture'
+    'corectrl: GPU control panel'
+    'goverlay: MangoHud config GUI'
+)
+install=sanchala-gaming.install
+backup=(
+    'etc/sanchala/gaming/gaming.conf'
+    'etc/sanchala/gaming/controllers.conf'
+    'etc/sanchala/gaming/streaming.conf'
+    'etc/gamemode.ini'
+)
+source=(
+    'sanchala-gaming'
+    'core.sh'
+    'launch.sh'
+    'helpers.sh'
+    'gaming.conf'
+    'controllers.conf'
+    'streaming.conf'
+    'gamemode.ini'
+    'MangoHud.conf'
+    'game-start.sh'
+    'game-end.sh'
+    '99-sanchala-controllers.rules'
+    'sanchala-gaming-mode.service'
+)
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+
+package() {
+    # Main binary
+    install -Dm755 sanchala-gaming "$pkgdir/usr/bin/sanchala-gaming"
+    
+    # Library functions
+    install -Dm644 core.sh "$pkgdir/usr/lib/sanchala-gaming/core.sh"
+    install -Dm644 launch.sh "$pkgdir/usr/lib/sanchala-gaming/launch.sh"
+    install -Dm644 helpers.sh "$pkgdir/usr/lib/sanchala-gaming/helpers.sh"
+    
+    # System configuration
+    install -Dm644 gaming.conf "$pkgdir/etc/sanchala/gaming/gaming.conf"
+    install -Dm644 controllers.conf "$pkgdir/etc/sanchala/gaming/controllers.conf"
+    install -Dm644 streaming.conf "$pkgdir/etc/sanchala/gaming/streaming.conf"
+    install -Dm644 gamemode.ini "$pkgdir/etc/gamemode.ini"
+    
+    # User config defaults
+    install -Dm644 MangoHud.conf "$pkgdir/usr/share/sanchala-gaming/defaults/MangoHud.conf"
+    
+    # Scripts
+    install -Dm755 game-start.sh "$pkgdir/usr/share/sanchala-gaming/scripts/game-start.sh"
+    install -Dm755 game-end.sh "$pkgdir/usr/share/sanchala-gaming/scripts/game-end.sh"
+    
+    # Udev rules
+    install -Dm644 99-sanchala-controllers.rules "$pkgdir/usr/lib/udev/rules.d/99-sanchala-controllers.rules"
+    
+    # Systemd service
+    install -Dm644 sanchala-gaming-mode.service "$pkgdir/usr/lib/systemd/user/sanchala-gaming-mode.service"
+}

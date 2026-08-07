@@ -1,0 +1,39 @@
+#!/bin/bash
+# Sanchala Network Settings
+set -euo pipefail
+
+show_status() {
+    echo "=== Network Status ==="
+    echo "Hostname: $(hostname)"
+    echo
+    echo "Connections:"
+    nmcli -t -f NAME,TYPE,DEVICE connection show --active | while IFS=: read -r name type dev; do
+        echo "  $name ($type) on $dev"
+    done
+    echo
+    echo "IP Addresses:"
+    ip -4 addr show | grep inet | awk '{print "  " $NF ": " $2}'
+}
+
+list_wifi() {
+    nmcli device wifi list
+}
+
+connect_wifi() {
+    nmcli device wifi connect "$1" password "${2:-}"
+}
+
+list_connections() {
+    nmcli connection show
+}
+
+case "${1:-status}" in
+    status) show_status ;;
+    wifi) list_wifi ;;
+    connect) connect_wifi "$2" "${3:-}" ;;
+    list) list_connections ;;
+    up) nmcli connection up "$2" ;;
+    down) nmcli connection down "$2" ;;
+    gui) exec sanchala-network-settings-gui ;;
+    *) echo "Usage: $0 {status|wifi|connect|list|up|down|gui}" ;;
+esac

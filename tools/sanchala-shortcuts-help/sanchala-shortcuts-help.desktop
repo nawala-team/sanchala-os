@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Keyboard Shortcuts
+Comment=View and customize keyboard shortcuts
+GenericName=Shortcuts Help
+Exec=sanchala-shortcuts-help
+Icon=preferences-desktop-keyboard
+Type=Application
+Categories=Settings;DesktopSettings;
+Keywords=keyboard;shortcuts;hotkeys;keybindings;
+StartupNotify=true

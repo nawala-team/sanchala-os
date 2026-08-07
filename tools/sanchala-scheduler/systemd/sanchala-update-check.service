@@ -1,0 +1,8 @@
+[Unit]
+Description=Sanchala Update Check
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/sanchala-updater check --notify

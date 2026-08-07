@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: GPL-3.0
+# Sanchala Disk Encryption - Full Disk & Volume Encryption Manager
+set -euo pipefail
+
+VERSION="1.0.0"
+CONFIG_DIR="/etc/sanchala/encryption"
+AUDIT_LOG="/var/log/sanchala/encryption-audit.log"
+
+RED='\033[0;31m' GREEN='\033[0;32m' YELLOW='\033[1;33m' BLUE='\033[0;34m' NC='\033[0m'
+
+log_audit() { echo "[$(date -Iseconds)] $1: ${2:-}" >> "$AUDIT_LOG" 2>/dev/null || true; }
+check_root() { [[ $EUID -eq 0 ]] || { echo -e "${RED}✗ Root required${NC}"; exit 1; }; }
+
+cmd_status() {
+    echo -e "${BLUE}Disk Encryption Status${NC}"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    lsblk -o NAME,SIZE,TYPE,FSTYPE,MOUNTPOINT | head -20
+    echo ""
+    echo -e "${BLUE}LUKS Volumes:${NC}"
+    lsblk -o NAME,FSTYPE | grep -i luks || echo "No LUKS volumes found"
+    echo ""
+    dmsetup ls --target crypt 2>/dev/null || echo "No active encrypted volumes"
+}
+
+cmd_encrypt() {
+    check_root
+    local device="$1"
+    [[ -b "$device" ]] || { echo -e "${RED}✗ Invalid device: $device${NC}"; exit 1; }
+    
+    echo -e "${YELLOW}⚠ WARNING: This will DESTROY all data on $device${NC}"
+    read -rp "Type 'YES' to confirm: " confirm
+    [[ "$confirm" == "YES" ]] || { echo "Aborted"; exit 1; }
+    
+    echo -e "${BLUE}ℹ Setting up LUKS encryption...${NC}"
+    cryptsetup luksFormat --type luks2 --cipher aes-xts-plain64 \
+        --key-size 512 --hash sha512 --pbkdf argon2id \
+        --pbkdf-memory 1048576 --pbkdf-parallel 4 "$device"
+    
+    log_audit "ENCRYPT" "Device encrypted: $device"
+    echo -e "${GREEN}✓ Device encrypted successfully${NC}"
+}
+
+cmd_open() {
+    check_root
+    local device="$1" name="${2:-encrypted}"
+    cryptsetup luksOpen "$device" "$name"
+    log_audit "OPEN" "Opened: $device as $name"
+    echo -e "${GREEN}✓ Volume opened at /dev/mapper/$name${NC}"
+}
+
+cmd_close() {
+    check_root
+    local name="$1"
+    cryptsetup luksClose "$name"
+    log_audit "CLOSE" "Closed: $name"
+    echo -e "${GREEN}✓ Volume closed${NC}"
+}
+
+cmd_backup_header() {
+    check_root
+    local device="$1" backup="${2:-luks-header-$(date +%Y%m%d).bin}"
+    cryptsetup luksHeaderBackup "$device" --header-backup-file "$backup"
+    chmod 600 "$backup"
+    echo -e "${GREEN}✓ Header backed up to: $backup${NC}"
+}
+
+case "${1:-status}" in
+    status) cmd_status ;;
+    encrypt) cmd_encrypt "$2" ;;
+    open) cmd_open "$2" "${3:-encrypted}" ;;
+    close) cmd_close "$2" ;;
+    backup-header) cmd_backup_header "$2" "${3:-}" ;;
+    add-key) check_root; cryptsetup luksAddKey "$2" ;;
+    *) echo "Usage: sanchala-disk-encryption {status|encrypt DEV|open DEV [NAME]|close NAME|backup-header DEV}" ;;
+esac

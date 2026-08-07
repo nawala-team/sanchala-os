@@ -1,0 +1,37 @@
+.TH SANCHALA-WORKSPACES 1 "2024" "Sanchala OS" "User Commands"
+.SH NAME
+sanchala-workspaces \- Virtual desktop management
+.SH SYNOPSIS
+.B sanchala-workspaces
+[\fIcommand\fR] [\fIoptions\fR]
+.SH DESCRIPTION
+Manage virtual desktops/workspaces with naming and navigation.
+.SH COMMANDS
+.TP
+.B status
+Show all workspaces
+.TP
+.B switch \fInumber\fR
+Switch to workspace
+.TP
+.B next
+Go to next workspace
+.TP
+.B prev
+Go to previous workspace
+.TP
+.B move \fInumber\fR
+Move current window to workspace
+.TP
+.B rename \fInumber\fR \fIname\fR
+Rename workspace
+.TP
+.B add [\fIname\fR]
+Add new workspace
+.SH EXAMPLES
+.TP
+sanchala-workspaces switch 2
+.TP
+sanchala-workspaces rename 1 "Main"
+.SH AUTHOR
+Sanchala OS Team

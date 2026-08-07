@@ -1,0 +1,107 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: GPL-3.0
+# Sanchala VPN - VPN Connection Manager
+
+set -euo pipefail
+VERSION="1.0.0"
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/sanchala/vpn"
+
+RED='\033[0;31m' GREEN='\033[0;32m' YELLOW='\033[1;33m' BLUE='\033[0;34m' NC='\033[0m'
+info() { echo -e "${BLUE}ℹ${NC} $1"; }
+ok() { echo -e "${GREEN}✓${NC} $1"; }
+warn() { echo -e "${YELLOW}⚠${NC} $1"; }
+err() { echo -e "${RED}✗${NC} $1" >&2; }
+
+show_help() {
+    cat << 'EOF'
+SANCHALA VPN - VPN Connection Manager
+
+USAGE: sanchala-vpn <COMMAND> [ARGS]
+
+COMMANDS:
+    list              List VPN connections
+    status            Show connection status
+    connect <NAME>    Connect to VPN
+    disconnect        Disconnect VPN
+    add <TYPE>        Add VPN (openvpn,wireguard,ipsec)
+    remove <NAME>     Remove VPN connection
+    import <FILE>     Import VPN config
+    logs              Show VPN logs
+    --gui             Launch GUI
+EOF
+}
+
+cmd_list() {
+    echo -e "${BLUE}═══ VPN Connections ═══${NC}"
+    nmcli connection show --active 2>/dev/null | grep -E "vpn|wireguard" && echo || true
+    echo "Available:"
+    nmcli connection show 2>/dev/null | grep -E "vpn|wireguard" || echo "  No VPN configured"
+}
+
+cmd_status() {
+    local active=$(nmcli connection show --active 2>/dev/null | grep -E "vpn|wireguard")
+    if [[ -n "$active" ]]; then
+        echo -e "${GREEN}●${NC} VPN Connected"
+        echo "$active"
+        echo -e "\nIP: $(curl -s ifconfig.me 2>/dev/null || echo 'unknown')"
+    else
+        echo -e "${RED}●${NC} VPN Disconnected"
+    fi
+}
+
+cmd_connect() {
+    local name="$1"
+    info "Connecting to $name..."
+    nmcli connection up "$name" && ok "Connected to $name"
+}
+
+cmd_disconnect() {
+    local active=$(nmcli connection show --active 2>/dev/null | grep -E "vpn|wireguard" | awk '{print $1}')
+    for conn in $active; do
+        nmcli connection down "$conn" && ok "Disconnected $conn"
+    done
+}
+
+cmd_add() {
+    local type="${1:-openvpn}"
+    case "$type" in
+        openvpn)
+            read -rp "Connection name: " name
+            read -rp "Gateway (server): " gateway
+            read -rp "Username: " user
+            nmcli connection add type vpn vpn-type openvpn \
+                con-name "$name" vpn.data "remote=$gateway,username=$user" \
+                && ok "Added OpenVPN: $name"
+            ;;
+        wireguard)
+            read -rp "Config file path: " cfg
+            wg-quick up "$cfg" && ok "WireGuard connected"
+            ;;
+        *) err "Unsupported type: $type" ;;
+    esac
+}
+
+cmd_remove() {
+    nmcli connection delete "$1" && ok "Removed $1"
+}
+
+cmd_import() {
+    local file="$1"
+    [[ -f "$file" ]] || { err "File not found: $file"; return 1; }
+    nmcli connection import type openvpn file "$file" && ok "Imported VPN config"
+}
+
+cmd_logs() {
+    journalctl -u NetworkManager -n 50 --no-pager 2>/dev/null | grep -i vpn || \
+    journalctl -u wg-quick@* -n 50 --no-pager 2>/dev/null
+}
+
+case "${1:-status}" in
+    list|ls) cmd_list ;; status) cmd_status ;;
+    connect|up) cmd_connect "${2:?Name required}" ;;
+    disconnect|down) cmd_disconnect ;;
+    add) cmd_add "${2:-openvpn}" ;; remove|rm) cmd_remove "${2:?Name required}" ;;
+    import) cmd_import "${2:?File required}" ;; logs) cmd_logs ;;
+    --gui) exec "$(dirname "$0")/sanchala-vpn-gui" ;;
+    -h|--help) show_help ;; *) err "Unknown: $1"; exit 1 ;;
+esac

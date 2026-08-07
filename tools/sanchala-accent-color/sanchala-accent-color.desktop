@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Accent Color
+Comment=Customize system accent color
+Exec=sanchala-accent-color gui
+Icon=preferences-desktop-color
+Terminal=false
+Type=Application
+Categories=Settings;DesktopSettings;
+Keywords=accent;color;theme;

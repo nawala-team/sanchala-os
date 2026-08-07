@@ -1,0 +1,101 @@
+#!/usr/bin/env python3
+"""Sanchala Podcasts - Podcast Player"""
+import sys, json
+from pathlib import Path
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+
+class PodcastsApp(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Sanchala Podcasts")
+        self.setMinimumSize(900, 600)
+        self.data_dir = Path.home() / ".local/share/sanchala/podcasts"
+        self.data_dir.mkdir(parents=True, exist_ok=True)
+        self.subs = self.load()
+        self.playing = False
+        self.init_ui()
+    
+    def init_ui(self):
+        self.setStyleSheet("QMainWindow{background:#1a1a2e;}QLabel{color:#eee;}QPushButton{background:#16213e;color:#eee;border:none;padding:10px;border-radius:6px;}QPushButton:hover{background:#1f4068;}")
+        c = QWidget(); self.setCentralWidget(c); m = QVBoxLayout(c)
+        
+        # Tabs
+        tabs = QHBoxLayout()
+        for t in ["🏠 Home", "🔍 Discover", "📚 Library", "⬇️ Downloads"]:
+            b = QPushButton(t); tabs.addWidget(b)
+        m.addLayout(tabs)
+        
+        # Content
+        main = QHBoxLayout()
+        
+        # Podcast grid
+        scroll = QScrollArea(); scroll.setWidgetResizable(True); scroll.setStyleSheet("border:none;")
+        grid_w = QWidget(); self.grid = QGridLayout(grid_w)
+        
+        podcasts = [
+            {"name": "Tech Today", "author": "Tech Network", "img": "🎙️"},
+            {"name": "Science Hour", "author": "Discovery", "img": "🔬"},
+            {"name": "Daily News", "author": "News Corp", "img": "📰"},
+            {"name": "Comedy Club", "author": "Laugh Inc", "img": "😂"},
+            {"name": "History Talks", "author": "History Channel", "img": "📜"},
+            {"name": "Music Vibes", "author": "Audio Plus", "img": "🎵"},
+        ]
+        
+        for i, p in enumerate(podcasts):
+            card = QPushButton(); card.setFixedSize(150, 180)
+            card.setStyleSheet("background:#16213e;border-radius:12px;")
+            card.setText(f"{p['img']}\n\n{p['name']}\n{p['author']}")
+            card.clicked.connect(lambda _, pod=p: self.show_podcast(pod))
+            self.grid.addWidget(card, i // 3, i % 3)
+        
+        scroll.setWidget(grid_w)
+        main.addWidget(scroll, 2)
+        
+        # Now playing sidebar
+        side = QVBoxLayout()
+        side.addWidget(QLabel("▶️ Now Playing"))
+        self.now_art = QLabel("🎙️"); self.now_art.setStyleSheet("font-size:64px;"); self.now_art.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.now_title = QLabel("No podcast playing"); self.now_title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.now_author = QLabel(""); self.now_author.setStyleSheet("color:#888;"); self.now_author.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        side.addWidget(self.now_art); side.addWidget(self.now_title); side.addWidget(self.now_author)
+        
+        # Progress
+        self.progress = QSlider(Qt.Orientation.Horizontal)
+        self.progress.setStyleSheet("QSlider::groove:horizontal{background:#16213e;height:6px;border-radius:3px;}QSlider::handle:horizontal{background:#e94560;width:14px;height:14px;margin:-4px 0;border-radius:7px;}")
+        side.addWidget(self.progress)
+        self.time_lbl = QLabel("0:00 / 45:00"); self.time_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        side.addWidget(self.time_lbl)
+        
+        # Controls
+        ctrl = QHBoxLayout()
+        for icon in ["⏮️", "⏪", "▶️", "⏩", "⏭️"]:
+            b = QPushButton(icon); b.setFixedSize(44, 44)
+            if icon == "▶️": b.clicked.connect(self.toggle_play); self.play_btn = b
+            ctrl.addWidget(b)
+        side.addLayout(ctrl)
+        
+        # Speed
+        spd = QHBoxLayout()
+        spd.addWidget(QLabel("Speed:"))
+        for s in ["0.5x", "1x", "1.5x", "2x"]:
+            b = QPushButton(s); b.setFixedWidth(50); spd.addWidget(b)
+        side.addLayout(spd)
+        side.addStretch()
+        main.addLayout(side, 1)
+        m.addLayout(main)
+    
+    def load(self):
+        f = self.data_dir / "subscriptions.json"
+        return json.loads(f.read_text()) if f.exists() else []
+    
+    def show_podcast(self, p):
+        self.now_art.setText(p["img"]); self.now_title.setText(p["name"]); self.now_author.setText(p["author"])
+    
+    def toggle_play(self):
+        self.playing = not self.playing
+        self.play_btn.setText("⏸️" if self.playing else "▶️")
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv); w = PodcastsApp(); w.show(); sys.exit(app.exec())

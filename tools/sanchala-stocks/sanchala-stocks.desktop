@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Sanchala Stocks
+Comment=Stock Market Tracker
+Exec=sanchala-stocks
+Icon=stock
+Terminal=false
+Type=Application
+Categories=Office;Finance;

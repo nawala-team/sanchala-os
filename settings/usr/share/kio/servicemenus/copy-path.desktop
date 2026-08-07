@@ -1,0 +1,33 @@
+[Desktop Entry]
+Type=Service
+ServiceTypes=KonqPopupMenu/Plugin
+MimeType=all/allfiles;inode/directory;
+Actions=copyPath;copyFilename;copyContents
+X-KDE-Priority=TopLevel
+X-KDE-StartupNotify=false
+X-KDE-Submenu=Copy Info
+X-KDE-Submenu-Icon=edit-copy
+
+[Desktop Action copyPath]
+Name=Copy Full Path
+Name[es]=Copiar ruta completa
+Name[fr]=Copier le chemin complet
+Name[de]=Vollständigen Pfad kopieren
+Icon=edit-copy-path
+Exec=sh -c 'printf "%s" "%f" | xclip -selection clipboard'
+
+[Desktop Action copyFilename]
+Name=Copy File Name
+Name[es]=Copiar nombre de archivo
+Name[fr]=Copier le nom du fichier
+Name[de]=Dateinamen kopieren
+Icon=edit-copy
+Exec=sh -c 'printf "%s" "$(basename "%f")" | xclip -selection clipboard'
+
+[Desktop Action copyContents]
+Name=Copy Contents (Text Files)
+Name[es]=Copiar contenido (archivos de texto)
+Name[fr]=Copier le contenu (fichiers texte)
+Name[de]=Inhalt kopieren (Textdateien)
+Icon=edit-copy
+Exec=sh -c 'cat "%f" | xclip -selection clipboard'

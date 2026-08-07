@@ -1,0 +1,61 @@
+# Sanchala OS User Management PKGBUILD
+# Maintainer: Sanchala OS Team
+
+pkgname=sanchala-users
+pkgver=1.0.0
+pkgrel=1
+pkgdesc="User management tools for Sanchala OS"
+arch=('x86_64')
+url="https://sanchala.id"
+license=('GPL3')
+depends=('systemd' 'polkit' 'accountsservice' 'dbus')
+makedepends=('rust' 'cargo')
+backup=(
+    'etc/sanchala/users/guest.conf'
+    'etc/sanchala/users/switch.conf'
+)
+
+build() {
+    cd "$srcdir/sanchala-users"
+    cargo build --release
+}
+
+package() {
+    cd "$srcdir/sanchala-users"
+    
+    # Binaries
+    install -Dm755 target/release/sanchala-users "$pkgdir/usr/bin/sanchala-users"
+    install -Dm755 target/release/sanchala-user-switch "$pkgdir/usr/bin/sanchala-user-switch"
+    
+    # Scripts
+    install -Dm755 scripts/guest-session-start "$pkgdir/usr/lib/sanchala/guest-session-start"
+    install -Dm755 scripts/guest-session-cleanup "$pkgdir/usr/lib/sanchala/guest-session-cleanup"
+    
+    # Configuration
+    install -Dm644 ../settings/etc/sanchala/users/guest.conf "$pkgdir/etc/sanchala/users/guest.conf"
+    install -Dm644 ../settings/etc/sanchala/users/switch.conf "$pkgdir/etc/sanchala/users/switch.conf"
+    
+    # PAM
+    install -Dm644 ../settings/etc/pam.d/sanchala-guest "$pkgdir/etc/pam.d/sanchala-guest"
+    
+    # Security limits
+    install -Dm644 ../settings/etc/security/limits.d/99-sanchala-guest.conf \
+        "$pkgdir/etc/security/limits.d/99-sanchala-guest.conf"
+    
+    # Systemd
+    install -Dm644 ../settings/etc/systemd/system/sanchala-user-switch.service \
+        "$pkgdir/usr/lib/systemd/system/sanchala-user-switch.service"
+    
+    # D-Bus
+    install -Dm644 ../settings/etc/dbus-1/interfaces/id.sanchala.UserSwitch.xml \
+        "$pkgdir/usr/share/dbus-1/interfaces/id.sanchala.UserSwitch.xml"
+    
+    # User templates
+    install -dm755 "$pkgdir/etc/accountsservice/user-templates.d"
+    install -Dm644 ../settings/etc/accountsservice/user-templates.d/*.conf \
+        "$pkgdir/etc/accountsservice/user-templates.d/"
+    
+    # Polkit rules
+    install -Dm644 ../settings/etc/polkit-1/rules.d/50-sanchala-parental.rules \
+        "$pkgdir/etc/polkit-1/rules.d/50-sanchala-parental.rules"
+}

@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Theme
+Name=Sanchala
+Description=Elegant login theme for Sanchala OS
+Author=Sanchala Team
+Version=1.0
+Website=https://sanchala.id
+Screenshot=preview.png
+MainScript=Main.qml
+ConfigFile=theme.conf
+TranslationsDirectory=translations

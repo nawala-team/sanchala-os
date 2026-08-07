@@ -1,0 +1,69 @@
+# ============================================
+# SANCHALA OS - KDE Global Settings
+# ============================================
+# Optimized for macOS-like experience
+# Privacy-first, beautiful defaults
+# ============================================
+
+[General]
+ColorScheme=SanchalaDark
+Name=Sanchala Dark
+widgetStyle=Breeze
+TerminalApplication=konsole
+TerminalService=org.kde.konsole.desktop
+BrowserApplication=brave-browser.desktop
+
+[Icons]
+Theme=sanchala-icons
+
+[KDE]
+AnimationDurationFactor=0.5
+LookAndFeelPackage=org.kde.sanchala.desktop
+SingleClick=false
+ScrollbarLeftClickNavigatesByPage=false
+ShowDeleteCommand=false
+wheelScrollLines=3
+# macOS-style: double-click to open
+DoubleClickInterval=400
+StartDragDistance=10
+StartDragTime=500
+
+[KFileDialog Settings]
+Allow Expansion=false
+Automatically select filename extension=true
+Breadcrumb Navigation=true
+Decoration position=2
+LocationCombo Completionmode=5
+PathCombo Completionmode=5
+Show Bookmarks=false
+Show Full Path=false
+Show Inline Previews=true
+Show Preview=false
+Show Speedbar=true
+Show hidden files=false
+Sort by=Name
+Sort directories first=true
+Sort hidden files last=false
+Sort reversed=false
+Speedbar Width=140
+View Style=DetailTree
+
+[WM]
+activeBackground=26,35,126
+activeBlend=26,35,126
+activeForeground=255,255,255
+inactiveBackground=33,33,33
+inactiveBlend=33,33,33
+inactiveForeground=189,189,189
+
+[KShortcutsDialog Settings]
+Dialog Size=600,480
+
+[PreviewSettings]
+MaximumRemoteSize=10485760
+MaximumSize=104857600
+
+[Toolbar style]
+ToolButtonStyle=TextBesideIcon
+ToolButtonStyleOtherToolbars=TextBesideIcon
+

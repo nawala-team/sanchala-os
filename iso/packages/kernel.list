@@ -1,0 +1,33 @@
+# ============================================================================
+# SANCHALA OS - Kernel & Security Packages
+# ============================================================================
+# These packages support the kernel security infrastructure
+# ============================================================================
+
+# Kernel
+linux-hardened
+linux-hardened-headers
+linux-firmware
+
+# Boot
+grub
+efibootmgr
+os-prober
+
+# Initramfs
+mkinitcpio
+mkinitcpio-busybox
+
+# Encryption
+cryptsetup
+tpm2-tools
+tpm2-tss
+sbctl
+
+# Security tools
+apparmor
+audit
+bubblewrap
+
+# Integrity
+ima-evm-utils

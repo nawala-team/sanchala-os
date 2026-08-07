@@ -1,0 +1,62 @@
+# ============================================================================
+# SANCHALA OS - Scanner udev Rules
+# ============================================================================
+# Location: /etc/udev/rules.d/82-sanchala-scanners.rules
+# Purpose: Scanner permissions and SANE integration
+# ============================================================================
+
+# ===========================================
+# SANE SCANNER PERMISSIONS
+# ===========================================
+# Allow scanner group access to SANE-detected devices
+SUBSYSTEM=="usb", ENV{libsane_matched}=="yes", MODE="0664", GROUP="scanner"
+
+# ===========================================
+# COMMON SCANNER VENDORS
+# ===========================================
+
+# Epson
+SUBSYSTEM=="usb", ATTR{idVendor}=="04b8", MODE="0664", GROUP="scanner"
+
+# Canon
+SUBSYSTEM=="usb", ATTR{idVendor}=="04a9", MODE="0664", GROUP="scanner"
+
+# HP
+SUBSYSTEM=="usb", ATTR{idVendor}=="03f0", MODE="0664", GROUP="scanner"
+
+# Brother
+SUBSYSTEM=="usb", ATTR{idVendor}=="04f9", MODE="0664", GROUP="scanner"
+
+# Fujitsu
+SUBSYSTEM=="usb", ATTR{idVendor}=="04c5", MODE="0664", GROUP="scanner"
+
+# Plustek
+SUBSYSTEM=="usb", ATTR{idVendor}=="07b3", MODE="0664", GROUP="scanner"
+
+# Mustek
+SUBSYSTEM=="usb", ATTR{idVendor}=="055f", MODE="0664", GROUP="scanner"
+
+# Xerox
+SUBSYSTEM=="usb", ATTR{idVendor}=="0924", MODE="0664", GROUP="scanner"
+
+# ===========================================
+# NETWORK/AIRSCAN SCANNERS
+# ===========================================
+# Network scanners (eSCL/AirScan) handled by sane-airscan
+# No udev rules needed - discovered via Avahi
+
+# ===========================================
+# MULTIFUNCTION PRINTERS (Scanner Component)
+# ===========================================
+# HP MFPs
+SUBSYSTEM=="usb", ATTR{idVendor}=="03f0", ATTR{bInterfaceClass}=="ff", MODE="0664", GROUP="scanner"
+
+# Brother MFPs
+SUBSYSTEM=="usb", ATTR{idVendor}=="04f9", ATTR{bInterfaceClass}=="ff", MODE="0664", GROUP="scanner"
+
+# ===========================================
+# IPP-USB (Modern USB Scanners)
+# ===========================================
+# ipp-usb creates network interface to USB printers/scanners
+# enabling driverless scanning via eSCL
+ACTION=="add", SUBSYSTEM=="usb", ATTR{bInterfaceClass}=="07", RUN+="/usr/bin/systemctl start ipp-usb"

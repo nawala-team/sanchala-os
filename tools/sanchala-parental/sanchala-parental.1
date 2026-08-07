@@ -1,0 +1,48 @@
+.TH SANCHALA-PARENTAL 1 "August 2026" "Sanchala OS" "User Commands"
+.SH NAME
+sanchala-parental \- Parental controls for Sanchala OS
+.SH SYNOPSIS
+.B sanchala-parental
+[\fIOPTIONS\fR] [\fICOMMAND\fR]
+.SH DESCRIPTION
+.B sanchala-parental
+provides parental control features including screen time limits,
+content filtering, application restrictions, and activity monitoring.
+.SH COMMANDS
+.TP
+.B status \fIUSER\fR
+Show parental control status
+.TP
+.B enable \fIUSER\fR
+Enable parental controls for user
+.TP
+.B disable \fIUSER\fR
+Disable parental controls
+.TP
+.B limits \fIUSER\fR
+Configure screen time limits
+.TP
+.B apps \fIUSER\fR
+Configure allowed/blocked apps
+.TP
+.B web \fIUSER\fR
+Configure web filtering
+.TP
+.B report \fIUSER\fR
+Generate activity report
+.SH OPTIONS
+.TP
+.B \-\-json
+Output in JSON format
+.TP
+.B \-h, \-\-help
+Show help message
+.SH FILES
+.TP
+.I /etc/sanchala/parental/
+System configuration
+.SH SEE ALSO
+.BR sanchala-users (8),
+.BR sanchala-guardian (1)
+.SH AUTHOR
+Sanchala OS Team <dev@sanchala.id>

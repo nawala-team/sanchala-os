@@ -1,0 +1,114 @@
+#!/bin/bash
+# sanchala-migrate - Universal OS migration tool for Sanchala OS
+# Part of SANCHALA OS - https://sanchala.id
+# License: GPL-3.0
+
+set -euo pipefail
+
+VERSION="1.0.0"
+LIB_DIR="/usr/lib/sanchala-migrate"
+DATA_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/sanchala-migrate"
+LOG_FILE="${DATA_DIR}/migrate.log"
+
+RED='\033[0;31m' GREEN='\033[0;32m' YELLOW='\033[1;33m'
+BLUE='\033[0;34m' CYAN='\033[0;36m' BOLD='\033[1m' NC='\033[0m'
+DRY_RUN=false
+
+mkdir -p "${DATA_DIR}"
+for lib in "${LIB_DIR}"/*.sh 2>/dev/null; do [[ -f "$lib" ]] && source "$lib"; done
+
+log() {
+    local level="$1"; shift
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] [${level}] $*" >> "${LOG_FILE}"
+    case "${level}" in
+        INFO) echo -e "${BLUE}ℹ${NC} $*" ;; OK) echo -e "${GREEN}✓${NC} $*" ;;
+        WARN) echo -e "${YELLOW}⚠${NC} $*" ;; ERROR) echo -e "${RED}✗${NC} $*" >&2 ;;
+    esac
+}
+
+print_banner() {
+    echo -e "${CYAN}══════════════════════════════════════════════════${NC}"
+    echo -e "  ${BOLD}SANCHALA MIGRATE${NC} - Easy switch from Windows/macOS"
+    echo -e "${CYAN}══════════════════════════════════════════════════${NC}\n"
+}
+
+detect_os_type() {
+    local p="$1"
+    if [[ -d "${p}/Windows" ]]; then echo "windows"
+    elif [[ -d "${p}/Library/Safari" || -d "${p}/System/Library" ]]; then echo "macos"
+    elif [[ -d "${p}/home" && -d "${p}/etc" ]]; then echo "linux"
+    elif [[ -d "${p}/AppData" ]]; then echo "windows-user"
+    elif [[ -d "${p}/.config" ]]; then echo "linux-user"
+    else echo "unknown"; fi
+}
+
+cmd_detect() {
+    log INFO "Scanning for migration sources..."
+    local found=0
+    for mnt in /mnt/* /media/*/*; do
+        [[ -d "$mnt" ]] || continue
+        local t=$(detect_os_type "$mnt")
+        [[ "$t" != "unknown" ]] && { echo -e "${GREEN}Found:${NC} ${t^} at $mnt"; found=1; }
+    done
+    [[ $found -eq 0 ]] && log WARN "No sources. Mount partition: sudo mount /dev/sdXY /mnt/windows"
+}
+
+cmd_migrate() {
+    local src="$1" inc="${2:-all}"
+    [[ ! -d "$src" ]] && { log ERROR "Not found: $src"; return 1; }
+    log INFO "Migrating from $src"; [[ "$DRY_RUN" == "true" ]] && log WARN "DRY RUN"
+    for f in Documents Downloads Pictures Music Videos Desktop; do
+        [[ -d "${src}/${f}" ]] && { log INFO "  ${f}..."; [[ "$DRY_RUN" != "true" ]] && rsync -a "${src}/${f}/" ~/"${f}/"; }
+        [[ -d "${src}/Users" ]] && for u in "${src}"/Users/*/; do
+            [[ -d "${u}${f}" ]] && { log INFO "  ${f} ($(basename $u))..."; [[ "$DRY_RUN" != "true" ]] && rsync -a "${u}${f}/" ~/"${f}/"; }
+        done
+    done
+    log OK "Migration completed!"
+}
+
+cmd_browser() {
+    log INFO "Browser import options:"
+    echo "  Chrome:  Import via chrome://settings/importData"
+    echo "  Firefox: Import via about:preferences#general → Import Data"
+    echo "  Or use: sanchala-migrate browser --export-bookmarks /path/to/profile"
+}
+
+show_help() {
+    cat << 'EOF'
+Usage: sanchala-migrate [COMMAND] [OPTIONS]
+
+Commands:
+  detect      Find migration sources
+  migrate     Run migration (--source PATH required)
+  browser     Browser import help
+  help        Show this help
+
+Options:
+  --source PATH   Source path (e.g., /mnt/windows)
+  --dry-run       Preview only
+  -h, --help      Show help
+
+Examples:
+  sanchala-migrate detect
+  sanchala-migrate --source /mnt/windows migrate
+  sanchala-migrate --source /mnt/windows --dry-run migrate
+EOF
+}
+
+main() {
+    local cmd="" src="" dry=false
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --source) src="$2"; shift 2 ;; --dry-run) DRY_RUN=true; shift ;;
+            -h|--help) show_help; exit 0 ;; *) cmd="$1"; shift ;;
+        esac
+    done
+    case "${cmd:-help}" in
+        detect) print_banner; cmd_detect ;;
+        migrate) print_banner; cmd_migrate "$src" ;;
+        browser) cmd_browser ;;
+        *) show_help ;;
+    esac
+}
+
+main "$@"

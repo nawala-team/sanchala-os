@@ -1,0 +1,231 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# SANCHALA OS - Production ISO Build Pipeline
+# ══════════════════════════════════════════════════════════════════════════════
+
+name: Build Sanchala OS ISO
+
+on:
+  push:
+    branches: [main, develop]
+    tags: ['v*']
+    paths:
+      - 'iso/**'
+      - 'filesystem/**'
+      - 'pkgbuilds/**'
+      - 'security/**'
+      - '.github/workflows/build-iso.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'iso/**'
+      - 'filesystem/**'
+      - 'pkgbuilds/**'
+      - 'security/**'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'ISO version (e.g., 1.0.0)'
+        required: false
+        default: 'rolling'
+      edition:
+        description: 'Edition to build'
+        required: false
+        default: 'full'
+        type: choice
+        options: [full, minimal]
+      debug:
+        description: 'Enable debug mode'
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  group: iso-build-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  SANCHALA_REPO_URL: ${{ secrets.SANCHALA_REPO_URL }}
+
+jobs:
+  # ════════════════════════════════════════════════════════════════════════════
+  # VALIDATE
+  # ════════════════════════════════════════════════════════════════════════════
+  validate:
+    name: Validate Build Config
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      should_release: ${{ steps.check.outputs.should_release }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine version
+        id: version
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            VERSION="${{ github.event.inputs.version }}"
+          elif [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            VERSION="${GITHUB_REF#refs/tags/v}"
+          else
+            VERSION="$(date +%Y.%m.%d)-$(git rev-parse --short HEAD)"
+          fi
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Check release conditions
+        id: check
+        run: |
+          [[ "${{ github.ref }}" == refs/tags/v* ]] && echo "should_release=true" >> $GITHUB_OUTPUT || echo "should_release=false" >> $GITHUB_OUTPUT
+
+      - name: Validate build script
+        run: bash -n iso/build-binary
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # BUILD
+  # ════════════════════════════════════════════════════════════════════════════
+  build:
+    name: Build ISO
+    needs: validate
+    runs-on: ${{ vars.USE_SELF_HOSTED == 'true' && 'self-hosted' || 'ubuntu-latest' }}
+    timeout-minutes: 180
+    container:
+      image: archlinux:latest
+      options: --privileged -v /dev:/dev
+    env:
+      ISO_VERSION: ${{ needs.validate.outputs.version }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup build environment
+        run: |
+          pacman-key --init && pacman-key --populate archlinux
+          pacman -Syu --noconfirm
+          pacman -S --noconfirm --needed \
+            arch-install-scripts archiso base-devel ccache dosfstools \
+            e2fsprogs git grub libisoburn mtools pv squashfs-tools xorriso zstd
+
+      - name: Restore package cache
+        uses: actions/cache@v4
+        with:
+          path: /var/cache/pacman/pkg
+          key: pacman-${{ hashFiles('iso/packages/*.list') }}
+          restore-keys: pacman-
+
+      - name: Build ISO
+        id: build
+        run: |
+          chmod +x iso/build-binary
+          ./iso/build-binary -v "${ISO_VERSION}"
+          ISO_FILE=$(find out/ -name "*.iso" | head -1)
+          echo "iso_name=$(basename $ISO_FILE)" >> $GITHUB_OUTPUT
+
+      - name: Generate checksums
+        run: |
+          cd out
+          for iso in *.iso; do
+            sha256sum "$iso" > "${iso}.sha256"
+            sha512sum "$iso" > "${iso}.sha512"
+            b2sum "$iso" > "${iso}.b2sum"
+          done
+
+      - name: Upload ISO artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sanchala-iso-${{ needs.validate.outputs.version }}
+          path: |
+            out/*.iso
+            out/*.sha256
+            out/*.sha512
+            out/*.b2sum
+          retention-days: 30
+          compression-level: 0
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # TEST ISO
+  # ════════════════════════════════════════════════════════════════════════════
+  test:
+    name: Test ISO Boot
+    needs: [validate, build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download ISO
+        uses: actions/download-artifact@v4
+        with:
+          name: sanchala-iso-${{ needs.validate.outputs.version }}
+          path: iso/
+
+      - name: Verify checksums
+        run: cd iso && sha256sum -c *.sha256
+
+      - name: Install QEMU
+        run: sudo apt-get update && sudo apt-get install -y qemu-system-x86 ovmf
+
+      - name: Boot test (UEFI)
+        timeout-minutes: 5
+        run: |
+          ISO=$(find iso/ -name "*.iso" | head -1)
+          timeout 90 qemu-system-x86_64 -m 2048 -cdrom "$ISO" -boot d \
+            -bios /usr/share/ovmf/OVMF.fd -nographic -no-reboot 2>&1 | tee boot.log &
+          sleep 60 && pkill -f qemu || true
+          grep -qi "sanchala\|grub\|linux" boot.log && echo "✅ Boot test passed"
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # RELEASE
+  # ════════════════════════════════════════════════════════════════════════════
+  release:
+    name: Create Release
+    needs: [validate, build, test]
+    runs-on: ubuntu-latest
+    if: needs.validate.outputs.should_release == 'true'
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download ISO
+        uses: actions/download-artifact@v4
+        with:
+          name: sanchala-iso-${{ needs.validate.outputs.version }}
+          path: release/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Sanchala OS ${{ needs.validate.outputs.version }}
+          files: release/*
+          generate_release_notes: true
+          draft: false
+          prerelease: ${{ contains(needs.validate.outputs.version, 'alpha') || contains(needs.validate.outputs.version, 'beta') }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+
+    steps:
+      - name: Download ISO
+        uses: actions/download-artifact@v4
+        with:
+          name: sanchala-iso
+
+      - name: Download checksums
+        uses: actions/download-artifact@v4
+        with:
+          name: checksums
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            *.iso
+            *.sha256
+            *.sha512
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

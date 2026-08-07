@@ -1,0 +1,27 @@
+{
+  "name": "sanchala-bandwidth-limiter",
+  "version": "1.0.0",
+  "description": "Control and limit network bandwidth per application",
+  "author": "Sanchala OS Team",
+  "category": "Network",
+  "settings": {
+    "enabled": false,
+    "globalDownloadLimit": 0,
+    "globalUploadLimit": 0,
+    "rules": [],
+    "schedules": [],
+    "priorityLevels": {
+      "realtime": { "priority": 1, "bandwidth": 100 },
+      "high": { "priority": 2, "bandwidth": 75 },
+      "normal": { "priority": 3, "bandwidth": 50 },
+      "low": { "priority": 4, "bandwidth": 25 },
+      "background": { "priority": 5, "bandwidth": 10 }
+    },
+    "defaultPriority": "normal",
+    "perAppLimits": {},
+    "excludeLocalTraffic": true,
+    "excludeVpn": false,
+    "notifications": true
+  },
+  "permissions": ["network", "traffic-control", "system"]
+}

@@ -1,0 +1,16 @@
+{
+    "name": "Sanchala Pomodoro",
+    "version": "2.0.0",
+    "description": "Focus timer and productivity tracker",
+    "category": "Productivity",
+    "icon": "🍅",
+    "launch": "./pomodoro.sh",
+    "author": "Sanchala OS",
+    "features": [
+        "Pomodoro technique timer",
+        "Quick custom timers",
+        "Session statistics",
+        "Break reminders",
+        "Progress tracking"
+    ]
+}

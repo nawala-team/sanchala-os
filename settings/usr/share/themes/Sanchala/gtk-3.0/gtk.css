@@ -1,0 +1,108 @@
+/* Sanchala OS GTK3 Theme - Light Variant
+ * A modern, clean theme matching KDE Plasma integration
+ * Version: 1.0
+ */
+
+/* === Color Definitions === */
+@define-color sanchala_indigo #3949AB;
+@define-color sanchala_deep_navy #1A237E;
+@define-color sanchala_electric_blue #536DFE;
+@define-color sanchala_golden_amber #FFB300;
+@define-color sanchala_success_green #00C853;
+@define-color sanchala_alert_red #FF1744;
+
+@define-color bg_color #F5F5F5;
+@define-color fg_color #212121;
+@define-color base_color #FFFFFF;
+@define-color text_color #212121;
+@define-color selected_bg_color @sanchala_indigo;
+@define-color selected_fg_color #FFFFFF;
+@define-color tooltip_bg_color #FAFAFA;
+@define-color tooltip_fg_color #212121;
+@define-color insensitive_bg_color #E0E0E0;
+@define-color insensitive_fg_color #9E9E9E;
+@define-color borders #E0E0E0;
+@define-color link_color @sanchala_electric_blue;
+@define-color warning_color @sanchala_golden_amber;
+@define-color error_color @sanchala_alert_red;
+@define-color success_color @sanchala_success_green;
+@define-color header_bg @sanchala_indigo;
+@define-color header_fg #FFFFFF;
+
+* { -gtk-icon-style: symbolic; outline-color: alpha(@sanchala_electric_blue, 0.5); }
+window, .background { background-color: @bg_color; color: @fg_color; }
+window.csd { border-radius: 12px; box-shadow: 0 3px 9px rgba(0,0,0,0.12); }
+
+headerbar, .titlebar {
+    background: linear-gradient(to bottom, @sanchala_indigo, shade(@sanchala_indigo, 0.95));
+    color: @header_fg; border-bottom: 1px solid shade(@sanchala_indigo, 0.8);
+    padding: 6px 8px; min-height: 36px; border-radius: 12px 12px 0 0;
+}
+headerbar:backdrop { background: shade(@sanchala_indigo, 0.9); }
+headerbar .title { font-weight: 600; }
+headerbar button { background: transparent; border: none; color: @header_fg; border-radius: 8px; }
+headerbar button:hover { background: alpha(white, 0.15); }
+
+button {
+    background: linear-gradient(to bottom, #F0F0F0, #E6E6E6);
+    border: 1px solid @borders; border-radius: 8px; padding: 6px 16px;
+    color: @fg_color; transition: all 150ms ease;
+}
+button:hover { background: linear-gradient(to bottom, #FAFAFA, #F0F0F0); }
+button:active, button:checked { background: linear-gradient(to bottom, #E0E0E0, #D6D6D6); }
+button:disabled { background: @insensitive_bg_color; color: @insensitive_fg_color; }
+button.suggested-action {
+    background: linear-gradient(to bottom, @sanchala_indigo, shade(@sanchala_indigo, 0.9));
+    color: white; border-color: shade(@sanchala_indigo, 0.8);
+}
+button.destructive-action { background: @alert_red; color: white; }
+
+entry, spinbutton {
+    background: @base_color; border: 1px solid @borders; border-radius: 8px;
+    padding: 8px 12px; color: @text_color; transition: all 150ms ease;
+}
+entry:focus { border-color: @sanchala_indigo; box-shadow: 0 0 0 2px alpha(@sanchala_indigo, 0.2); }
+
+list, listview, treeview { background: @base_color; color: @text_color; }
+list row:hover, listview > row:hover { background: alpha(@sanchala_indigo, 0.08); }
+list row:selected, listview > row:selected { background: @selected_bg_color; color: @selected_fg_color; }
+
+scrollbar { background: transparent; }
+scrollbar slider { background: alpha(@fg_color, 0.3); border-radius: 9999px; min-width: 8px; margin: 2px; }
+scrollbar slider:hover { background: alpha(@fg_color, 0.5); }
+scrollbar slider:active { background: @sanchala_indigo; }
+
+switch { background: #BDBDBD; border-radius: 9999px; min-width: 48px; min-height: 24px; }
+switch:checked { background: @sanchala_indigo; }
+switch slider { background: white; border-radius: 50%; min-width: 20px; margin: 2px; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+
+check, radio { background: @base_color; border: 2px solid @borders; min-width: 18px; min-height: 18px; }
+check { border-radius: 4px; }
+radio { border-radius: 50%; }
+check:checked, radio:checked { background: @sanchala_indigo; border-color: @sanchala_indigo; color: white; }
+
+progressbar trough { background: #E0E0E0; border-radius: 9999px; min-height: 6px; }
+progressbar progress { background: linear-gradient(to right, @sanchala_indigo, @sanchala_electric_blue); border-radius: 9999px; }
+
+scale trough { background: #E0E0E0; border-radius: 9999px; min-height: 6px; }
+scale highlight { background: @sanchala_indigo; border-radius: 9999px; }
+scale slider { background: white; border: 1px solid @borders; border-radius: 50%; min-width: 20px; }
+
+notebook > header { background: shade(@bg_color, 0.96); border-bottom: 1px solid @borders; }
+notebook > header > tabs > tab { padding: 8px 16px; border-radius: 8px 8px 0 0; }
+notebook > header > tabs > tab:checked { background: @base_color; border-bottom: 2px solid @sanchala_indigo; }
+
+menu, .context-menu { background: @base_color; border: 1px solid @borders; border-radius: 12px; padding: 6px; box-shadow: 0 6px 12px rgba(0,0,0,0.15); }
+menuitem { padding: 8px 12px; border-radius: 8px; }
+menuitem:hover { background: @selected_bg_color; color: @selected_fg_color; }
+
+popover { background: @base_color; border: 1px solid @borders; border-radius: 12px; box-shadow: 0 6px 12px rgba(0,0,0,0.15); }
+tooltip { background: @tooltip_bg_color; border-radius: 8px; padding: 6px 10px; }
+
+.sidebar, placessidebar { background: shade(@bg_color, 0.98); border-right: 1px solid @borders; }
+.sidebar row { padding: 8px 12px; border-radius: 8px; margin: 2px 6px; }
+.sidebar row:selected { background: @selected_bg_color; color: @selected_fg_color; }
+
+@define-color accent_bg_color @sanchala_indigo;
+@define-color accent_fg_color #FFFFFF;
+@define-color accent_color @sanchala_indigo;

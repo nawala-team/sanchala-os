@@ -1,0 +1,19 @@
+# ============================================================================
+# SANCHALA OS - Password Strength Override for High Security
+# ============================================================================
+# Drop-in for environments requiring stronger passwords
+# Enable by renaming to 10-high-security.conf
+# ============================================================================
+
+# Longer minimum for high security environments
+minlen = 16
+
+# Require all 4 character classes
+minclass = 4
+
+# More unique characters
+difok = 8
+
+# Stricter repeat limits
+maxrepeat = 2
+maxclassrepeat = 3

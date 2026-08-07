@@ -1,0 +1,98 @@
+#!/usr/bin/env python3
+"""Sanchala Text Editor - Lightweight Text Editor"""
+import sys
+from pathlib import Path
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+
+class TextEditor(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Sanchala Text Editor")
+        self.setMinimumSize(800, 600)
+        self.current_file = None
+        self.init_ui()
+        if len(sys.argv) > 1: self.open_file(sys.argv[1])
+    
+    def init_ui(self):
+        self.setStyleSheet("QMainWindow{background:#1e1e1e;}QPlainTextEdit{background:#1e1e1e;color:#d4d4d4;border:none;font-family:'Fira Code',monospace;font-size:14px;}")
+        
+        # Menu
+        menu = self.menuBar()
+        menu.setStyleSheet("background:#333;color:#fff;")
+        
+        file_menu = menu.addMenu("&File")
+        for name, short, slot in [("New", "Ctrl+N", self.new_file), ("Open", "Ctrl+O", lambda: self.open_file()), ("Save", "Ctrl+S", self.save_file), ("Save As", "Ctrl+Shift+S", self.save_as), ("Exit", "Ctrl+Q", self.close)]:
+            a = QAction(name, self); a.setShortcut(short); a.triggered.connect(slot); file_menu.addAction(a)
+        
+        edit_menu = menu.addMenu("&Edit")
+        for name, short, slot in [("Undo", "Ctrl+Z", lambda: self.editor.undo()), ("Redo", "Ctrl+Y", lambda: self.editor.redo()), ("Cut", "Ctrl+X", lambda: self.editor.cut()), ("Copy", "Ctrl+C", lambda: self.editor.copy()), ("Paste", "Ctrl+V", lambda: self.editor.paste()), ("Find", "Ctrl+F", self.find)]:
+            a = QAction(name, self); a.setShortcut(short); a.triggered.connect(slot); edit_menu.addAction(a)
+        
+        view_menu = menu.addMenu("&View")
+        self.line_nums = QAction("Line Numbers", self, checkable=True, checked=True)
+        view_menu.addAction(self.line_nums)
+        
+        # Toolbar
+        tb = QToolBar(); tb.setStyleSheet("background:#252526;border:none;padding:5px;")
+        for icon, tip, slot in [("📄", "New", self.new_file), ("📂", "Open", lambda: self.open_file()), ("💾", "Save", self.save_file), ("🔍", "Find", self.find)]:
+            b = QPushButton(icon); b.setToolTip(tip); b.setStyleSheet("background:transparent;border:none;font-size:18px;padding:5px 10px;"); b.clicked.connect(slot); tb.addWidget(b)
+        self.addToolBar(tb)
+        
+        # Editor
+        self.editor = QPlainTextEdit()
+        self.editor.setLineWrapMode(QPlainTextEdit.LineWrapMode.NoWrap)
+        self.editor.textChanged.connect(self.update_status)
+        self.setCentralWidget(self.editor)
+        
+        # Status bar
+        self.status = self.statusBar()
+        self.status.setStyleSheet("background:#007acc;color:#fff;")
+        self.pos_label = QLabel("Ln 1, Col 1")
+        self.status.addPermanentWidget(self.pos_label)
+        self.editor.cursorPositionChanged.connect(self.update_cursor)
+    
+    def new_file(self):
+        self.editor.clear(); self.current_file = None; self.setWindowTitle("Sanchala Text Editor - Untitled")
+    
+    def open_file(self, path=None):
+        if not path:
+            path, _ = QFileDialog.getOpenFileName(self, "Open File")
+        if path:
+            self.editor.setPlainText(Path(path).read_text())
+            self.current_file = path
+            self.setWindowTitle(f"Sanchala Text Editor - {Path(path).name}")
+    
+    def save_file(self):
+        if self.current_file:
+            Path(self.current_file).write_text(self.editor.toPlainText())
+            self.status.showMessage("Saved!", 2000)
+        else:
+            self.save_as()
+    
+    def save_as(self):
+        path, _ = QFileDialog.getSaveFileName(self, "Save As")
+        if path:
+            Path(path).write_text(self.editor.toPlainText())
+            self.current_file = path
+            self.setWindowTitle(f"Sanchala Text Editor - {Path(path).name}")
+    
+    def find(self):
+        text, ok = QInputDialog.getText(self, "Find", "Search for:")
+        if ok and text:
+            cursor = self.editor.document().find(text)
+            if not cursor.isNull():
+                self.editor.setTextCursor(cursor)
+    
+    def update_status(self):
+        words = len(self.editor.toPlainText().split())
+        chars = len(self.editor.toPlainText())
+        self.status.showMessage(f"Words: {words} | Characters: {chars}")
+    
+    def update_cursor(self):
+        c = self.editor.textCursor()
+        self.pos_label.setText(f"Ln {c.blockNumber()+1}, Col {c.columnNumber()+1}")
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv); w = TextEditor(); w.show(); sys.exit(app.exec())

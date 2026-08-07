@@ -1,0 +1,34 @@
+.TH SANCHALA-NIGHTLIGHT 1 "2024" "Sanchala OS" "User Commands"
+.SH NAME
+sanchala-nightlight \- Blue light filter for eye comfort
+.SH SYNOPSIS
+.B sanchala-nightlight
+[\fIcommand\fR] [\fIoptions\fR]
+.SH DESCRIPTION
+Reduce blue light emission for comfortable viewing at night. Supports automatic scheduling based on sunset/sunrise or manual times.
+.SH COMMANDS
+.TP
+.B on [\-t \fItemperature\fR]
+Enable night light
+.TP
+.B off
+Disable night light
+.TP
+.B toggle
+Toggle night light state
+.TP
+.B temperature \fIvalue\fR
+Set color temperature (1000-10000K)
+.TP
+.B schedule \fImode\fR
+Set schedule: sunset, manual, off
+.TP
+.B status
+Show current status
+.SH EXAMPLES
+.TP
+sanchala-nightlight on -t 4000
+.TP
+sanchala-nightlight schedule manual --start 20:00 --end 06:00
+.SH AUTHOR
+Sanchala OS Team

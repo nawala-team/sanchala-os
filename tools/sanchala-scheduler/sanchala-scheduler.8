@@ -1,0 +1,51 @@
+.TH SANCHALA-SCHEDULER 8 "August 2026" "Sanchala OS" "System Administration"
+.SH NAME
+sanchala-scheduler \- Task scheduler and automation for Sanchala OS
+.SH SYNOPSIS
+.B sanchala-scheduler
+[\fIOPTIONS\fR] [\fICOMMAND\fR]
+.SH DESCRIPTION
+.B sanchala-scheduler
+provides a user-friendly interface for scheduling tasks, managing
+systemd timers, and automating system maintenance.
+.SH COMMANDS
+.TP
+.B list
+List scheduled tasks
+.TP
+.B add \fINAME\fR
+Create new scheduled task
+.TP
+.B remove \fINAME\fR
+Remove scheduled task
+.TP
+.B enable \fINAME\fR
+Enable task
+.TP
+.B disable \fINAME\fR
+Disable task
+.TP
+.B run \fINAME\fR
+Run task immediately
+.TP
+.B logs \fR[\fINAME\fR]
+Show task execution logs
+.SH OPTIONS
+.TP
+.B \-\-json
+Output in JSON format
+.TP
+.B \-h, \-\-help
+Show help message
+.SH FILES
+.TP
+.I /etc/sanchala/scheduler/
+System task definitions
+.TP
+.I ~/.config/sanchala/scheduler/
+User task definitions
+.SH SEE ALSO
+.BR systemctl (1),
+.BR systemd.timer (5)
+.SH AUTHOR
+Sanchala OS Team <dev@sanchala.id>

@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Sanchala Service Manager
+Comment=Manage system services
+Exec=sanchala-service-manager-gui
+Icon=preferences-system-services
+Type=Application
+Categories=Settings;System;
+Keywords=service;systemd;daemon;

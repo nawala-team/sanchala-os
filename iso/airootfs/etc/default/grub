@@ -1,0 +1,62 @@
+# ============================================================================
+# SANCHALA OS - GRUB Configuration
+# ============================================================================
+# Install: /etc/default/grub
+# Purpose: Bootloader configuration with security parameters
+# ============================================================================
+
+# Default boot entry
+GRUB_DEFAULT=0
+
+# Boot timeout (seconds)
+GRUB_TIMEOUT=3
+
+# Timeout style (menu shown briefly)
+GRUB_TIMEOUT_STYLE=menu
+
+# Distribution name
+GRUB_DISTRIBUTOR="Sanchala OS"
+
+# ============================================================================
+# KERNEL PARAMETERS (SECURITY HARDENED)
+# ============================================================================
+GRUB_CMDLINE_LINUX_DEFAULT="quiet loglevel=3 rd.systemd.show_status=auto rd.udev.log_priority=3 splash slab_nomerge init_on_alloc=1 init_on_free=1 page_alloc.shuffle=1 pti=on vsyscall=none debugfs=off oops=panic lockdown=confidentiality iommu=force randomize_kstack_offset=on"
+
+# Parameters for all boot entries (including recovery)
+GRUB_CMDLINE_LINUX=""
+
+# ============================================================================
+# DISPLAY SETTINGS
+# ============================================================================
+# Graphics mode for GRUB menu
+GRUB_GFXMODE=auto
+
+# Keep graphics mode for kernel (Plymouth splash)
+GRUB_GFXPAYLOAD_LINUX=keep
+
+# Terminal output
+GRUB_TERMINAL_OUTPUT="gfxterm"
+
+# ============================================================================
+# THEME (Sanchala branded)
+# ============================================================================
+GRUB_THEME="/boot/grub/themes/sanchala/theme.txt"
+GRUB_BACKGROUND="/boot/grub/themes/sanchala/background.png"
+
+# ============================================================================
+# SECURITY
+# ============================================================================
+# Disable recovery mode entries (attack surface reduction)
+GRUB_DISABLE_RECOVERY=true
+
+# Disable OS prober (security - prevents boot tampering detection)
+GRUB_DISABLE_OS_PROBER=false
+
+# ============================================================================
+# ENCRYPTION SUPPORT
+# ============================================================================
+# Enable cryptodisk for encrypted /boot
+GRUB_ENABLE_CRYPTODISK=y
+
+# Preload modules for encrypted boot
+GRUB_PRELOAD_MODULES="part_gpt part_msdos cryptodisk luks2 btrfs"

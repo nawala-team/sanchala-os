@@ -1,0 +1,28 @@
+# ============================================
+# SANCHALA OS - aria2 Download Daemon Service
+# ============================================
+# Runs aria2 as a user service for download management
+# ============================================
+
+[Unit]
+Description=Sanchala OS aria2 Download Daemon
+Documentation=man:aria2c(1)
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/aria2c --conf-path=/etc/aria2/aria2.conf --enable-rpc --rpc-listen-all=false
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+RestartSec=5
+
+# Directories
+RuntimeDirectory=aria2
+ConfigurationDirectory=aria2
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=default.target

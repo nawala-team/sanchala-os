@@ -1,0 +1,16 @@
+{
+    "name": "Sanchala Dictation",
+    "version": "2.0.0",
+    "description": "Voice-to-text dictation and note taking tool",
+    "category": "Productivity",
+    "icon": "🎤",
+    "launch": "./dictation.sh",
+    "author": "Sanchala OS",
+    "features": [
+        "Voice-to-text transcription",
+        "Quick note creation",
+        "Note search and management",
+        "Audio recording",
+        "Export to multiple formats"
+    ]
+}

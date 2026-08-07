@@ -1,0 +1,51 @@
+# ============================================
+# SANCHALA OS - Kate Editor Shortcuts
+# ============================================
+# Standard text editor shortcuts
+# ============================================
+
+[Shortcuts]
+# File Operations
+file_new=Ctrl+N
+file_open=Ctrl+O
+file_save=Ctrl+S
+file_save_as=Ctrl+Shift+S
+file_close=Ctrl+W
+file_quit=Ctrl+Q
+file_print=Ctrl+P
+
+# Edit Operations
+edit_undo=Ctrl+Z
+edit_redo=Ctrl+Shift+Z
+edit_cut=Ctrl+X
+edit_copy=Ctrl+C
+edit_paste=Ctrl+V
+edit_select_all=Ctrl+A
+
+# Search
+edit_find=Ctrl+F
+edit_find_next=F3
+edit_find_prev=Shift+F3
+edit_replace=Ctrl+H
+go_goto_line=Ctrl+G
+
+# View
+view_zoom_in=Ctrl++
+view_zoom_out=Ctrl+-
+view_zoom_reset=Ctrl+0
+toggle_line_numbers=F11
+toggle_word_wrap=F10
+
+# Navigation
+go_next_tab=Ctrl+Tab
+go_prev_tab=Ctrl+Shift+Tab
+go_back=Alt+Left
+go_forward=Alt+Right
+
+# Code
+tools_comment=Ctrl+/
+tools_indent=Tab
+tools_unindent=Shift+Tab
+tools_toggle_bookmark=Ctrl+B
+tools_next_bookmark=Alt+PgDown
+tools_prev_bookmark=Alt+PgUp

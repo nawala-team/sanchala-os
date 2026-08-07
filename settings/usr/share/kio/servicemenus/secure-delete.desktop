@@ -1,0 +1,25 @@
+[Desktop Entry]
+Type=Service
+ServiceTypes=KonqPopupMenu/Plugin
+MimeType=all/allfiles;inode/directory;
+Actions=secureDelete;shredFile
+X-KDE-Priority=TopLevel
+X-KDE-StartupNotify=false
+X-KDE-Submenu=Secure Delete
+X-KDE-Submenu-Icon=edit-delete-shred
+
+[Desktop Action secureDelete]
+Name=Secure Delete (1 pass)
+Name[es]=Eliminación segura (1 pasada)
+Name[fr]=Suppression sécurisée (1 passe)
+Name[de]=Sicheres Löschen (1 Durchgang)
+Icon=edit-delete
+Exec=sh -c 'if kdialog --yesno "Securely delete selected files? This cannot be undone."; then shred -vfz -n 1 %F && rm -rf %F && kdialog --passivepopup "Files securely deleted" 3; fi'
+
+[Desktop Action shredFile]
+Name=Shred (3 passes, DoD standard)
+Name[es]=Destruir (3 pasadas, estándar DoD)
+Name[fr]=Déchiqueter (3 passes, norme DoD)
+Name[de]=Schreddern (3 Durchgänge, DoD-Standard)
+Icon=edit-delete-shred
+Exec=sh -c 'if kdialog --yesno "PERMANENTLY DESTROY selected files with 3-pass overwrite? This CANNOT be undone."; then shred -vfz -n 3 %F && rm -rf %F && kdialog --passivepopup "Files permanently destroyed" 3; fi'

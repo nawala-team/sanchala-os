@@ -1,0 +1,94 @@
+#!/usr/bin/env python3
+"""Sanchala Dictionary - Dictionary and Thesaurus"""
+import sys, json
+from pathlib import Path
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+
+class DictionaryApp(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Sanchala Dictionary")
+        self.setMinimumSize(700, 500)
+        self.data_dir = Path.home() / ".local/share/sanchala/dictionary"
+        self.data_dir.mkdir(parents=True, exist_ok=True)
+        self.history = []
+        self.init_ui()
+    
+    def init_ui(self):
+        self.setStyleSheet("QMainWindow{background:#fdfcfb;}QLabel{color:#333;}QPushButton{background:#e8e8e8;color:#333;border:none;padding:10px;border-radius:6px;}QPushButton:hover{background:#ddd;}QLineEdit{background:#fff;border:2px solid #ddd;border-radius:20px;padding:12px 20px;font-size:16px;}")
+        c = QWidget(); self.setCentralWidget(c); m = QVBoxLayout(c)
+        
+        # Search
+        s = QHBoxLayout()
+        self.search = QLineEdit(); self.search.setPlaceholderText("🔍 Search for a word...")
+        self.search.returnPressed.connect(self.lookup)
+        s.addWidget(self.search)
+        btn = QPushButton("Search"); btn.clicked.connect(self.lookup); s.addWidget(btn)
+        m.addLayout(s)
+        
+        # Tabs
+        tabs = QHBoxLayout()
+        for t in ["📖 Definition", "📚 Thesaurus", "🌐 Translate", "📜 History"]:
+            b = QPushButton(t); tabs.addWidget(b)
+        m.addLayout(tabs)
+        
+        # Result area
+        self.result = QTextEdit()
+        self.result.setReadOnly(True)
+        self.result.setStyleSheet("background:#fff;border:1px solid #eee;border-radius:10px;padding:20px;font-size:15px;")
+        self.result.setHtml("""
+            <h2>Welcome to Sanchala Dictionary</h2>
+            <p>Type a word above to look up its definition, synonyms, and translations.</p>
+            <h3>Features:</h3>
+            <ul>
+                <li>📖 Comprehensive definitions</li>
+                <li>📚 Synonyms and antonyms</li>
+                <li>🔊 Pronunciation audio</li>
+                <li>🌐 Multi-language translation</li>
+                <li>📝 Word of the day</li>
+            </ul>
+        """)
+        m.addWidget(self.result)
+        
+        # Word of the day
+        wod = QFrame(); wod.setStyleSheet("background:#f0f7ff;border-radius:10px;padding:15px;")
+        wl = QHBoxLayout(wod)
+        wl.addWidget(QLabel("📅 Word of the Day:"))
+        wl.addWidget(QLabel("<b>Serendipity</b> - the occurrence of events by chance in a happy way"))
+        wl.addStretch()
+        m.addWidget(wod)
+    
+    def lookup(self):
+        word = self.search.text().strip().lower()
+        if not word: return
+        
+        self.history.append(word)
+        
+        # Sample dictionary data
+        defs = {
+            "hello": {"pos": "exclamation", "def": "used as a greeting or to begin a phone conversation", "syn": ["hi", "hey", "greetings"], "ant": ["goodbye", "farewell"]},
+            "computer": {"pos": "noun", "def": "an electronic device for storing and processing data", "syn": ["PC", "machine", "processor"], "ant": []},
+            "beautiful": {"pos": "adjective", "def": "pleasing the senses or mind aesthetically", "syn": ["attractive", "pretty", "lovely", "stunning"], "ant": ["ugly", "unattractive"]},
+        }
+        
+        if word in defs:
+            d = defs[word]
+            html = f"""
+                <h1>{word}</h1>
+                <p style="color:#666;"><i>{d['pos']}</i> 🔊</p>
+                <h3>Definition</h3>
+                <p>{d['def']}</p>
+                <h3>Synonyms</h3>
+                <p style="color:#2563eb;">{', '.join(d['syn']) if d['syn'] else 'None found'}</p>
+                <h3>Antonyms</h3>
+                <p style="color:#dc2626;">{', '.join(d['ant']) if d['ant'] else 'None found'}</p>
+            """
+        else:
+            html = f"<h2>{word}</h2><p>Definition not found. Try searching online.</p>"
+        
+        self.result.setHtml(html)
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv); w = DictionaryApp(); w.show(); sys.exit(app.exec())

@@ -1,0 +1,36 @@
+.TH SANCHALA-ACCENT-COLOR 1 "2024" "Sanchala OS" "User Commands"
+.SH NAME
+sanchala-accent-color \- System-wide accent color customization
+.SH SYNOPSIS
+.B sanchala-accent-color
+[\fIcommand\fR] [\fIcolor\fR]
+.SH DESCRIPTION
+Set a system-wide accent color that applies across KDE Plasma and GTK applications.
+.SH COMMANDS
+.TP
+.B set \fIcolor\fR
+Set accent color (preset name or #RRGGBB hex)
+.TP
+.B presets
+List available color presets
+.TP
+.B current
+Show current accent color
+.TP
+.B auto \fIon|off\fR
+Enable/disable automatic color from wallpaper
+.SH PRESETS
+blue, purple, pink, red, orange, yellow, green, teal, cyan, graphite
+.SH EXAMPLES
+.TP
+Set blue accent:
+.B sanchala-accent-color set blue
+.TP
+Set custom color:
+.B sanchala-accent-color set "#e91e63"
+.SH FILES
+.TP
+.I ~/.config/sanchala/accent-color/config.json
+Configuration file
+.SH AUTHOR
+Sanchala OS Team

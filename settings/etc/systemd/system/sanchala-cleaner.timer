@@ -1,0 +1,21 @@
+# Sanchala Cleaner - Weekly Automatic Cleanup Timer
+# /etc/systemd/system/sanchala-cleaner.timer
+# SPDX-License-Identifier: GPL-3.0
+
+[Unit]
+Description=Weekly Sanchala OS System Maintenance
+Documentation=man:sanchala-cleaner(8)
+
+[Timer]
+# Run weekly on Sunday at 3:00 AM
+OnCalendar=Sun *-*-* 03:00:00
+# Add randomized delay up to 1 hour to avoid thundering herd
+RandomizedDelaySec=1h
+# Run on boot if last scheduled time was missed
+Persistent=true
+# Only run when system is idle
+OnBootSec=15min
+AccuracySec=1h
+
+[Install]
+WantedBy=timers.target

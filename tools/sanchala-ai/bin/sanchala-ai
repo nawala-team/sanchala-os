@@ -1,0 +1,111 @@
+#!/usr/bin/env python3
+"""Sanchala AI - Command Line Interface"""
+
+import os
+import sys
+import json
+import argparse
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent.parent / "lib"))
+
+def get_daemon():
+    from sanchala_aid import SanchalaAIDaemon
+    return SanchalaAIDaemon()
+
+def cmd_chat(args):
+    daemon = get_daemon()
+    if not daemon.ollama.is_available():
+        print("Error: Ollama not running. Start: systemctl --user start ollama")
+        sys.exit(1)
+    
+    prompt = " ".join(args.prompt) if args.prompt else None
+    
+    if args.interactive or not prompt:
+        print(f"Sanchala AI ({daemon.ollama.model}) - type 'exit' to quit\n")
+        while True:
+            try:
+                user_input = input("🧑 You: ").strip()
+                if user_input.lower() in ('exit', 'quit'):
+                    break
+                if not user_input:
+                    continue
+                print("🤖 AI: ", end="", flush=True)
+                result = json.loads(daemon.chat(user_input))
+                print(result.get("response", result.get("error", "")))
+            except (KeyboardInterrupt, EOFError):
+                break
+    else:
+        result = json.loads(daemon.chat(prompt))
+        if args.json:
+            print(json.dumps(result, indent=2))
+        else:
+            print(result.get("response", result.get("error", "")))
+
+def cmd_ocr(args):
+    daemon = get_daemon()
+    if not daemon.ocr.is_available():
+        print("Error: Install tesseract: sudo pacman -S tesseract")
+        sys.exit(1)
+    if not Path(args.image).exists():
+        print(f"Error: File not found: {args.image}")
+        sys.exit(1)
+    
+    result = json.loads(daemon.ocr_scan(args.image, args.lang or ""))
+    if args.json:
+        print(json.dumps(result, indent=2))
+    elif args.output:
+        Path(args.output).write_text(result.get("text", ""))
+        print(f"Saved to: {args.output}")
+    else:
+        print(result.get("text", result.get("error", "")))
+
+def cmd_status(args):
+    daemon = get_daemon()
+    status = json.loads(daemon.get_status())
+    if args.json:
+        print(json.dumps(status, indent=2))
+    else:
+        print("Sanchala AI Status\n" + "=" * 30)
+        print(f"Ollama:    {'✓' if status['ollama_available'] else '✗'} {status['ollama_model']}")
+        print(f"Tesseract: {'✓' if status['tesseract_available'] else '✗'}")
+
+def cmd_models(args):
+    daemon = get_daemon()
+    if args.pull:
+        os.system(f"ollama pull {args.pull}")
+    else:
+        for m in daemon.ollama.list_models():
+            print(f"  • {m}")
+
+def main():
+    parser = argparse.ArgumentParser(prog="sanchala-ai", description="Local AI assistant")
+    parser.add_argument("--json", action="store_true")
+    sub = parser.add_subparsers(dest="cmd")
+    
+    p = sub.add_parser("chat", help="Chat with AI")
+    p.add_argument("prompt", nargs="*")
+    p.add_argument("-i", "--interactive", action="store_true")
+    p.set_defaults(func=cmd_chat)
+    
+    p = sub.add_parser("ocr", help="Extract text from image")
+    p.add_argument("image")
+    p.add_argument("-l", "--lang")
+    p.add_argument("-o", "--output")
+    p.set_defaults(func=cmd_ocr)
+    
+    p = sub.add_parser("status", help="Show status")
+    p.set_defaults(func=cmd_status)
+    
+    p = sub.add_parser("models", help="Manage models")
+    p.add_argument("--pull", metavar="MODEL")
+    p.set_defaults(func=cmd_models)
+    
+    args = parser.parse_args()
+    if hasattr(args, 'func'):
+        args.func(args)
+    else:
+        parser.print_help()
+
+if __name__ == "__main__":
+    main()

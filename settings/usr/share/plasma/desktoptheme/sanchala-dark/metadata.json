@@ -1,0 +1,19 @@
+{
+    "KPlugin": {
+        "Authors": [
+            {
+                "Email": "team@sanchala.org",
+                "Name": "Sanchala OS Team"
+            }
+        ],
+        "Category": "Plasma Theme",
+        "Description": "The official Sanchala OS dark theme with modern blur effects and OLED-friendly colors",
+        "EnabledByDefault": false,
+        "Id": "sanchala-dark",
+        "License": "GPL-3.0+",
+        "Name": "Sanchala Dark",
+        "Version": "1.0",
+        "Website": "https://sanchala.org"
+    },
+    "X-Plasma-API": "5.0"
+}

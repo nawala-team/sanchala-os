@@ -1,0 +1,10 @@
+{
+    "name": "Sanchala Expense Tracker",
+    "version": "2.0.0",
+    "description": "Personal finance manager",
+    "category": "Productivity",
+    "icon": "💰",
+    "launch": "./expense-tracker.sh",
+    "author": "Sanchala OS",
+    "features": ["Track expenses", "Income tracking", "Category breakdown", "Monthly summary", "Budget setting"]
+}

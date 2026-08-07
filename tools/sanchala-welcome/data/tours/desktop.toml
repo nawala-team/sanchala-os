@@ -1,0 +1,64 @@
+# Desktop Essentials Tour
+[tour]
+id = "desktop"
+name = "Desktop Essentials"
+description = "Learn the basics of Sanchala OS desktop"
+estimated_minutes = 3
+
+[[steps]]
+id = "welcome"
+title = "Welcome to Your Desktop"
+description = "This is your Sanchala OS desktop. Let's explore the key areas."
+target = { type = "fullscreen" }
+position = "center"
+
+[[steps]]
+id = "panel"
+title = "The Top Panel"
+description = "Quick access to system status, notifications, and the clock. Click the clock for calendar and events."
+target = { type = "panel", name = "top" }
+position = "bottom"
+
+[[steps]]
+id = "app-menu"
+title = "Application Menu"
+description = "Click here or press the Super key to open the app launcher. Search for any app or file."
+target = { type = "widget", id = "app-menu" }
+position = "bottom"
+action = { type = "click", target = "app-menu" }
+
+[[steps]]
+id = "dock"
+title = "The Dock"
+description = "Your favorite apps live here. Drag apps to add them, right-click to remove."
+target = { type = "panel", name = "dock" }
+position = "top"
+
+[[steps]]
+id = "system-tray"
+title = "System Tray"
+description = "Network, sound, battery, and more. Click icons for quick settings."
+target = { type = "widget", id = "system-tray" }
+position = "bottom"
+
+[[steps]]
+id = "workspaces"
+title = "Virtual Workspaces"
+description = "Organize your work with multiple desktops. Press Super+1/2/3 to switch."
+target = { type = "widget", id = "pager" }
+position = "bottom"
+
+[[steps]]
+id = "files"
+title = "File Manager"
+description = "Dolphin is your file manager. It supports tabs, split view, and cloud integration."
+target = { type = "fullscreen" }
+position = "center"
+action = { type = "open_app", app_id = "org.kde.dolphin" }
+
+[[steps]]
+id = "complete"
+title = "You're Ready!"
+description = "You now know the desktop basics. Explore more with the Security and Privacy tours."
+target = { type = "fullscreen" }
+position = "center"

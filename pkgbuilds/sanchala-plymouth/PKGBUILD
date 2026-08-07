@@ -1,0 +1,33 @@
+# Maintainer: Sanchala Team <dev@sanchala.id>
+
+pkgname=sanchala-plymouth
+pkgver=1.0.0
+pkgrel=1
+pkgdesc='Sanchala OS Plymouth boot splash theme'
+arch=('any')
+url='https://sanchala.id'
+license=('GPL3')
+groups=('sanchala')
+depends=('plymouth')
+
+package() {
+    # Install Plymouth theme
+    install -dm755 "$pkgdir/usr/share/plymouth/themes/sanchala"
+    
+    # Copy theme files
+    cp -r "$srcdir/plymouth-theme/"* "$pkgdir/usr/share/plymouth/themes/sanchala/"
+    
+    # Install theme descriptor
+    install -Dm644 "$srcdir/sanchala.plymouth" \
+        "$pkgdir/usr/share/plymouth/themes/sanchala/sanchala.plymouth"
+    
+    # Set as default theme
+    install -dm755 "$pkgdir/etc/plymouth"
+    echo "[Daemon]" > "$pkgdir/etc/plymouth/plymouthd.conf"
+    echo "Theme=sanchala" >> "$pkgdir/etc/plymouth/plymouthd.conf"
+}
+
+post_install() {
+    plymouth-set-default-theme sanchala 2>/dev/null || true
+    echo ">>> Rebuild initramfs: mkinitcpio -P"
+}

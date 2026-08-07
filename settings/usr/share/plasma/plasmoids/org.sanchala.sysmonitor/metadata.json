@@ -1,0 +1,25 @@
+{
+    "KPlugin": {
+        "Id": "org.sanchala.sysmonitor",
+        "Name": "Sanchala System Monitor",
+        "Description": "Real-time CPU, memory, and network monitoring widget",
+        "Icon": "utilities-system-monitor",
+        "Authors": [
+            {
+                "Name": "Sanchala Team",
+                "Email": "team@sanchala.id"
+            }
+        ],
+        "Category": "System Information",
+        "License": "GPL-3.0",
+        "Version": "1.0.0",
+        "Website": "https://sanchala.id"
+    },
+    "X-Plasma-API": "declarativeappletscript",
+    "X-Plasma-MainScript": "ui/main.qml",
+    "KPackageStructure": "Plasma/Applet",
+    "X-Sanchala-Permissions": [
+        "system-info"
+    ],
+    "X-Sanchala-MinVersion": "1.0"
+}

@@ -1,0 +1,125 @@
+# ============================================
+# SANCHALA OS - KDE Plasma Desktop Configuration
+# ============================================
+# macOS-style layout with top panel and dock
+# ============================================
+
+[ActionPlugins][0]
+MiddleButton;NoModifier=org.kde.paste
+RightButton;NoModifier=org.kde.contextmenu
+
+[ActionPlugins][1]
+RightButton;NoModifier=org.kde.contextmenu
+
+[Containments][1]
+activityId=
+formfactor=0
+immutability=1
+lastScreen=0
+location=0
+plugin=org.kde.plasma.folder
+wallpaperplugin=org.kde.image
+
+[Containments][1][Wallpaper][org.kde.image][General]
+Image=/usr/share/wallpapers/sanchala/contents/images/default.png
+PreviewImage=/usr/share/wallpapers/sanchala/contents/images/default.png
+
+# ============================================
+# TOP PANEL (macOS-style menu bar)
+# ============================================
+[Containments][2]
+activityId=
+formfactor=2
+immutability=1
+lastScreen=0
+location=3
+plugin=org.kde.panel
+
+[Containments][2][Applets][3]
+immutability=1
+plugin=org.kde.plasma.kickoff
+
+[Containments][2][Applets][3][Configuration]
+PreloadWeight=100
+
+[Containments][2][Applets][3][Configuration][General]
+favoritesPortedToKAstats=true
+icon=start-here-sanchala
+
+[Containments][2][Applets][4]
+immutability=1
+plugin=org.kde.plasma.appmenu
+
+[Containments][2][Applets][4][Configuration][General]
+compactView=false
+
+[Containments][2][Applets][5]
+immutability=1
+plugin=org.kde.plasma.panelspacer
+
+[Containments][2][Applets][6]
+immutability=1
+plugin=org.kde.plasma.digitalclock
+
+[Containments][2][Applets][6][Configuration][Appearance]
+fontWeight=400
+showDate=true
+showSeconds=false
+
+[Containments][2][Applets][7]
+immutability=1
+plugin=org.kde.plasma.panelspacer
+
+[Containments][2][Applets][8]
+immutability=1
+plugin=org.kde.plasma.systemtray
+
+[Containments][2][Applets][8][Configuration]
+PreloadWeight=100
+SystrayContainmentId=9
+
+[Containments][2][General]
+AppletOrder=3;4;5;6;7;8
+
+# ============================================
+# SYSTEM TRAY
+# ============================================
+[Containments][9]
+activityId=
+formfactor=2
+immutability=1
+lastScreen=0
+location=3
+plugin=org.kde.plasma.private.systemtray
+
+[Containments][9][General]
+extraItems=org.kde.plasma.networkmanagement,org.kde.plasma.bluetooth,org.kde.plasma.volume,org.kde.plasma.battery,org.kde.plasma.notifications
+knownItems=org.kde.plasma.networkmanagement,org.kde.plasma.bluetooth,org.kde.plasma.volume,org.kde.plasma.battery,org.kde.plasma.notifications,org.kde.plasma.clipboard,org.kde.plasma.devicenotifier
+shownItems=org.kde.plasma.networkmanagement,org.kde.plasma.volume,org.kde.plasma.battery
+
+# ============================================
+# DOCK (Bottom - macOS-style)
+# ============================================
+[Containments][10]
+activityId=
+formfactor=2
+immutability=1
+lastScreen=0
+location=4
+plugin=org.kde.panel
+
+[Containments][10][Applets][11]
+immutability=1
+plugin=org.kde.plasma.icontasks
+
+[Containments][10][Applets][11][Configuration][General]
+launchers=applications:org.kde.dolphin.desktop,applications:brave-browser.desktop,applications:org.kde.konsole.desktop,applications:org.kde.kate.desktop,applications:org.kde.kontact.desktop,applications:libreoffice-startcenter.desktop,applications:systemsettings.desktop
+
+[Containments][10][General]
+AppletOrder=11
+
+[Containments][10][Configuration]
+panelVisibility=2
+
+[ScreenMapping]
+itemsOnDisabledScreens=

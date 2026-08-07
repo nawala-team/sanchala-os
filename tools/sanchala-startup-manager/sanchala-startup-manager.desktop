@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Sanchala Startup Manager
+Comment=Manage startup applications
+Exec=sanchala-startup-manager-gui
+Icon=system-run
+Type=Application
+Categories=Settings;System;
+Keywords=startup;autostart;boot;

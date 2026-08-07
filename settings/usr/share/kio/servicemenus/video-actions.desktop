@@ -1,0 +1,49 @@
+[Desktop Entry]
+Type=Service
+ServiceTypes=KonqPopupMenu/Plugin
+MimeType=video/mp4;video/x-matroska;video/webm;video/avi;video/quicktime;video/x-msvideo;
+Actions=convertMp4;convertWebm;extractAudio;trimVideo;createGif
+X-KDE-Priority=TopLevel
+X-KDE-StartupNotify=false
+X-KDE-Submenu=Video Actions
+X-KDE-Submenu-Icon=video-x-generic
+
+[Desktop Action convertMp4]
+Name=Convert to MP4 (H.264)
+Name[es]=Convertir a MP4 (H.264)
+Name[fr]=Convertir en MP4 (H.264)
+Name[de]=In MP4 konvertieren (H.264)
+Icon=video-mp4
+Exec=sh -c 'ffmpeg -i "%f" -c:v libx264 -crf 23 -c:a aac -b:a 192k "${f%%.*}.mp4" && kdialog --passivepopup "Conversion complete!" 3'
+
+[Desktop Action convertWebm]
+Name=Convert to WebM (VP9)
+Name[es]=Convertir a WebM (VP9)
+Name[fr]=Convertir en WebM (VP9)
+Name[de]=In WebM konvertieren (VP9)
+Icon=video-webm
+Exec=sh -c 'ffmpeg -i "%f" -c:v libvpx-vp9 -crf 30 -b:v 0 -c:a libopus "${f%%.*}.webm" && kdialog --passivepopup "Conversion complete!" 3'
+
+[Desktop Action extractAudio]
+Name=Extract Audio (MP3)
+Name[es]=Extraer audio (MP3)
+Name[fr]=Extraire l'audio (MP3)
+Name[de]=Audio extrahieren (MP3)
+Icon=audio-x-generic
+Exec=sh -c 'ffmpeg -i "%f" -vn -acodec libmp3lame -q:a 2 "${f%%.*}.mp3" && kdialog --passivepopup "Audio extracted!" 3'
+
+[Desktop Action trimVideo]
+Name=Trim Video...
+Name[es]=Recortar video...
+Name[fr]=Couper la vidéo...
+Name[de]=Video zuschneiden...
+Icon=edit-cut
+Exec=sh -c 'START=$(kdialog --inputbox "Start time (HH:MM:SS):" "00:00:00") && END=$(kdialog --inputbox "End time (HH:MM:SS):" "00:01:00") && ffmpeg -i "%f" -ss "$START" -to "$END" -c copy "${f%%.*}_trimmed.${f##*.}"'
+
+[Desktop Action createGif]
+Name=Create GIF (10 seconds)
+Name[es]=Crear GIF (10 segundos)
+Name[fr]=Créer un GIF (10 secondes)
+Name[de]=GIF erstellen (10 Sekunden)
+Icon=image-gif
+Exec=sh -c 'ffmpeg -i "%f" -t 10 -vf "fps=10,scale=480:-1:flags=lanczos" -loop 0 "${f%%.*}.gif" && kdialog --passivepopup "GIF created!" 3'

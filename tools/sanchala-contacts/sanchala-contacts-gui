@@ -1,0 +1,99 @@
+#!/usr/bin/env python3
+"""Sanchala Contacts - Contact Management"""
+import sys, json
+from pathlib import Path
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+
+class ContactsApp(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Sanchala Contacts")
+        self.setMinimumSize(700, 500)
+        self.data_dir = Path.home() / ".local/share/sanchala/contacts"
+        self.data_dir.mkdir(parents=True, exist_ok=True)
+        self.contacts = self.load()
+        self.init_ui()
+    
+    def init_ui(self):
+        self.setStyleSheet("QMainWindow{background:#1e1e2e;}QLabel{color:#cdd6f4;}QPushButton{background:#313244;color:#cdd6f4;border:none;padding:8px 16px;border-radius:6px;}QPushButton:hover{background:#45475a;}QLineEdit,QListWidget{background:#313244;color:#cdd6f4;border:none;border-radius:6px;padding:8px;}")
+        c = QWidget(); self.setCentralWidget(c); m = QHBoxLayout(c)
+        
+        left = QVBoxLayout()
+        srch = QLineEdit(); srch.setPlaceholderText("🔍 Search contacts...")
+        srch.textChanged.connect(self.filter); left.addWidget(srch)
+        self.lst = QListWidget(); self.lst.currentRowChanged.connect(self.show_contact)
+        left.addWidget(self.lst)
+        add = QPushButton("+ Add Contact"); add.setStyleSheet("background:#89b4fa;color:#1e1e2e;")
+        add.clicked.connect(self.add); left.addWidget(add)
+        m.addLayout(left, 1)
+        
+        self.detail = QWidget(); self.detail.setStyleSheet("background:#313244;border-radius:10px;")
+        d = QVBoxLayout(self.detail)
+        self.avatar = QLabel("👤"); self.avatar.setStyleSheet("font-size:64px;"); self.avatar.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.name_lbl = QLabel("Select a contact"); self.name_lbl.setStyleSheet("font-size:20px;font-weight:bold;"); self.name_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.phone_lbl = QLabel(""); self.phone_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.email_lbl = QLabel(""); self.email_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        d.addStretch(); d.addWidget(self.avatar); d.addWidget(self.name_lbl); d.addWidget(self.phone_lbl); d.addWidget(self.email_lbl)
+        btns = QHBoxLayout()
+        for txt in ["📞 Call", "✉️ Email", "✏️ Edit", "🗑️ Delete"]:
+            b = QPushButton(txt); btns.addWidget(b)
+            if "Delete" in txt: b.clicked.connect(self.delete)
+            if "Edit" in txt: b.clicked.connect(self.edit)
+        d.addLayout(btns); d.addStretch()
+        m.addWidget(self.detail, 2)
+        self.refresh()
+    
+    def load(self):
+        f = self.data_dir / "contacts.json"
+        return json.loads(f.read_text()) if f.exists() else []
+    
+    def save(self):
+        (self.data_dir / "contacts.json").write_text(json.dumps(self.contacts, indent=2))
+    
+    def refresh(self):
+        self.lst.clear()
+        for c in sorted(self.contacts, key=lambda x: x.get("name","")): self.lst.addItem(c.get("name","Unknown"))
+    
+    def filter(self, txt):
+        for i in range(self.lst.count()):
+            self.lst.item(i).setHidden(txt.lower() not in self.lst.item(i).text().lower())
+    
+    def show_contact(self, row):
+        if 0 <= row < len(self.contacts):
+            c = sorted(self.contacts, key=lambda x: x.get("name",""))[row]
+            self.name_lbl.setText(c.get("name","")); self.phone_lbl.setText(f"📞 {c.get('phone','')}"); self.email_lbl.setText(f"✉️ {c.get('email','')}")
+    
+    def add(self):
+        dlg = QDialog(self); dlg.setWindowTitle("Add Contact"); dlg.setMinimumWidth(300)
+        l = QFormLayout(dlg)
+        n = QLineEdit(); p = QLineEdit(); e = QLineEdit()
+        l.addRow("Name:", n); l.addRow("Phone:", p); l.addRow("Email:", e)
+        b = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok|QDialogButtonBox.StandardButton.Cancel)
+        b.accepted.connect(dlg.accept); b.rejected.connect(dlg.reject); l.addRow(b)
+        if dlg.exec() == QDialog.DialogCode.Accepted and n.text():
+            self.contacts.append({"name":n.text(),"phone":p.text(),"email":e.text()})
+            self.save(); self.refresh()
+    
+    def edit(self):
+        row = self.lst.currentRow()
+        if row < 0: return
+        c = sorted(self.contacts, key=lambda x: x.get("name",""))[row]
+        dlg = QDialog(self); dlg.setWindowTitle("Edit Contact"); l = QFormLayout(dlg)
+        n = QLineEdit(c.get("name","")); p = QLineEdit(c.get("phone","")); e = QLineEdit(c.get("email",""))
+        l.addRow("Name:", n); l.addRow("Phone:", p); l.addRow("Email:", e)
+        b = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok|QDialogButtonBox.StandardButton.Cancel)
+        b.accepted.connect(dlg.accept); b.rejected.connect(dlg.reject); l.addRow(b)
+        if dlg.exec() == QDialog.DialogCode.Accepted:
+            idx = self.contacts.index(c); self.contacts[idx] = {"name":n.text(),"phone":p.text(),"email":e.text()}
+            self.save(); self.refresh()
+    
+    def delete(self):
+        row = self.lst.currentRow()
+        if row >= 0:
+            c = sorted(self.contacts, key=lambda x: x.get("name",""))[row]
+            self.contacts.remove(c); self.save(); self.refresh()
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv); w = ContactsApp(); w.show(); sys.exit(app.exec())

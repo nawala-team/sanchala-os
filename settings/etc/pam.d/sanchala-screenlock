@@ -1,0 +1,23 @@
+# ============================================================================
+# SANCHALA OS - Screen Lock Authentication
+# ============================================================================
+# Quick unlock for screen lock (optimized for speed like Touch ID)
+# ============================================================================
+
+# Fingerprint first - instant unlock
+auth        sufficient    pam_fprintd.so max_tries=5 timeout=30
+
+# FIDO2 key
+auth        sufficient    pam_u2f.so cue authfile=/etc/sanchala/identity/u2f_keys
+
+# Password fallback
+auth        required      pam_unix.so try_first_pass nullok
+
+# Account
+account     include       system-auth
+
+# No password change from lock screen
+password    required      pam_deny.so
+
+# Session
+session     include       system-auth

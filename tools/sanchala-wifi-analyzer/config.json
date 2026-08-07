@@ -1,0 +1,33 @@
+{
+  "name": "sanchala-wifi-analyzer",
+  "version": "1.0.0",
+  "description": "WiFi network analysis and optimization tool",
+  "author": "Sanchala OS Team",
+  "license": "GPL-3.0",
+  "category": "Network",
+  "settings": {
+    "scanInterval": 5000,
+    "showHiddenNetworks": true,
+    "showSignalStrength": true,
+    "showChannelOverlap": true,
+    "bands": ["2.4GHz", "5GHz", "6GHz"],
+    "signalUnit": "dBm",
+    "autoRefresh": true
+  },
+  "analysis": {
+    "channelRecommendation": true,
+    "interferenceDetection": true,
+    "securityAudit": true,
+    "speedTest": true
+  },
+  "display": {
+    "graphType": "spectrum",
+    "colorScheme": "signal-strength",
+    "sortBy": "signal",
+    "groupByBand": true
+  },
+  "export": {
+    "formats": ["csv", "json", "pdf"],
+    "includeLocation": false
+  }
+}

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Bandwidth Limiter
+Comment=Control network bandwidth usage per application
+Exec=sanchala-bandwidth-limiter
+Icon=network-transmit-receive
+Terminal=false
+Type=Application
+Categories=Network;System;Settings;
+Keywords=bandwidth;limit;throttle;qos;traffic;
+StartupNotify=true

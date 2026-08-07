@@ -1,0 +1,130 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0
+# Sanchala Sound Themes - Manage system sound themes
+"""Configure system sounds, notifications, and event sounds"""
+
+import sys, json, argparse, subprocess
+from pathlib import Path
+
+VERSION = "1.0.0"
+CONFIG_DIR = Path.home() / ".config" / "sanchala" / "sounds"
+SOUND_DIRS = [Path("/usr/share/sounds"), Path.home() / ".local/share/sounds"]
+
+class SoundConfig:
+    def __init__(self):
+        CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+        self.file = CONFIG_DIR / "config.json"
+        self.data = self._load()
+    
+    def _load(self):
+        defaults = {"theme": "freedesktop", "enabled": True, "volume": 80,
+                    "events": {"notification": True, "login": True, "logout": True,
+                              "window": False, "button": False}}
+        if self.file.exists():
+            try: defaults.update(json.load(open(self.file)))
+            except: pass
+        return defaults
+    
+    def save(self):
+        with open(self.file, 'w') as f: json.dump(self.data, f, indent=2)
+
+def get_themes():
+    themes = []
+    for d in SOUND_DIRS:
+        if d.exists():
+            for t in d.iterdir():
+                if t.is_dir() and (t / "index.theme").exists():
+                    themes.append(t.name)
+    return sorted(set(themes))
+
+def play_sound(sound: str):
+    cmds = [
+        f"paplay /usr/share/sounds/freedesktop/stereo/{sound}.oga",
+        f"aplay /usr/share/sounds/freedesktop/stereo/{sound}.wav",
+        f"canberra-gtk-play -i {sound}",
+    ]
+    for cmd in cmds:
+        if subprocess.run(cmd, shell=True, capture_output=True).returncode == 0:
+            return True
+    return False
+
+def cmd_list(args):
+    themes = get_themes()
+    config = SoundConfig()
+    
+    print(f"\n🔊 Sound Themes\n" + "━"*35)
+    for t in themes:
+        marker = "●" if t == config.data["theme"] else "○"
+        print(f"  {marker} {t}")
+    print()
+    return 0
+
+def cmd_set(args):
+    config = SoundConfig()
+    config.data["theme"] = args.theme
+    config.save()
+    # Apply via gsettings
+    subprocess.run(["gsettings", "set", "org.gnome.desktop.sound", "theme-name", args.theme], capture_output=True)
+    print(f"✅ Sound theme: {args.theme}")
+    return 0
+
+def cmd_enable(args):
+    config = SoundConfig()
+    config.data["enabled"] = True
+    config.save()
+    subprocess.run(["gsettings", "set", "org.gnome.desktop.sound", "event-sounds", "true"], capture_output=True)
+    print("✅ Sound effects enabled")
+    return 0
+
+def cmd_disable(args):
+    config = SoundConfig()
+    config.data["enabled"] = False
+    config.save()
+    subprocess.run(["gsettings", "set", "org.gnome.desktop.sound", "event-sounds", "false"], capture_output=True)
+    print("✅ Sound effects disabled")
+    return 0
+
+def cmd_test(args):
+    sound = args.sound or "message"
+    print(f"🔊 Playing: {sound}")
+    if not play_sound(sound):
+        print("❌ Could not play sound")
+        return 1
+    return 0
+
+def cmd_volume(args):
+    config = SoundConfig()
+    config.data["volume"] = args.level
+    config.save()
+    print(f"✅ Sound volume: {args.level}%")
+    return 0
+
+def cmd_status(args):
+    config = SoundConfig()
+    print(f"\n🔊 Sound Settings\n" + "━"*35)
+    print(f"  Theme:   {config.data['theme']}")
+    print(f"  Enabled: {'Yes' if config.data['enabled'] else 'No'}")
+    print(f"  Volume:  {config.data['volume']}%")
+    print()
+    return 0
+
+def main():
+    p = argparse.ArgumentParser(prog="sanchala-sound-themes", description="🔊 Sound Themes")
+    p.add_argument("--version", action="version", version=f"%(prog)s {VERSION}")
+    sub = p.add_subparsers(dest="cmd")
+    
+    sub.add_parser("list", help="List themes")
+    s = sub.add_parser("set", help="Set theme"); s.add_argument("theme")
+    sub.add_parser("enable", help="Enable sounds")
+    sub.add_parser("disable", help="Disable sounds")
+    s = sub.add_parser("test", help="Test sound"); s.add_argument("sound", nargs="?")
+    s = sub.add_parser("volume", help="Set volume"); s.add_argument("level", type=int)
+    sub.add_parser("status", help="Show status")
+    
+    args = p.parse_args()
+    cmds = {"list": cmd_list, "set": cmd_set, "enable": cmd_enable, "disable": cmd_disable,
+            "test": cmd_test, "volume": cmd_volume, "status": cmd_status}
+    if args.cmd in cmds: return cmds[args.cmd](args)
+    return cmd_status(args)
+
+if __name__ == "__main__": sys.exit(main())

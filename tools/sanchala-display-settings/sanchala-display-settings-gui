@@ -1,0 +1,110 @@
+#!/usr/bin/env python3
+"""Sanchala Display Settings GUI"""
+import sys, subprocess
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+
+class DisplaySettings(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Sanchala Display Settings")
+        self.setMinimumSize(500, 400)
+        self.displays = {}
+        self.init_ui()
+        self.load_displays()
+    
+    def init_ui(self):
+        w = QWidget()
+        self.setCentralWidget(w)
+        layout = QVBoxLayout(w)
+        
+        # Display selector
+        disp_row = QHBoxLayout()
+        disp_row.addWidget(QLabel("Display:"))
+        self.display_combo = QComboBox()
+        self.display_combo.currentTextChanged.connect(self.on_display_changed)
+        disp_row.addWidget(self.display_combo, 1)
+        layout.addLayout(disp_row)
+        
+        # Resolution
+        res_row = QHBoxLayout()
+        res_row.addWidget(QLabel("Resolution:"))
+        self.res_combo = QComboBox()
+        res_row.addWidget(self.res_combo, 1)
+        layout.addLayout(res_row)
+        
+        # Brightness
+        bright_row = QHBoxLayout()
+        bright_row.addWidget(QLabel("Brightness:"))
+        self.brightness = QSlider(Qt.Orientation.Horizontal)
+        self.brightness.setRange(10, 100)
+        self.brightness.setValue(100)
+        self.bright_lbl = QLabel("100%")
+        self.brightness.valueChanged.connect(lambda v: self.bright_lbl.setText(f"{v}%"))
+        bright_row.addWidget(self.brightness, 1)
+        bright_row.addWidget(self.bright_lbl)
+        layout.addLayout(bright_row)
+        
+        # Rotation
+        rot_row = QHBoxLayout()
+        rot_row.addWidget(QLabel("Rotation:"))
+        self.rotation = QComboBox()
+        self.rotation.addItems(["Normal", "Left", "Right", "Inverted"])
+        rot_row.addWidget(self.rotation, 1)
+        layout.addLayout(rot_row)
+        
+        # Night Light
+        self.nightlight = QCheckBox("Night Light (reduce blue light)")
+        layout.addWidget(self.nightlight)
+        
+        layout.addStretch()
+        
+        # Apply button
+        apply_btn = QPushButton("Apply")
+        apply_btn.clicked.connect(self.apply_settings)
+        layout.addWidget(apply_btn)
+    
+    def load_displays(self):
+        try:
+            out = subprocess.check_output(["xrandr", "--query"], text=True)
+            current = None
+            for line in out.split("\n"):
+                if " connected" in line:
+                    parts = line.split()
+                    current = parts[0]
+                    self.displays[current] = []
+                    self.display_combo.addItem(current)
+                elif current and line.strip() and line[0] == " ":
+                    mode = line.split()[0]
+                    if "x" in mode:
+                        self.displays[current].append(mode)
+        except: pass
+    
+    def on_display_changed(self, name):
+        self.res_combo.clear()
+        if name in self.displays:
+            self.res_combo.addItems(self.displays[name])
+    
+    def apply_settings(self):
+        display = self.display_combo.currentText()
+        if not display:
+            return
+        # Resolution
+        res = self.res_combo.currentText()
+        if res:
+            subprocess.run(["xrandr", "--output", display, "--mode", res])
+        # Brightness
+        bright = self.brightness.value() / 100.0
+        subprocess.run(["xrandr", "--output", display, "--brightness", str(bright)])
+        # Rotation
+        rot_map = {"Normal": "normal", "Left": "left", "Right": "right", "Inverted": "inverted"}
+        rot = rot_map.get(self.rotation.currentText(), "normal")
+        subprocess.run(["xrandr", "--output", display, "--rotate", rot])
+        QMessageBox.information(self, "Applied", "Display settings applied.")
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    w = DisplaySettings()
+    w.show()
+    sys.exit(app.exec())

@@ -1,0 +1,136 @@
+# ============================================================================
+# SANCHALA OS - KOrganizer Configuration
+# ============================================================================
+# Calendar & Task Management - Apple Calendar-style experience
+# ============================================================================
+
+[General]
+# Active calendar view on startup: day, week, month, agenda, todo
+ActiveView=month
+
+# Show menu bar
+ShowMenuBar=true
+
+# Confirm deletes
+Confirm Deletes=true
+
+[Time & Date]
+# First day of week: 0=Sunday, 1=Monday
+WeekStartDay=1
+
+# Default event duration (minutes)
+DefaultDuration=60
+
+# Working hours
+WorkingHoursStart=09:00
+WorkingHoursEnd=17:00
+
+# Working days (bitmask: Mon=1, Tue=2, Wed=4, Thu=8, Fri=16, Sat=32, Sun=64)
+WorkingDays=31
+
+# Time zone
+TimeZoneId=
+
+# Use system timezone
+UseSystemTimeZone=true
+
+[Views]
+# Month view settings
+MonthViewShowWeekNumbers=true
+MonthViewShowTodos=true
+
+# Agenda view hour height (pixels)
+AgendaViewHourSize=60
+
+# Color coding: category, resource, tag
+ColorCoding=category
+
+# Show current time indicator
+ShowCurrentTimeIndicator=true
+
+# Highlight working hours
+HighlightWorkingHours=true
+
+# Show weekends
+ShowWeekends=true
+
+[Colors]
+# Event colors by category
+AgendaBgColor=255,255,255
+WorkingHoursColor=240,240,255
+TodoDueColor=255,200,200
+HolidayColor=255,240,240
+
+[Reminders]
+# Enable reminders
+EnableReminders=true
+
+# Default reminder time before event (minutes)
+DefaultReminderTime=15
+
+# Reminder methods: popup, sound, both
+ReminderMethod=both
+
+# Snooze duration (minutes)
+SnoozeDuration=5
+
+# Play sound
+PlaySound=true
+SoundFile=/usr/share/sounds/sanchala/notifications/calendar.ogg
+
+[FreeBusy]
+# Enable free/busy publishing
+EnableFreeBusy=false
+
+# Free/busy publish URL (CalDAV servers support this)
+FreeBusyPublishUrl=
+
+# Retrieve free/busy from contacts
+RetrieveFreeBusy=true
+
+[Import/Export]
+# Default export format: ical, vcal
+DefaultExportFormat=ical
+
+# Auto-import .ics files
+AutoImportICS=true
+
+# Ask before importing
+AskBeforeImport=true
+
+[Integration]
+# Integrate with system notifications
+UseSystemNotifications=true
+
+# Show events in Plasma calendar widget
+PlasmaIntegration=true
+
+# Enable keyboard shortcuts
+EnableShortcuts=true
+
+[Sync]
+# Auto-sync interval (minutes, 0=manual only)
+AutoSyncInterval=15
+
+# Sync on startup
+SyncOnStartup=true
+
+# Background sync
+BackgroundSync=true
+
+[Todo]
+# Show completed todos
+ShowCompletedTodos=false
+
+# Auto-archive completed after (days, 0=never)
+AutoArchiveAfter=30
+
+# Default priority (1-9, 5=medium)
+DefaultPriority=5
+
+# Due date reminder (days before)
+DueDateReminder=1
+
+[MainWindow]
+Height=700
+Width=1000

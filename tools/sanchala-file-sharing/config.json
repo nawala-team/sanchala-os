@@ -1,0 +1,26 @@
+{
+  "name": "sanchala-file-sharing",
+  "version": "1.0.0",
+  "description": "Network file sharing manager (SMB/NFS/WebDAV)",
+  "author": "Sanchala OS Team",
+  "category": "Network",
+  "settings": {
+    "smbEnabled": true,
+    "nfsEnabled": false,
+    "webdavEnabled": false,
+    "ftpEnabled": false,
+    "workgroup": "WORKGROUP",
+    "serverName": "sanchala-share",
+    "sharedFolders": [],
+    "guestAccess": false,
+    "maxConnections": 10,
+    "encryption": "auto",
+    "discoverable": true,
+    "protocols": {
+      "smb1": false,
+      "smb2": true,
+      "smb3": true
+    }
+  },
+  "permissions": ["network", "filesystem", "users"]
+}

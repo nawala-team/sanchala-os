@@ -1,0 +1,37 @@
+[package]
+name = "sanchala-privacy"
+version = "1.0.0"
+edition = "2021"
+authors = ["Sanchala Team <dev@sanchala.id>"]
+description = "Sanchala OS Privacy Dashboard and Controls"
+license = "GPL-3.0"
+repository = "https://github.com/dansiapa/sanchala-os"
+keywords = ["privacy", "linux", "sanchala", "telemetry"]
+categories = ["command-line-utilities", "os"]
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+toml = "0.8"
+log = "0.4"
+env_logger = "0.10"
+clap = { version = "4.0", features = ["derive"] }
+chrono = { version = "0.4", features = ["serde"] }
+rusqlite = { version = "0.30", features = ["bundled"] }
+dirs = "5.0"
+zbus = "4.0"
+tokio = { version = "1.0", features = ["full"] }
+notify-rust = "4"
+
+[profile.release]
+opt-level = 3
+lto = true
+strip = true
+
+[[bin]]
+name = "sanchala-privacy"
+path = "src/main.rs"
+
+[[bin]]
+name = "sanchala-privd"
+path = "src/daemon.rs"

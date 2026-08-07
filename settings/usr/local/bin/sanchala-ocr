@@ -1,0 +1,139 @@
+#!/bin/bash
+# ============================================
+# SANCHALA OS - Screenshot OCR Tool
+# ============================================
+# Extract text from screenshots using Tesseract
+# Usage: sanchala-ocr [image_file] [--clipboard]
+# ============================================
+
+set -euo pipefail
+
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/sanchala"
+TESSERACT_CONF="$CONFIG_DIR/ocr.conf"
+DEFAULT_LANG="eng"
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+usage() {
+    cat << EOF
+SANCHALA OS - Screenshot OCR Tool
+
+Usage: $(basename "$0") [OPTIONS] [IMAGE_FILE]
+
+Options:
+    -c, --clipboard     Copy extracted text to clipboard
+    -n, --notify        Show desktop notification
+    -l, --lang LANG     OCR language (default: eng)
+    -r, --region        Capture region for OCR
+    -o, --output FILE   Save text to file
+    -h, --help          Show this help
+
+Languages: eng, deu, fra, spa, jpn, chi_sim, chi_tra, kor, ara
+EOF
+    exit 0
+}
+
+check_deps() {
+    local missing=()
+    command -v tesseract >/dev/null 2>&1 || missing+=("tesseract")
+    command -v spectacle >/dev/null 2>&1 || missing+=("spectacle")
+    command -v wl-copy >/dev/null 2>&1 || missing+=("wl-clipboard")
+    
+    if [[ ${#missing[@]} -gt 0 ]]; then
+        echo -e "${RED}Error: Missing: ${missing[*]}${NC}" >&2
+        exit 1
+    fi
+}
+
+notify() {
+    local title="$1" message="$2" icon="${3:-accessories-text-editor}"
+    command -v notify-send >/dev/null 2>&1 && \
+        notify-send -i "$icon" -a "Sanchala OCR" "$title" "$message"
+}
+
+take_screenshot() {
+    local mode="$1"
+    local temp_file=$(mktemp --suffix=.png)
+    
+    case "$mode" in
+        region) spectacle -b -r -o "$temp_file" 2>/dev/null ;;
+        window) spectacle -b -a -o "$temp_file" 2>/dev/null ;;
+        *) spectacle -b -f -o "$temp_file" 2>/dev/null ;;
+    esac
+    
+    [[ -s "$temp_file" ]] && echo "$temp_file" || { rm -f "$temp_file"; return 1; }
+}
+
+do_ocr() {
+    local image="$1" lang="$2"
+    tesseract "$image" stdout -l "$lang" 2>/dev/null
+}
+
+main() {
+    local image_file="" copy_clipboard=false show_notify=false
+    local lang="$DEFAULT_LANG" take_shot=false shot_mode="full"
+    local output_file="" temp_files=()
+    
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -c|--clipboard) copy_clipboard=true; shift ;;
+            -n|--notify) show_notify=true; shift ;;
+            -l|--lang) lang="$2"; shift 2 ;;
+            -r|--region) take_shot=true; shot_mode="region"; shift ;;
+            -w|--window) take_shot=true; shot_mode="window"; shift ;;
+            -s|--screenshot) take_shot=true; shift ;;
+            -o|--output) output_file="$2"; shift 2 ;;
+            -h|--help) usage ;;
+            -*) echo -e "${RED}Unknown: $1${NC}" >&2; usage ;;
+            *) image_file="$1"; shift ;;
+        esac
+    done
+    
+    check_deps
+    
+    if [[ "$take_shot" == true ]]; then
+        echo -e "${BLUE}Taking screenshot...${NC}"
+        image_file=$(take_screenshot "$shot_mode") || {
+            [[ "$show_notify" == true ]] && notify "Cancelled" "Screenshot cancelled"
+            exit 0
+        }
+        temp_files+=("$image_file")
+    fi
+    
+    if [[ -z "$image_file" ]]; then
+        image_file=$(mktemp --suffix=.png)
+        temp_files+=("$image_file")
+        wl-paste -t image/png > "$image_file" 2>/dev/null || {
+            echo -e "${RED}Error: No image provided${NC}" >&2
+            rm -f "${temp_files[@]}"; exit 1
+        }
+    fi
+    
+    [[ ! -f "$image_file" ]] && { echo -e "${RED}File not found${NC}" >&2; exit 1; }
+    
+    echo -e "${BLUE}Extracting text ($lang)...${NC}"
+    local text=$(do_ocr "$image_file" "$lang")
+    
+    if [[ -z "${text// /}" ]]; then
+        echo -e "${YELLOW}No text found${NC}"
+        [[ "$show_notify" == true ]] && notify "OCR Complete" "No text found"
+        rm -f "${temp_files[@]}"; exit 0
+    fi
+    
+    [[ "$copy_clipboard" == true ]] && { echo -n "$text" | wl-copy; echo -e "${GREEN}✓ Copied to clipboard${NC}"; }
+    [[ -n "$output_file" ]] && { echo "$text" > "$output_file"; echo -e "${GREEN}✓ Saved: $output_file${NC}"; }
+    [[ "$show_notify" == true ]] && notify "OCR Complete" "${text:0:100}..."
+    
+    if [[ "$copy_clipboard" == false ]] && [[ -z "$output_file" ]]; then
+        echo -e "${GREEN}Extracted text:${NC}"
+        echo "$text"
+    fi
+    
+    rm -f "${temp_files[@]}"
+}
+
+main "$@"

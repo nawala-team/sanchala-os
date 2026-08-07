@@ -1,0 +1,127 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0
+# Sanchala QuickLook - macOS-style file preview with Space key
+"""Preview files quickly without opening applications"""
+
+import sys, json, argparse, subprocess, os, mimetypes
+from pathlib import Path
+
+VERSION = "1.0.0"
+
+PREVIEWERS = {
+    "image": ["feh", "--scale-down", "-B", "black"],
+    "video": ["mpv", "--pause", "--really-quiet", "--autofit=80%"],
+    "audio": ["mpv", "--pause", "--really-quiet", "--force-window"],
+    "pdf": ["zathura"],
+    "text": ["less"],
+    "office": ["libreoffice", "--view"],
+    "archive": ["file-roller"],
+    "markdown": ["glow"],
+}
+
+def get_file_type(path: Path) -> str:
+    mime, _ = mimetypes.guess_type(str(path))
+    if not mime: 
+        return "text" if path.suffix in ['.txt','.md','.json','.xml','.yml','.yaml','.sh','.py','.js','.c','.cpp','.h'] else "unknown"
+    if mime.startswith("image"): return "image"
+    if mime.startswith("video"): return "video"
+    if mime.startswith("audio"): return "audio"
+    if mime == "application/pdf": return "pdf"
+    if "office" in mime or "document" in mime: return "office"
+    if "zip" in mime or "tar" in mime or "archive" in mime: return "archive"
+    if mime.startswith("text") or mime == "application/json": return "text"
+    return "unknown"
+
+def preview_file(path: Path, file_type: str):
+    if file_type == "text" or file_type == "unknown":
+        # Built-in text preview
+        try:
+            content = path.read_text(errors='replace')[:5000]
+            lines = content.split('\n')
+            print(f"\n📄 {path.name}\n" + "━"*50)
+            for i, line in enumerate(lines[:40], 1):
+                print(f"{i:3} │ {line[:100]}")
+            if len(lines) > 40:
+                print(f"    │ ... ({len(lines) - 40} more lines)")
+            print()
+            return True
+        except: pass
+    
+    if file_type in PREVIEWERS:
+        cmd = PREVIEWERS[file_type] + [str(path)]
+        try:
+            subprocess.run(cmd, timeout=60)
+            return True
+        except FileNotFoundError:
+            pass
+    
+    # Fallback: try xdg-open
+    subprocess.run(["xdg-open", str(path)])
+    return True
+
+def cmd_preview(args):
+    path = Path(args.file).resolve()
+    if not path.exists():
+        print(f"❌ File not found: {args.file}")
+        return 1
+    
+    file_type = get_file_type(path)
+    
+    # Show file info header
+    stat = path.stat()
+    size = stat.st_size
+    if size > 1024*1024: size_str = f"{size/1024/1024:.1f} MB"
+    elif size > 1024: size_str = f"{size/1024:.1f} KB"
+    else: size_str = f"{size} B"
+    
+    print(f"\n👁️  QuickLook: {path.name}")
+    print(f"   Type: {file_type} | Size: {size_str}")
+    print("━"*50)
+    
+    preview_file(path, file_type)
+    return 0
+
+def cmd_info(args):
+    path = Path(args.file).resolve()
+    if not path.exists():
+        print(f"❌ File not found: {args.file}")
+        return 1
+    
+    stat = path.stat()
+    mime, _ = mimetypes.guess_type(str(path))
+    
+    print(f"\n📋 File Info: {path.name}\n" + "━"*40)
+    print(f"  Path:     {path}")
+    print(f"  Type:     {mime or 'unknown'}")
+    print(f"  Size:     {stat.st_size:,} bytes")
+    print(f"  Modified: {stat.st_mtime}")
+    print(f"  Mode:     {oct(stat.st_mode)[-3:]}")
+    print()
+    return 0
+
+def main():
+    p = argparse.ArgumentParser(prog="sanchala-quicklook", description="👁️ QuickLook")
+    p.add_argument("--version", action="version", version=f"%(prog)s {VERSION}")
+    sub = p.add_subparsers(dest="cmd")
+    
+    s = sub.add_parser("preview", help="Preview file")
+    s.add_argument("file")
+    
+    s = sub.add_parser("info", help="File info")
+    s.add_argument("file")
+    
+    # Direct file argument
+    p.add_argument("file", nargs="?")
+    
+    args = p.parse_args()
+    
+    if args.cmd == "preview": return cmd_preview(args)
+    if args.cmd == "info": return cmd_info(args)
+    if args.file: 
+        args_ns = argparse.Namespace(file=args.file)
+        return cmd_preview(args_ns)
+    
+    p.print_help()
+    return 0
+
+if __name__ == "__main__": sys.exit(main())

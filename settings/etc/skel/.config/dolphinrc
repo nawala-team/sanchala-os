@@ -1,0 +1,140 @@
+# ============================================
+# SANCHALA OS - Dolphin File Manager Settings
+# ============================================
+# macOS Finder-like experience with enhanced
+# productivity features and privacy defaults
+# ============================================
+
+[General]
+# Archive browsing without extraction
+BrowseThroughArchives=true
+# Confirm before closing multiple tabs
+ConfirmClosingMultipleTabs=true
+# Allow editing URL bar directly
+EditableUrl=true
+# Per-folder view settings (like Finder)
+GlobalViewProps=false
+# Remember window state
+ModifiedStartupSettings=false
+# New folders open in new tab
+OpenExternallyCalledFolderInNewTab=true
+# Show complete path for clarity
+ShowFullPath=true
+ShowFullPathInTitlebar=true
+# Helpful tooltips on hover
+ShowToolTips=true
+# Case-insensitive sorting (like Finder)
+SortingChoice=CaseInsensitiveSorting
+# Tab switching behavior
+UseTabForSwitchingSplitView=false
+Version=202
+ViewPropsTimestamp=2024,1,1,0,0,0
+# Filtering
+FilterBar=false
+# Show hidden files by default (toggle with Ctrl+H)
+ShowHiddenFiles=false
+# Home directory as default
+HomeUrl=file://$HOME
+# Remember last location
+RememberOpenedTabs=true
+# Split view settings
+SplitView=false
+
+[ContextMenu]
+# Show "Open With" submenu
+ShowOpenWith=true
+# Show "Copy To" / "Move To" submenus
+ShowCopyMoveMenu=true
+# Show "Delete" in context menu (not just Trash)
+ShowDeleteCommand=false
+
+[DetailsMode]
+# Expandable folder trees
+ExpandableFolders=true
+# Preview size in details view
+PreviewSize=22
+# Side padding for modern look
+SidePadding=4
+# Highlight entire row
+HighlightEntireRow=true
+
+[CompactMode]
+IconSize=32
+PreviewSize=32
+MaximumTextLines=1
+
+[IconsMode]
+# Icon size (64 = medium, like Finder)
+IconSize=64
+# Preview size for thumbnails
+PreviewSize=96
+# Text width under icons
+TextWidthIndex=2
+# Maximum text lines
+MaximumTextLines=2
+
+[KFileDialog Settings]
+Places Icons Auto-resize=false
+Places Icons Static Size=22
+
+[MainWindow]
+# Hide menu bar for clean look (F10 to show)
+MenuBar=Disabled
+# Lock toolbars
+ToolBarsMovable=Disabled
+# Sidebar width
+SidebarWidth=200
+
+[MainWindow][Toolbar mainToolBar]
+# Finder-like toolbar with icons only
+ToolButtonStyle=IconOnly
+
+[Open-with settings]
+CompletionMode=1
+History=
+
+[PlacesPanel]
+# Icons size in places panel
+IconSize=22
+
+[PreviewSettings]
+# Enable extensive preview plugins for rich thumbnails
+Plugins=appimagethumbnail,audiothumbnail,blenderthumbnail,comicbookthumbnail,cursorthumbnail,djvuthumbnail,ebookthumbnail,exrthumbnail,directorythumbnail,fontthumbnail,imagethumbnail,jaborathumbnail,kraborathumbnail,opaborathumbnail,moaborathumbnail,svgthumbnail,textthumbnail,windowsexethumbnail,windowsimagethumbnail,ffmpegthumbs,rawthumbnail,webarchivethumbnail,gaborathumbnail,markdownthumbnail
+
+[Search]
+# Search everywhere by default
+Location=Everywhere
+
+[FoldersPanel]
+# Show hidden folders in tree
+HiddenFilesShown=false
+# Limit folder depth for performance
+LimitFoldersPanelToHome=true
+
+[InformationPanel]
+# Date format
+DateFormat=ShortFormat
+# Show preview in info panel
+ShowPreview=true
+# Preview auto-play
+AutoPlayMedia=false
+
+[VersionControl]
+# Enable git integration
+enabledPlugins=Git
+
+[Notification Messages]
+# Confirm permanent deletion
+ConfirmDelete=true
+# Confirm empty trash
+ConfirmEmptyTrash=true
+
+[ContentDisplay]
+# Natural sorting (1, 2, 10 not 1, 10, 2)
+NaturalSorting=true
+# Directories first
+DirectoriesFirst=true
+# Hidden files last
+HiddenFilesLast=true
+# Sort case-insensitively
+CaseSensitiveSorting=false

@@ -1,0 +1,29 @@
+[Unit]
+Description=Mount Sanchala Cloud Storage (%i)
+After=network-online.target sanchala-cloudd.service
+Requires=sanchala-cloudd.service
+Wants=network-online.target
+
+[Service]
+Type=notify
+ExecStart=/usr/bin/rclone mount %i: %h/Cloud/%i \
+    --config=%h/.config/sanchala-cloud/rclone.conf \
+    --vfs-cache-mode=full \
+    --vfs-cache-max-age=24h \
+    --vfs-cache-max-size=10G \
+    --vfs-read-ahead=128M \
+    --buffer-size=64M \
+    --dir-cache-time=5m \
+    --poll-interval=1m \
+    --allow-other \
+    --daemon-timeout=10m
+ExecStop=/bin/fusermount -u %h/Cloud/%i
+Restart=on-failure
+RestartSec=30
+
+# Directories
+RuntimeDirectory=sanchala-cloud-%i
+CacheDirectory=sanchala-cloud-%i
+
+[Install]
+WantedBy=default.target

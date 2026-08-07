@@ -1,0 +1,155 @@
+.TH SANCHALA-DIAGNOSTICS 1 "2024" "Sanchala OS" "User Commands"
+.SH NAME
+sanchala-diagnostics \- macOS-style Activity Monitor and System Information
+.SH SYNOPSIS
+.B sanchala-diagnostics
+[\fICOMMAND\fR] [\fIOPTIONS\fR]
+.SH DESCRIPTION
+Sanchala Diagnostics provides comprehensive system monitoring and hardware
+information tools for Sanchala OS, similar to macOS Activity Monitor and
+System Information utilities.
+.SH COMMANDS
+.SS "System Overview"
+.TP
+.B overview
+Display complete system overview (default command)
+.TP
+.B summary
+Quick system health summary with status indicators
+.TP
+.B report
+Generate detailed system report
+.SS "Process Monitoring"
+.TP
+.B top
+Launch interactive system monitor (btop/htop/top)
+.TP
+.B processes \fR[\fISORT\fR]
+List processes sorted by cpu, mem, pid, or time
+.TP
+.B kill \fIPID\fR [\fISIGNAL\fR]
+Terminate process with optional signal (default: 15)
+.TP
+.B priority \fIPID\fR \fINICE\fR
+Set process priority (-20 to 19)
+.SS "CPU & Memory"
+.TP
+.B cpu
+CPU information, frequencies, and usage
+.TP
+.B memory
+Memory usage details and top consumers
+.TP
+.B swap
+Swap usage and configuration
+.TP
+.B load
+System load averages
+.SS "Disk & Storage"
+.TP
+.B disk
+Disk usage overview
+.TP
+.B smart \fR[\fIDEVICE\fR]
+SMART health status (requires smartmontools)
+.TP
+.B io
+Disk I/O statistics
+.TP
+.B mounts
+Mounted filesystems
+.TP
+.B partitions
+Partition layout
+.SS "Network"
+.TP
+.B network
+Network interface status
+.TP
+.B connections
+Active network connections
+.TP
+.B ports
+Open ports and listeners
+.TP
+.B ping \fIHOST\fR
+Connectivity test
+.TP
+.B traceroute \fIHOST\fR
+Network path trace
+.SS "Hardware"
+.TP
+.B hardware
+Complete hardware information
+.TP
+.B pci
+PCI devices
+.TP
+.B usb
+USB devices
+.TP
+.B sensors
+Temperature and fan sensors
+.TP
+.B battery
+Battery status (laptops)
+.SS "Diagnostics"
+.TP
+.B health
+System health check with thresholds
+.TP
+.B benchmark
+Quick system benchmark
+.TP
+.B logs \fR[\fISERVICE\fR]
+System logs viewer
+.SH OPTIONS
+.TP
+.B \-\-json
+Output in JSON format
+.TP
+.B \-\-export \fIFILE\fR
+Export report to file
+.TP
+.B \-h, \-\-help
+Show help message
+.TP
+.B \-\-version
+Show version information
+.SH EXAMPLES
+.TP
+Display system overview:
+.B sanchala-diagnostics
+.TP
+Check disk SMART status:
+.B sanchala-diagnostics smart /dev/sda
+.TP
+Test network connectivity:
+.B sanchala-diagnostics ping google.com
+.TP
+Export system report:
+.B sanchala-diagnostics report --export ~/report.txt
+.TP
+JSON output:
+.B sanchala-diagnostics overview --json
+.SH FILES
+.TP
+.I /etc/sanchala/diagnostics/diagnostics.toml
+Main configuration file
+.TP
+.I /etc/sanchala/diagnostics/btop.conf
+btop theme configuration
+.TP
+.I /var/log/sanchala/diagnostics.log
+Log file
+.SH SEE ALSO
+.BR btop (1),
+.BR htop (1),
+.BR smartctl (8),
+.BR sensors (1),
+.BR lspci (8),
+.BR lsusb (8)
+.SH AUTHOR
+Sanchala Team <team@sanchala.id>
+.SH COPYRIGHT
+Copyright \(co 2024 Sanchala Team. License GPLv3+.

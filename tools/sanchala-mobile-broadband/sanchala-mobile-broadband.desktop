@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Mobile Broadband
+Comment=Manage cellular/mobile data connections and hotspot
+Exec=sanchala-mobile-broadband
+Icon=network-cellular
+Terminal=false
+Type=Application
+Categories=Network;Settings;
+Keywords=mobile;cellular;4g;5g;lte;broadband;hotspot;tethering;
+StartupNotify=true

@@ -1,0 +1,22 @@
+[Desktop Entry]
+Name=Sanchala Drop
+GenericName=Quick File Share
+Comment=Share files with nearby devices
+Exec=sanchala-drop %F
+Icon=document-share
+Terminal=false
+Type=Application
+Categories=Utility;Network;FileTransfer;
+Keywords=share;send;airdrop;transfer;kdeconnect;
+MimeType=application/octet-stream;
+Actions=share-clipboard;find-phone;
+
+[Desktop Action share-clipboard]
+Name=Share Clipboard
+Exec=sanchala-sync kdc clipboard
+Icon=edit-paste
+
+[Desktop Action find-phone]
+Name=Find My Phone
+Exec=sanchala-sync kdc ring
+Icon=phone

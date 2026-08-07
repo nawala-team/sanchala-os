@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kcfg xmlns="http://www.kde.org/standards/kcfg/1.0"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.kde.org/standards/kcfg/1.0
+                          http://www.kde.org/standards/kcfg/1.0/kcfg.xsd">
+    <kcfgfile name=""/>
+
+    <group name="General">
+        <entry name="showMediaWidget" type="Bool">
+            <default>true</default>
+            <label>Show Now Playing widget</label>
+        </entry>
+        <entry name="showBrightnessSlider" type="Bool">
+            <default>true</default>
+            <label>Show brightness slider</label>
+        </entry>
+        <entry name="gridColumns" type="Int">
+            <default>3</default>
+            <min>2</min>
+            <max>4</max>
+            <label>Number of toggle columns</label>
+        </entry>
+        <entry name="enabledToggles" type="StringList">
+            <default>wifi,bluetooth,dnd,darkmode,screencast,focus</default>
+            <label>List of enabled toggles</label>
+        </entry>
+    </group>
+
+    <group name="Appearance">
+        <entry name="panelWidth" type="Int">
+            <default>340</default>
+            <min>280</min>
+            <max>480</max>
+            <label>Panel width in pixels</label>
+        </entry>
+        <entry name="animationDuration" type="Int">
+            <default>200</default>
+            <min>0</min>
+            <max>500</max>
+            <label>Animation duration in milliseconds</label>
+        </entry>
+    </group>
+</kcfg>

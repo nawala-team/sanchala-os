@@ -1,0 +1,20 @@
+# SANCHALA OS - Localization Tool
+# Location: /usr/share/sanchala/l10n/
+
+pkgname=sanchala-l10n
+pkgver=1.0.0
+pkgrel=1
+pkgdesc="Sanchala OS localization helper tool"
+arch=('any')
+url="https://github.com/nicostudios/sanchala-os"
+license=('MIT')
+depends=('bash' 'gettext' 'qt6-tools')
+optdepends=(
+    'translate-toolkit: Additional translation utilities'
+    'hunspell: Spell checking support'
+)
+
+package() {
+    install -Dm755 sanchala-l10n.sh "$pkgdir/usr/bin/sanchala-l10n"
+    install -Dm644 README.md "$pkgdir/usr/share/doc/sanchala-l10n/README.md"
+}

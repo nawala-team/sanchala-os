@@ -1,0 +1,73 @@
+#!/usr/bin/env python3
+"""Sanchala Camera - Professional Camera Application"""
+import sys, os, json
+from datetime import datetime
+from pathlib import Path
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+
+class CameraApp(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Sanchala Camera")
+        self.setMinimumSize(800, 600)
+        self.data_dir = Path.home() / ".local/share/sanchala/camera"
+        self.photos_dir = self.data_dir / "photos"
+        self.photos_dir.mkdir(parents=True, exist_ok=True)
+        self.init_ui()
+    
+    def init_ui(self):
+        self.setStyleSheet("QMainWindow{background:#1a1a1a;} QLabel,QPushButton{color:#fff;}")
+        central = QWidget()
+        self.setCentralWidget(central)
+        layout = QVBoxLayout(central)
+        
+        # Viewfinder
+        self.viewfinder = QLabel("📷 Camera Preview\nClick Capture to take photo")
+        self.viewfinder.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.viewfinder.setMinimumSize(640, 400)
+        self.viewfinder.setStyleSheet("background:#2c3e50; border-radius:10px; font-size:18px;")
+        layout.addWidget(self.viewfinder)
+        
+        # Controls
+        ctrl = QHBoxLayout()
+        for txt, slot in [("⚡Flash", None), ("📷 Capture", self.capture), ("🔄Switch", None), ("🖼️Gallery", self.gallery)]:
+            btn = QPushButton(txt)
+            btn.setStyleSheet("background:#333; padding:15px 25px; border-radius:8px; font-size:14px;")
+            if slot: btn.clicked.connect(slot)
+            if "Capture" in txt: btn.setStyleSheet("background:#e74c3c; padding:15px 30px; border-radius:35px;")
+            ctrl.addWidget(btn)
+        layout.addLayout(ctrl)
+    
+    def capture(self):
+        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+        img = QImage(1920, 1080, QImage.Format.Format_RGB32)
+        img.fill(QColor("#34495e"))
+        p = QPainter(img)
+        p.setPen(QColor("#fff"))
+        p.setFont(QFont("Sans", 36))
+        p.drawText(img.rect(), Qt.AlignmentFlag.AlignCenter, f"📷 {ts}")
+        p.end()
+        path = self.photos_dir / f"IMG_{ts}.jpg"
+        img.save(str(path), "JPEG", 90)
+        self.statusBar().showMessage(f"Saved: {path.name}", 3000)
+    
+    def gallery(self):
+        dlg = QDialog(self)
+        dlg.setWindowTitle("Gallery")
+        dlg.setMinimumSize(500, 400)
+        layout = QGridLayout(dlg)
+        for i, p in enumerate(sorted(self.photos_dir.glob("*.jpg"), reverse=True)[:12]):
+            btn = QPushButton()
+            btn.setIcon(QIcon(QPixmap(str(p)).scaled(100,100,Qt.AspectRatioMode.KeepAspectRatio)))
+            btn.setIconSize(QSize(100,100))
+            btn.setFixedSize(110,110)
+            layout.addWidget(btn, i//4, i%4)
+        dlg.exec()
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    w = CameraApp()
+    w.show()
+    sys.exit(app.exec())

@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=Sanchala Backup
+GenericName=Backup Manager
+Comment=Time Machine-like backup and recovery
+Exec=sanchala-backup-gui
+Icon=sanchala-backup
+Terminal=false
+Type=Application
+Categories=System;Utility;Archiving;
+Keywords=backup;snapshot;restore;recovery;btrfs;
+StartupNotify=true
+X-GNOME-UsesNotifications=true

@@ -1,0 +1,85 @@
+.TH SANCHALA-BACKUP 1 "August 2026" "Sanchala OS" "User Commands"
+.SH NAME
+sanchala-backup \- Time Machine-like backup tool for Sanchala OS
+.SH SYNOPSIS
+.B sanchala-backup
+[\fIOPTIONS\fR] \fICOMMAND\fR [\fIARGS\fR]
+.SH DESCRIPTION
+.B sanchala-backup
+provides snapshot management and backup functionality using Btrfs
+snapshots via Snapper, with optional remote backup via Restic and
+cloud sync via Rclone.
+.SH COMMANDS
+.TP
+.B list
+List all snapshots for the specified config
+.TP
+.B create \fI[DESCRIPTION]\fR
+Create a new manual snapshot
+.TP
+.B delete \fIID\fR
+Delete a snapshot
+.TP
+.B info \fIID\fR
+Show detailed snapshot information
+.TP
+.B compare \fIID1 ID2\fR
+Compare two snapshots
+.TP
+.B browse \fIID\fR [\fIPATH\fR]
+Browse snapshot contents
+.TP
+.B restore \fIID PATH\fR
+Restore file or directory from snapshot
+.TP
+.B rollback \fIID\fR
+Schedule full system rollback (requires reboot)
+.TP
+.B remote \fIACTION\fR
+Manage remote backups (list, add, backup, status)
+.TP
+.B cloud \fIACTION\fR
+Manage cloud sync (setup, sync, status)
+.TP
+.B status
+Show backup system status
+.TP
+.B cleanup
+Clean old snapshots
+.SH OPTIONS
+.TP
+.B \-c, \-\-config \fINAME\fR
+Snapper config to use (default: root)
+.TP
+.B \-\-json
+Output in JSON format
+.TP
+.B \-h, \-\-help
+Show help message
+.SH EXAMPLES
+.TP
+Create a snapshot before making changes:
+.B sanchala-backup create "Before config update"
+.TP
+Restore a file from snapshot 42:
+.B sudo sanchala-backup restore 42 /etc/fstab
+.TP
+Full system rollback:
+.B sudo sanchala-backup rollback 35
+.SH FILES
+.TP
+.I /etc/sanchala/backup.toml
+Main configuration file
+.TP
+.I /etc/snapper/configs/
+Snapper configuration files
+.TP
+.I /.snapshots/
+Snapshot storage directory
+.SH SEE ALSO
+.BR snapper (8),
+.BR btrfs (8),
+.BR restic (1),
+.BR rclone (1)
+.SH AUTHOR
+Sanchala OS Team <dev@sanchala.id>

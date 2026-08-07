@@ -1,0 +1,62 @@
+.TH SANCHALA-PERMISSIONS 1 "August 2026" "Sanchala OS" "User Commands"
+.SH NAME
+sanchala-permissions \- Application permission manager (TCC-like) for Sanchala OS
+.SH SYNOPSIS
+.B sanchala-permissions
+[\fIOPTIONS\fR] [\fICOMMAND\fR] [\fIARGS\fR]
+.SH DESCRIPTION
+.B sanchala-permissions
+provides macOS TCC-like permission management for applications,
+controlling access to camera, microphone, location, files, and more.
+.SH COMMANDS
+.TP
+.B list \fR[\fIAPP\fR]
+List permissions (all or for specific app)
+.TP
+.B grant \fIAPP\fR \fIPERMISSION\fR
+Grant permission to application
+.TP
+.B revoke \fIAPP\fR \fIPERMISSION\fR
+Revoke permission from application
+.TP
+.B reset \fIAPP\fR
+Reset all permissions for application
+.TP
+.B audit \fR[\fIAPP\fR]
+Show permission access log
+.TP
+.B requests
+Show pending permission requests
+.SH PERMISSIONS
+camera, microphone, location, contacts, calendar, files, downloads,
+desktop, documents, removable, network, notifications, accessibility,
+automation, screen-recording, input-monitoring
+.SH OPTIONS
+.TP
+.B \-\-json
+Output in JSON format
+.TP
+.B \-h, \-\-help
+Show help message
+.SH EXAMPLES
+.TP
+List all app permissions:
+.B sanchala-permissions list
+.TP
+Grant camera to Zoom:
+.B sanchala-permissions grant zoom camera
+.TP
+Show access audit:
+.B sanchala-permissions audit firefox
+.SH FILES
+.TP
+.I /etc/sanchala/permissions/
+System policy
+.TP
+.I ~/.config/sanchala/permissions.db
+User permission database
+.SH SEE ALSO
+.BR sanchala-guardian (1),
+.BR flatpak-permission (1)
+.SH AUTHOR
+Sanchala OS Team <dev@sanchala.id>

@@ -1,0 +1,28 @@
+[package]
+name = "sanchala-users"
+version = "1.0.0"
+edition = "2021"
+authors = ["Sanchala OS Team"]
+description = "User Management Tool for Sanchala OS"
+license = "GPL-3.0"
+
+[dependencies]
+tokio = { version = "1.35", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+toml = "0.8"
+zbus = "4.0"
+clap = { version = "4.4", features = ["derive"] }
+log = "0.4"
+env_logger = "0.10"
+nix = { version = "0.27", features = ["user", "fs"] }
+dirs = "5.0"
+sha2 = "0.10"
+
+[[bin]]
+name = "sanchala-users"
+path = "src/main.rs"
+
+[[bin]]
+name = "sanchala-user-switch"
+path = "src/switch.rs"

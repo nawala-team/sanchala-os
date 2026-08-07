@@ -1,0 +1,82 @@
+# ============================================================
+# SANCHALA OS - Web Search Shortcuts
+# ============================================================
+# Quick web searches from KRunner
+# Usage: prefix:search term
+# ============================================================
+
+[General]
+DefaultSearchEngine=ddg
+UseSelectedText=true
+OpenInNewTab=true
+
+[Shortcuts]
+# Privacy-focused search (default)
+ddg=https://duckduckgo.com/?q=\\{@}
+ddg_Name=DuckDuckGo
+ddg_Keys=ddg,duck,d
+
+# Google (for when you need it)
+gg=https://www.google.com/search?q=\\{@}
+gg_Name=Google
+gg_Keys=gg,google,g
+
+# Wikipedia
+wp=https://en.wikipedia.org/wiki/Special:Search?search=\\{@}
+wp_Name=Wikipedia
+wp_Keys=wp,wiki,w
+
+# GitHub
+gh=https://github.com/search?q=\\{@}
+gh_Name=GitHub
+gh_Keys=gh,github
+
+# Stack Overflow
+so=https://stackoverflow.com/search?q=\\{@}
+so_Name=Stack Overflow
+so_Keys=so,stack
+
+# YouTube
+yt=https://www.youtube.com/results?search_query=\\{@}
+yt_Name=YouTube
+yt_Keys=yt,youtube
+
+# Reddit
+rd=https://www.reddit.com/search/?q=\\{@}
+rd_Name=Reddit
+rd_Keys=rd,reddit
+
+# OpenStreetMap
+maps=https://www.openstreetmap.org/search?query=\\{@}
+maps_Name=OpenStreetMap
+maps_Keys=maps,osm,map
+
+# Arch Wiki
+aw=https://wiki.archlinux.org/index.php?search=\\{@}
+aw_Name=Arch Wiki
+aw_Keys=aw,arch,archwiki
+
+# KDE Documentation
+kde=https://docs.kde.org/?search=\\{@}
+kde_Name=KDE Docs
+kde_Keys=kde,plasma
+
+# Package Search (Arch)
+pkg=https://archlinux.org/packages/?q=\\{@}
+pkg_Name=Arch Packages
+pkg_Keys=pkg,pacman
+
+# AUR Search
+aur=https://aur.archlinux.org/packages?K=\\{@}
+aur_Name=AUR
+aur_Keys=aur
+
+# Translate
+tr=https://translate.google.com/?text=\\{@}
+tr_Name=Google Translate
+tr_Keys=tr,translate
+
+# Dictionary
+dict=https://www.merriam-webster.com/dictionary/\\{@}
+dict_Name=Dictionary
+dict_Keys=dict,define,def

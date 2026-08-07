@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Proxy Settings
+GenericName=Network Proxy Configuration
+Comment=Configure system-wide proxy settings
+Exec=sanchala-proxy-settings
+Icon=preferences-system-network-proxy
+Terminal=false
+Type=Application
+Categories=Network;Settings;System;
+Keywords=proxy;http;socks;network;settings;configuration;
+StartupNotify=true

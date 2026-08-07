@@ -1,0 +1,15 @@
+# ============================================================================
+# SANCHALA OS - GNOME Keyring Unlock
+# ============================================================================
+# Automatic keyring unlock with biometric
+# ============================================================================
+
+auth        sufficient    pam_fprintd.so
+auth        required      pam_unix.so try_first_pass
+
+account     include       system-auth
+
+password    include       system-auth
+
+session     optional      pam_gnome_keyring.so auto_start
+session     include       system-auth

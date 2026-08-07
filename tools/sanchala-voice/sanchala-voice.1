@@ -1,0 +1,48 @@
+.TH SANCHALA-VOICE 1 "August 2026" "Sanchala OS" "User Commands"
+.SH NAME
+sanchala-voice \- Voice control and dictation for Sanchala OS
+.SH SYNOPSIS
+.B sanchala-voice
+[\fIOPTIONS\fR] [\fICOMMAND\fR]
+.SH DESCRIPTION
+.B sanchala-voice
+provides local voice recognition for dictation and system control
+using Whisper models. All processing runs locally for privacy.
+.SH COMMANDS
+.TP
+.B start
+Start voice recognition
+.TP
+.B stop
+Stop voice recognition
+.TP
+.B dictate
+Start dictation mode
+.TP
+.B status
+Show service status
+.TP
+.B models
+Manage voice models
+.SH OPTIONS
+.TP
+.B \-m, \-\-model \fINAME\fR
+Select voice model
+.TP
+.B \-l, \-\-language \fICODE\fR
+Set recognition language
+.TP
+.B \-h, \-\-help
+Show help message
+.SH FILES
+.TP
+.I /etc/sanchala/voice/voice.toml
+Configuration file
+.TP
+.I ~/.local/share/sanchala-voice/models/
+Voice models
+.SH SEE ALSO
+.BR sanchala-ai (1),
+.BR sanchala-accessibility (1)
+.SH AUTHOR
+Sanchala OS Team <dev@sanchala.id>

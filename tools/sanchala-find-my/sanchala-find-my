@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: GPL-3.0
+# Sanchala Find My - Device Location & Remote Management
+set -euo pipefail
+
+VERSION="1.0.0"
+STATE_DIR="/var/lib/sanchala/find-my"
+AUDIT_LOG="/var/log/sanchala/find-my-audit.log"
+
+RED='\033[0;31m' GREEN='\033[0;32m' YELLOW='\033[1;33m' BLUE='\033[0;34m' NC='\033[0m'
+
+log_audit() { echo "[$(date -Iseconds)] $1: ${2:-}" >> "$AUDIT_LOG" 2>/dev/null || true; }
+check_root() { [[ $EUID -eq 0 ]] || { echo -e "${RED}✗ Root required${NC}"; exit 1; }; }
+
+cmd_status() {
+    echo -e "${BLUE}Find My Device Status${NC}"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "Device ID: $(cat /etc/machine-id 2>/dev/null || hostname)"
+    echo "Hostname: $(hostname)"
+    echo -e "\n${BLUE}Network:${NC}"
+    ip -4 addr show 2>/dev/null | grep inet | awk '{print "  " $2}' || hostname -I
+}
+
+cmd_locate() {
+    echo -e "${BLUE}Locating device...${NC}"
+    local result
+    result=$(curl -s "http://ip-api.com/json" 2>/dev/null) || true
+    if [[ -n "$result" ]]; then
+        echo "$result" | grep -oP '"city":"\K[^"]+|"country":"\K[^"]+' | tr '\n' ', '
+        echo ""
+    fi
+    log_audit "LOCATE" "Device located"
+}
+
+cmd_ring() {
+    echo -e "${YELLOW}🔔 RINGING DEVICE${NC}"
+    local i
+    for i in {1..5}; do
+        paplay /usr/share/sounds/freedesktop/stereo/alarm-clock-elapsed.oga 2>/dev/null || echo -e "\a"
+        sleep 1
+    done
+    log_audit "RING" "Device rang"
+}
+
+cmd_lock() {
+    check_root
+    echo -e "${RED}🔒 LOCKING DEVICE${NC}"
+    loginctl lock-sessions 2>/dev/null || true
+    echo 0 > /sys/bus/usb/drivers_autoprobe 2>/dev/null || true
+    log_audit "LOCK" "Device locked"
+    echo -e "${GREEN}✓ Device locked${NC}"
+}
+
+case "${1:-status}" in
+    status) cmd_status ;; locate) cmd_locate ;; ring) cmd_ring ;; lock) cmd_lock ;;
+    *) echo "Usage: sanchala-find-my {status|locate|ring|lock}" ;;
+esac

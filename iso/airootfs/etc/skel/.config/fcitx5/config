@@ -1,0 +1,43 @@
+# ============================================================================
+# SANCHALA OS - Fcitx5 User Configuration
+# ============================================================================
+# Location: ~/.config/fcitx5/config
+# User-level input method configuration
+# ============================================================================
+
+[Hotkey]
+TriggerKeys=Control+space
+AltTriggerKeys=Shift_L
+EnumerateForwardKeys=Control+Shift_L
+EnumerateBackwardKeys=Control+Shift_R
+EnumerateSkipFirst=False
+
+[Hotkey/ActivateKeys]
+0=Control+space
+
+[Hotkey/DeactivateKeys]
+0=Control+space
+
+[Hotkey/PrevPage]
+0=Up
+1=Page_Up
+
+[Hotkey/NextPage]
+0=Down
+1=Page_Down
+
+[Hotkey/PrevCandidate]
+0=Shift+Tab
+
+[Hotkey/NextCandidate]
+0=Tab
+
+[Behavior]
+ShowInputMethodInformation=True
+ShowInputMethodInformationWhenFocusIn=False
+CompactInputMethodInformation=True
+ShowFirstInputMethodInformation=True
+DefaultPageSize=7
+ShareInputState=No
+PreeditEnabledByDefault=True
+ShowPreedit=True

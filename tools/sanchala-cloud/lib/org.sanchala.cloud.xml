@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
+"http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<node name="/org/sanchala/cloud">
+  <interface name="org.sanchala.cloud">
+    <!-- Methods -->
+    <method name="GetStatus">
+      <arg type="a{sv}" direction="out" name="status"/>
+    </method>
+    
+    <method name="GetAccountStatus">
+      <arg type="s" direction="in" name="account"/>
+      <arg type="s" direction="out" name="status"/>
+    </method>
+    
+    <method name="GetFileStatus">
+      <arg type="s" direction="in" name="path"/>
+      <arg type="s" direction="out" name="status"/>
+    </method>
+    
+    <method name="Sync">
+      <arg type="s" direction="in" name="account"/>
+      <arg type="b" direction="out" name="success"/>
+    </method>
+    
+    <method name="SyncAll">
+      <arg type="b" direction="out" name="success"/>
+    </method>
+    
+    <method name="PinFile">
+      <arg type="s" direction="in" name="path"/>
+      <arg type="b" direction="out" name="success"/>
+    </method>
+    
+    <method name="UnpinFile">
+      <arg type="s" direction="in" name="path"/>
+      <arg type="b" direction="out" name="success"/>
+    </method>
+    
+    <method name="ListAccounts">
+      <arg type="as" direction="out" name="accounts"/>
+    </method>
+    
+    <!-- Signals -->
+    <signal name="SyncStarted">
+      <arg type="s" name="account"/>
+    </signal>
+    
+    <signal name="SyncComplete">
+      <arg type="s" name="account"/>
+      <arg type="b" name="success"/>
+    </signal>
+    
+    <signal name="SyncProgress">
+      <arg type="s" name="account"/>
+      <arg type="i" name="percent"/>
+      <arg type="s" name="currentFile"/>
+    </signal>
+    
+    <signal name="FileStatusChanged">
+      <arg type="s" name="path"/>
+      <arg type="s" name="status"/>
+    </signal>
+    
+    <signal name="AccountAdded">
+      <arg type="s" name="account"/>
+    </signal>
+    
+    <signal name="AccountRemoved">
+      <arg type="s" name="account"/>
+    </signal>
+    
+    <signal name="Error">
+      <arg type="s" name="account"/>
+      <arg type="s" name="message"/>
+    </signal>
+    
+    <!-- Properties -->
+    <property name="Running" type="b" access="read"/>
+    <property name="SyncInterval" type="i" access="readwrite"/>
+    <property name="AutoSync" type="b" access="readwrite"/>
+  </interface>
+</node>

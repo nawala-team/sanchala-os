@@ -1,0 +1,28 @@
+{
+  "name": "sanchala-torrent",
+  "version": "1.0.0",
+  "description": "BitTorrent client with magnet link support",
+  "author": "Sanchala OS Team",
+  "category": "Network",
+  "settings": {
+    "downloadDir": "~/Downloads/Torrents",
+    "maxDownloadSpeed": 0,
+    "maxUploadSpeed": 0,
+    "maxConnections": 200,
+    "maxConnectionsPerTorrent": 50,
+    "port": 6881,
+    "portRange": [6881, 6889],
+    "enableDHT": true,
+    "enablePEX": true,
+    "enableLPD": true,
+    "enableUTP": true,
+    "encryption": "prefer",
+    "preallocateSpace": true,
+    "autoStart": true,
+    "seedRatioLimit": 2.0,
+    "seedTimeLimit": 0,
+    "queueDownloads": 5,
+    "queueSeeds": 10
+  },
+  "permissions": ["network", "filesystem"]
+}

@@ -1,0 +1,48 @@
+#!/bin/bash
+# SPDX-License-Identifier: GPL-3.0
+# Sanchala OS - GRUB Btrfs Snapshot Configuration
+# /etc/default/grub-btrfs/config
+
+# Path to snapshot directory
+GRUB_BTRFS_SNAPSHOT_DIR="/.snapshots"
+
+# Kernel parameters for booting snapshots
+GRUB_BTRFS_SNAPSHOT_KERNEL_PARAMETERS="ro"
+
+# Limit number of snapshots in GRUB menu
+GRUB_BTRFS_LIMIT="10"
+
+# Submenu name for snapshots
+GRUB_BTRFS_SUBMENU_NAME="Sanchala OS Snapshots"
+
+# Show full path or just snapshot number
+GRUB_BTRFS_SHOW_TOTAL_SNAPSHOTS_FOUND="true"
+GRUB_BTRFS_SHOW_SNAPSHOTS_FOUND="true"
+
+# Title format: %Y=year, %m=month, %d=day, %H=hour, %M=minute
+GRUB_BTRFS_TITLE_FORMAT="%Y-%m-%d %H:%M | Snapshot %1"
+
+# Grub directory
+GRUB_BTRFS_GRUB_DIRNAME="/boot/grub"
+
+# Boot flag file (indicates snapshot boot)
+GRUB_BTRFS_BOOT_DIRNAME="/boot"
+
+# Protection against booting read-only
+GRUB_BTRFS_PROTECTION_ENABLED="true"
+
+# Theme for snapshot entries (inherit from main)
+GRUB_BTRFS_DISABLE_GRUB_THEME="false"
+
+# Override detection of initramfs
+GRUB_BTRFS_OVERRIDE_BOOT_PARTITION_DETECTION="false"
+
+# Snapshot types to include
+# pre, post, single, timeline
+GRUB_BTRFS_SNAPSHOT_TYPES="pre post single"
+
+# Only show important snapshots in main menu
+GRUB_BTRFS_SHOW_IMPORTANT_ONLY="false"
+
+# Custom class for menu entries
+GRUB_BTRFS_ENTRY_CLASS="sanchala-snapshot"

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Snap Layouts
+Comment=Window snapping layouts
+Exec=sanchala-snap-layouts list
+Icon=view-grid
+Terminal=false
+Type=Application
+Categories=Settings;DesktopSettings;
+Keywords=snap;layout;window;tile;

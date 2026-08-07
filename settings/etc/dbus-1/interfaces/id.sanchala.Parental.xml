@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
+  "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<node name="/id/sanchala/Parental">
+  <interface name="id.sanchala.Parental">
+    <!-- Screen Time -->
+    <method name="GetRemainingTime">
+      <arg name="username" type="s" direction="in"/>
+      <arg name="minutes" type="u" direction="out"/>
+    </method>
+    
+    <method name="GrantExtension">
+      <arg name="username" type="s" direction="in"/>
+      <arg name="minutes" type="u" direction="in"/>
+      <arg name="success" type="b" direction="out"/>
+    </method>
+    
+    <method name="IsAllowedNow">
+      <arg name="username" type="s" direction="in"/>
+      <arg name="allowed" type="b" direction="out"/>
+      <arg name="reason" type="s" direction="out"/>
+    </method>
+    
+    <!-- Content Filter -->
+    <method name="CheckUrl">
+      <arg name="username" type="s" direction="in"/>
+      <arg name="url" type="s" direction="in"/>
+      <arg name="allowed" type="b" direction="out"/>
+    </method>
+    
+    <method name="CheckApp">
+      <arg name="username" type="s" direction="in"/>
+      <arg name="app_id" type="s" direction="in"/>
+      <arg name="allowed" type="b" direction="out"/>
+    </method>
+    
+    <!-- Status -->
+    <method name="GetUserStatus">
+      <arg name="username" type="s" direction="in"/>
+      <arg name="status_json" type="s" direction="out"/>
+    </method>
+    
+    <!-- Signals -->
+    <signal name="TimeLimitWarning">
+      <arg name="username" type="s"/>
+      <arg name="minutes_remaining" type="u"/>
+    </signal>
+    
+    <signal name="TimeLimitReached">
+      <arg name="username" type="s"/>
+    </signal>
+    
+    <signal name="ContentBlocked">
+      <arg name="username" type="s"/>
+      <arg name="target" type="s"/>
+      <arg name="reason" type="s"/>
+    </signal>
+  </interface>
+</node>

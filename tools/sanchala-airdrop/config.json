@@ -1,0 +1,23 @@
+{
+  "name": "sanchala-airdrop",
+  "version": "1.0.0",
+  "description": "Wireless file transfer between nearby devices",
+  "author": "Sanchala OS Team",
+  "category": "Network",
+  "settings": {
+    "enabled": true,
+    "visibility": "contacts-only",
+    "autoAccept": false,
+    "saveLocation": "~/Downloads/Airdrop",
+    "useWifi": true,
+    "useBluetooth": true,
+    "compression": "auto",
+    "encryptTransfers": true,
+    "maxFileSize": 0,
+    "allowedTypes": ["*"],
+    "notifyOnReceive": true,
+    "showPreview": true,
+    "discoveryTimeout": 30
+  },
+  "permissions": ["network", "bluetooth", "filesystem", "notifications"]
+}

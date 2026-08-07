@@ -1,0 +1,101 @@
+#!/usr/bin/env python3
+"""Sanchala Network Settings GUI"""
+import sys, subprocess
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+
+class NetworkSettings(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Sanchala Network Settings")
+        self.setMinimumSize(500, 450)
+        self.init_ui()
+        self.refresh()
+    
+    def init_ui(self):
+        w = QWidget()
+        self.setCentralWidget(w)
+        layout = QVBoxLayout(w)
+        
+        tabs = QTabWidget()
+        
+        # WiFi tab
+        wifi_w = QWidget()
+        wifi_l = QVBoxLayout(wifi_w)
+        self.wifi_toggle = QCheckBox("WiFi Enabled")
+        self.wifi_toggle.setChecked(True)
+        self.wifi_toggle.toggled.connect(self.toggle_wifi)
+        wifi_l.addWidget(self.wifi_toggle)
+        self.wifi_list = QTreeWidget()
+        self.wifi_list.setHeaderLabels(["Network", "Signal", "Security"])
+        wifi_l.addWidget(self.wifi_list)
+        wifi_btn = QHBoxLayout()
+        scan_btn = QPushButton("Scan")
+        scan_btn.clicked.connect(self.scan_wifi)
+        connect_btn = QPushButton("Connect")
+        connect_btn.clicked.connect(self.connect_wifi)
+        wifi_btn.addWidget(scan_btn)
+        wifi_btn.addWidget(connect_btn)
+        wifi_l.addLayout(wifi_btn)
+        tabs.addTab(wifi_w, "WiFi")
+        
+        # Connections tab
+        conn_w = QWidget()
+        conn_l = QVBoxLayout(conn_w)
+        self.conn_list = QTreeWidget()
+        self.conn_list.setHeaderLabels(["Name", "Type", "Device"])
+        conn_l.addWidget(self.conn_list)
+        tabs.addTab(conn_w, "Connections")
+        
+        layout.addWidget(tabs)
+    
+    def refresh(self):
+        self.scan_wifi()
+        self.load_connections()
+    
+    def toggle_wifi(self, enabled):
+        subprocess.run(["nmcli", "radio", "wifi", "on" if enabled else "off"])
+    
+    def scan_wifi(self):
+        self.wifi_list.clear()
+        try:
+            out = subprocess.check_output(["nmcli", "-t", "-f", "SSID,SIGNAL,SECURITY", "device", "wifi", "list"], text=True)
+            for line in out.strip().split("\n"):
+                if line:
+                    parts = line.split(":")
+                    if len(parts) >= 3 and parts[0]:
+                        item = QTreeWidgetItem([parts[0], f"{parts[1]}%", parts[2]])
+                        self.wifi_list.addTopLevelItem(item)
+        except: pass
+    
+    def connect_wifi(self):
+        item = self.wifi_list.currentItem()
+        if not item:
+            return
+        ssid = item.text(0)
+        password, ok = QInputDialog.getText(self, "Connect", f"Password for {ssid}:", QLineEdit.EchoMode.Password)
+        if ok:
+            result = subprocess.run(["nmcli", "device", "wifi", "connect", ssid, "password", password],
+                                   capture_output=True, text=True)
+            if result.returncode == 0:
+                QMessageBox.information(self, "Connected", f"Connected to {ssid}")
+            else:
+                QMessageBox.warning(self, "Error", result.stderr)
+    
+    def load_connections(self):
+        self.conn_list.clear()
+        try:
+            out = subprocess.check_output(["nmcli", "-t", "-f", "NAME,TYPE,DEVICE", "connection", "show"], text=True)
+            for line in out.strip().split("\n"):
+                if line:
+                    parts = line.split(":")
+                    item = QTreeWidgetItem(parts[:3] if len(parts) >= 3 else parts + [""]*(3-len(parts)))
+                    self.conn_list.addTopLevelItem(item)
+        except: pass
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    w = NetworkSettings()
+    w.show()
+    sys.exit(app.exec())

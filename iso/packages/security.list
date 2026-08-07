@@ -1,0 +1,52 @@
+# ============================================
+# SANCHALA OS - Security Packages
+# ============================================
+
+# Kernel Security
+linux-hardened
+linux-hardened-headers
+
+# Mandatory Access Control
+apparmor
+
+# Firewall
+nftables
+firewalld
+
+# Audit
+audit
+
+# Sandboxing
+bubblewrap
+flatpak
+xdg-desktop-portal
+xdg-desktop-portal-kde
+firejail
+
+# TPM
+tpm2-tss
+tpm2-tools
+
+# Integrity
+aide
+
+# Secure Boot
+sbsigntools
+efitools
+
+# Encryption
+cryptsetup
+gpg
+
+# Password
+passwdqc
+
+# USB Security
+usbguard
+
+# Network Security
+wireguard-tools
+openssl
+
+# Antivirus/Scanner
+clamav

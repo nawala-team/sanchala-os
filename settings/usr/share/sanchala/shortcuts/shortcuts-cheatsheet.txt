@@ -1,0 +1,51 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    SANCHALA OS - KEYBOARD SHORTCUTS                          ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║                                                                              ║
+║  🚀 ESSENTIAL                          🪟 WINDOW MANAGEMENT                  ║
+║  ─────────────────────────────         ─────────────────────────────         ║
+║  Super           App Launcher          Alt+Tab         Switch Windows        ║
+║  Super+Space     Quick Search          Alt+F4          Close Window          ║
+║  Ctrl+Alt+T      Terminal              Super+Up        Maximize              ║
+║  Super+E         File Manager          Super+Down      Minimize              ║
+║  Super+I         Settings              F11             Fullscreen            ║
+║  Ctrl+Alt+L      Lock Screen           Super+D         Show Desktop          ║
+║  Ctrl+Alt+Del    Log Out               Super+Tab       Overview              ║
+║                                                                              ║
+║  📋 EDITING                            🖼️ WINDOW TILING                      ║
+║  ─────────────────────────────         ─────────────────────────────         ║
+║  Ctrl+C          Copy                  Super+Left      Tile Left             ║
+║  Ctrl+X          Cut                   Super+Right     Tile Right            ║
+║  Ctrl+V          Paste                 Super+Shift+Up  Tile Top              ║
+║  Ctrl+Z          Undo                  Super+Shift+Down Tile Bottom          ║
+║  Ctrl+Shift+Z    Redo                  Super+C         Center Window         ║
+║  Ctrl+A          Select All            Super+T         Always on Top         ║
+║  Ctrl+S          Save                                                        ║
+║  Ctrl+F          Find                                                        ║
+║                                                                              ║
+║  🖥️ VIRTUAL DESKTOPS                   📸 SCREENSHOTS                        ║
+║  ─────────────────────────────         ─────────────────────────────         ║
+║  Super+1-4       Switch Desktop        Print           Full Screen           ║
+║  Super+Shift+1-4 Move Window           Shift+Print     Select Region         ║
+║  Super+Ctrl+←/→  Desktop Left/Right    Alt+Print       Active Window         ║
+║  Super+F8        Desktop Grid                                                ║
+║                                                                              ║
+║  🔊 MEDIA & VOLUME                     🔧 SYSTEM                             ║
+║  ─────────────────────────────         ─────────────────────────────         ║
+║  Volume Up/Down  Adjust Volume         Ctrl+Shift+Esc  System Monitor        ║
+║  Volume Mute     Toggle Mute           Ctrl+Alt+Esc    Kill Window           ║
+║  Media Play      Play/Pause            Super+Shift+N   Night Light           ║
+║  Media Next/Prev Skip Track            Super+V         Clipboard History     ║
+║                                                                              ║
+║  🚀 SANCHALA QUICK ACCESS              🔍 SEARCH                             ║
+║  ─────────────────────────────         ─────────────────────────────         ║
+║  Super+H         Home Folder           Super+Space     KRunner               ║
+║  Super+J         Downloads             Alt+F2          Command Runner        ║
+║  Super+W         Web Browser           Ctrl+F          Find in App           ║
+║  Super+X         Text Editor                                                 ║
+║  Super+Shift+C   Color Picker                                                ║
+║  Super+F1        This Cheat Sheet                                            ║
+║                                                                              ║
+║  💡 TIP: Hold Super key for 2 seconds to see available shortcuts             ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝

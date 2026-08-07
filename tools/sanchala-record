@@ -1,0 +1,147 @@
+#!/bin/bash
+# ============================================
+# SANCHALA OS - Screen Recorder
+# ============================================
+# Simple screen recording using PipeWire
+# ============================================
+
+set -e
+
+# Default settings
+OUTPUT_DIR="$HOME/Videos/Recordings"
+FILENAME="recording-$(date +%Y%m%d-%H%M%S)"
+FORMAT="mp4"
+AUDIO=false
+FRAMERATE=60
+CODEC="libx264"
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
+
+print_status() { echo -e "${GREEN}[✓]${NC} $1"; }
+print_warning() { echo -e "${YELLOW}[!]${NC} $1"; }
+print_error() { echo -e "${RED}[✗]${NC} $1"; }
+
+usage() {
+    cat << EOF
+SANCHALA OS Screen Recorder
+
+Usage: sanchala-record [OPTIONS]
+
+Options:
+  -o, --output FILE    Output filename (default: recording-DATE.mp4)
+  -a, --audio          Record with audio
+  -f, --fps NUM        Framerate (default: 60)
+  -c, --codec CODEC    Video codec: libx264, libx265, av1 (default: libx264)
+  -w, --window         Record specific window (interactive selection)
+  -r, --region         Record specific region (interactive selection)
+  -h, --help           Show this help
+
+Examples:
+  sanchala-record                    # Record full screen
+  sanchala-record -a                 # Record with audio
+  sanchala-record -o demo.mp4 -a     # Custom filename with audio
+  sanchala-record -f 30 -c libx265   # 30fps with H.265
+
+EOF
+}
+
+check_dependencies() {
+    local missing=()
+    
+    if ! command -v wf-recorder &>/dev/null; then
+        missing+=("wf-recorder")
+    fi
+    
+    if [[ ${#missing[@]} -gt 0 ]]; then
+        print_error "Missing dependencies: ${missing[*]}"
+        echo "Install with: sudo pacman -S ${missing[*]}"
+        exit 1
+    fi
+}
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -o|--output)
+            FILENAME="$2"
+            shift 2
+            ;;
+        -a|--audio)
+            AUDIO=true
+            shift
+            ;;
+        -f|--fps)
+            FRAMERATE="$2"
+            shift 2
+            ;;
+        -c|--codec)
+            CODEC="$2"
+            shift 2
+            ;;
+        -w|--window)
+            WINDOW_MODE=true
+            shift
+            ;;
+        -r|--region)
+            REGION_MODE=true
+            shift
+            ;;
+        -h|--help)
+            usage
+            exit 0
+            ;;
+        *)
+            print_error "Unknown option: $1"
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+check_dependencies
+
+# Create output directory
+mkdir -p "$OUTPUT_DIR"
+
+# Build output path
+if [[ "$FILENAME" != /* ]]; then
+    OUTPUT_PATH="$OUTPUT_DIR/$FILENAME"
+else
+    OUTPUT_PATH="$FILENAME"
+fi
+
+# Add extension if missing
+if [[ "$OUTPUT_PATH" != *.mp4 && "$OUTPUT_PATH" != *.mkv && "$OUTPUT_PATH" != *.webm ]]; then
+    OUTPUT_PATH="${OUTPUT_PATH}.${FORMAT}"
+fi
+
+# Build wf-recorder command
+CMD=(wf-recorder)
+CMD+=(-f "$OUTPUT_PATH")
+CMD+=(--framerate "$FRAMERATE")
+CMD+=(-c "$CODEC")
+
+if [[ "$AUDIO" == true ]]; then
+    CMD+=(-a)
+fi
+
+if [[ "$WINDOW_MODE" == true ]]; then
+    print_status "Click on window to record..."
+fi
+
+if [[ "$REGION_MODE" == true ]]; then
+    CMD+=(-g "$(slurp)")
+fi
+
+print_status "Starting recording: $OUTPUT_PATH"
+print_status "Press Ctrl+C to stop"
+echo ""
+
+# Start recording
+"${CMD[@]}"
+
+print_status "Recording saved: $OUTPUT_PATH"

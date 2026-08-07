@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Install Sanchala OS
+GenericName=System Installer
+Comment=Install Sanchala OS to your computer
+Exec=sanchala-install
+Icon=calamares
+Terminal=false
+Categories=System;
+Keywords=install;installer;calamares;setup;

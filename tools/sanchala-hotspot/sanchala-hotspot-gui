@@ -1,0 +1,74 @@
+#!/usr/bin/env python3
+"""Sanchala Hotspot GUI"""
+import sys, subprocess
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+
+class HotspotGUI(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Sanchala Hotspot")
+        self.setMinimumSize(400, 300)
+        self.init_ui()
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.update_status)
+        self.timer.start(3000)
+        self.update_status()
+    
+    def init_ui(self):
+        w = QWidget()
+        self.setCentralWidget(w)
+        layout = QVBoxLayout(w)
+        
+        # Status
+        self.status_lbl = QLabel("Checking...")
+        self.status_lbl.setStyleSheet("font-size: 16px; font-weight: bold;")
+        layout.addWidget(self.status_lbl)
+        
+        # Config
+        form = QFormLayout()
+        self.ssid = QLineEdit("Sanchala-Hotspot")
+        self.password = QLineEdit()
+        self.password.setEchoMode(QLineEdit.EchoMode.Password)
+        form.addRow("SSID:", self.ssid)
+        form.addRow("Password:", self.password)
+        layout.addLayout(form)
+        
+        # Buttons
+        self.toggle_btn = QPushButton("Start Hotspot")
+        self.toggle_btn.setMinimumHeight(40)
+        self.toggle_btn.clicked.connect(self.toggle)
+        layout.addWidget(self.toggle_btn)
+        
+        layout.addStretch()
+    
+    def is_active(self):
+        r = subprocess.run(["nmcli", "-t", "-f", "NAME", "con", "show", "--active"], capture_output=True, text=True)
+        return "Hotspot" in r.stdout
+    
+    def update_status(self):
+        if self.is_active():
+            self.status_lbl.setText("● Hotspot Active")
+            self.status_lbl.setStyleSheet("color: #27ae60; font-size: 16px; font-weight: bold;")
+            self.toggle_btn.setText("Stop Hotspot")
+        else:
+            self.status_lbl.setText("○ Hotspot Inactive")
+            self.status_lbl.setStyleSheet("color: #7f8c8d; font-size: 16px; font-weight: bold;")
+            self.toggle_btn.setText("Start Hotspot")
+    
+    def toggle(self):
+        if self.is_active():
+            subprocess.run(["sanchala-hotspot", "stop"])
+        else:
+            cmd = ["sanchala-hotspot", "start", self.ssid.text()]
+            if self.password.text():
+                cmd.append(self.password.text())
+            subprocess.run(cmd)
+        self.update_status()
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    w = HotspotGUI()
+    w.show()
+    sys.exit(app.exec())

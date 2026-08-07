@@ -1,0 +1,11 @@
+#!/bin/bash
+# Sanchala Calculator - Scientific Calculator
+set -euo pipefail
+
+eval_expr() { echo "scale=10; $1" | bc -l 2>/dev/null || echo "Error"; }
+
+case "${1:-gui}" in
+    eval) eval_expr "$2" ;;
+    gui) exec sanchala-calculator-gui ;;
+    *) eval_expr "$*" ;;
+esac

@@ -1,0 +1,8 @@
+[Unit]
+Description=Sanchala SSD TRIM Service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/fstrim -av
+PrivateDevices=no
+ProtectSystem=strict

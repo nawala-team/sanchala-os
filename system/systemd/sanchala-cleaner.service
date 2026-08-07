@@ -1,0 +1,15 @@
+[Unit]
+Description=Sanchala OS System Cleaner
+Documentation=man:sanchala-cleaner(1)
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/sanchala-cleaner clean --yes --quiet
+Nice=19
+IOSchedulingClass=idle
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

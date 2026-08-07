@@ -1,0 +1,21 @@
+[Protocol]
+exec=kio_onedrive
+protocol=onedrive
+input=none
+output=filesystem
+listing=Name,Type,Size,Date,AccessDate,MimeType
+reading=true
+writing=true
+makedir=true
+deleting=true
+moving=true
+linking=false
+Icon=onedrive
+maxInstances=10
+maxInstancesPerHost=10
+defaultMimetype=inode/directory
+Class=:internet
+ProxiedBy=onedrive
+X-Plasma-Protocol=true
+Description=Microsoft OneDrive
+Description[id]=Microsoft OneDrive

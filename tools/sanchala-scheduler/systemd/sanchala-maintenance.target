@@ -1,0 +1,6 @@
+[Unit]
+Description=Sanchala Maintenance Target
+StopWhenUnneeded=true
+
+[Install]
+WantedBy=multi-user.target

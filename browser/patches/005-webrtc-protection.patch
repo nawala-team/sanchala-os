@@ -1,0 +1,18 @@
+diff --git a/third_party/blink/renderer/modules/peerconnection/rtc_peer_connection.cc b/third_party/blink/renderer/modules/peerconnection/rtc_peer_connection.cc
+--- a/third_party/blink/renderer/modules/peerconnection/rtc_peer_connection.cc
++++ b/third_party/blink/renderer/modules/peerconnection/rtc_peer_connection.cc
+@@ -200,6 +200,18 @@ void RTCPeerConnection::Initialize() {
++#ifdef SANCHALA_BROWSER
++  // Sanchala: Block local IP leak via WebRTC
++  webrtc::PeerConnectionInterface::IceServer turn_server;
++  
++  // Force TURN relay only mode
++  config_.type = webrtc::PeerConnectionInterface::kRelay;
++  
++  // Disable mDNS to prevent local network scanning
++  config_.enable_mdns = false;
++  
++  // Block private IPs from ICE candidates
++  config_.prune_turn_ports = true;
++#endif
+ }

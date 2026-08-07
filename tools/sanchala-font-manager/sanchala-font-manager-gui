@@ -1,0 +1,97 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0
+# Sanchala Font Manager GUI
+
+import sys, subprocess
+from PyQt6.QtWidgets import *
+from PyQt6.QtGui import QIcon, QFont, QFontDatabase
+from PyQt6.QtCore import Qt
+
+class FontManager(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Sanchala Font Manager")
+        self.setWindowIcon(QIcon.fromTheme("preferences-desktop-font"))
+        self.setMinimumSize(700, 500)
+        self.setup_ui()
+        self.load_fonts()
+        
+    def setup_ui(self):
+        central = QWidget()
+        self.setCentralWidget(central)
+        layout = QHBoxLayout(central)
+        
+        # Left panel - font list
+        left = QVBoxLayout()
+        self.search = QLineEdit()
+        self.search.setPlaceholderText("Search fonts...")
+        self.search.textChanged.connect(self.filter_fonts)
+        left.addWidget(self.search)
+        
+        self.font_list = QListWidget()
+        self.font_list.currentItemChanged.connect(self.preview_font)
+        left.addWidget(self.font_list)
+        
+        btns = QHBoxLayout()
+        for txt, slot in [("Install", self.install), ("Remove", self.remove), ("Refresh", self.load_fonts)]:
+            b = QPushButton(txt); b.clicked.connect(slot); btns.addWidget(b)
+        left.addLayout(btns)
+        layout.addLayout(left, 1)
+        
+        # Right panel - preview
+        right = QVBoxLayout()
+        self.preview_text = QTextEdit()
+        self.preview_text.setPlainText("The quick brown fox jumps over the lazy dog\n"
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZ\nabcdefghijklmnopqrstuvwxyz\n0123456789")
+        right.addWidget(QLabel("Preview:"))
+        right.addWidget(self.preview_text)
+        
+        self.size_spin = QSpinBox()
+        self.size_spin.setRange(8, 72)
+        self.size_spin.setValue(16)
+        self.size_spin.valueChanged.connect(self.update_preview)
+        sz = QHBoxLayout()
+        sz.addWidget(QLabel("Size:")); sz.addWidget(self.size_spin); sz.addStretch()
+        right.addLayout(sz)
+        layout.addLayout(right, 1)
+        
+        self.all_fonts = []
+        
+    def load_fonts(self):
+        self.font_list.clear()
+        self.all_fonts = sorted(set(QFontDatabase.families()))
+        self.font_list.addItems(self.all_fonts)
+        
+    def filter_fonts(self, text):
+        self.font_list.clear()
+        filtered = [f for f in self.all_fonts if text.lower() in f.lower()]
+        self.font_list.addItems(filtered)
+        
+    def preview_font(self, item):
+        if item:
+            self.update_preview()
+            
+    def update_preview(self):
+        item = self.font_list.currentItem()
+        if item:
+            font = QFont(item.text(), self.size_spin.value())
+            self.preview_text.setFont(font)
+            
+    def install(self):
+        files, _ = QFileDialog.getOpenFileNames(self, "Install Fonts", "",
+            "Fonts (*.ttf *.otf *.woff *.woff2)")
+        if files:
+            subprocess.run(["sanchala-font-manager", "install"] + files)
+            self.load_fonts()
+            QMessageBox.information(self, "Installed", f"Installed {len(files)} font(s)")
+            
+    def remove(self):
+        item = self.font_list.currentItem()
+        if item and QMessageBox.question(self, "Remove", f"Remove {item.text()}?") == QMessageBox.StandardButton.Yes:
+            subprocess.run(["sanchala-font-manager", "remove", item.text()])
+            self.load_fonts()
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    win = FontManager(); win.show()
+    sys.exit(app.exec())

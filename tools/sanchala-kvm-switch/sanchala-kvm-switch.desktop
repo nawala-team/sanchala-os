@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=KVM Switch
+Comment=Control multiple computers with one keyboard and mouse
+Exec=sanchala-kvm-switch
+Icon=input-keyboard
+Terminal=false
+Type=Application
+Categories=Network;Utility;System;
+Keywords=kvm;keyboard;mouse;switch;synergy;barrier;
+StartupNotify=true

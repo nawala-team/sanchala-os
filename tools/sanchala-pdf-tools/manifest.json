@@ -1,0 +1,10 @@
+{
+    "name": "Sanchala PDF Tools",
+    "version": "2.0.0",
+    "description": "PDF manipulation suite",
+    "category": "Productivity",
+    "icon": "📄",
+    "launch": "./pdf-tools.sh",
+    "author": "Sanchala OS",
+    "features": ["Merge PDFs", "Split PDFs", "Compress", "Extract text", "Rotate pages", "PDF info"]
+}

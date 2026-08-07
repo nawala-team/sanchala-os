@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Link
+Name=Cloud
+Name[id]=Cloud
+Comment=Cloud storage accounts
+Comment[id]=Akun penyimpanan cloud
+Icon=folder-cloud
+URL=file://$HOME/Cloud

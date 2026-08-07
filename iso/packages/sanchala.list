@@ -1,0 +1,32 @@
+# ============================================
+# SANCHALA OS - Custom Packages
+# ============================================
+
+# Core Identity
+sanchala-filesystem
+sanchala-keyring
+sanchala-mirrorlist
+
+# Settings & Configuration
+sanchala-settings
+
+# Theming
+sanchala-wallpapers
+sanchala-icons
+sanchala-grub-theme
+sanchala-plymouth
+
+# Applications
+sanchala-welcome
+sanchala-guardian
+sanchala-store
+
+# Dock (latte-dock is in official repos)
+latte-dock
+
+# Installer
+calamares
+
+# Note: plasma5-applets-window-buttons is AUR
+# Must be added to Sanchala repo if needed
+

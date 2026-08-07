@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Name=Sanchala Download Manager
+GenericName=Download Manager
+Comment=aria2 download daemon for Sanchala OS
+Exec=/usr/lib/sanchala/sanchala-download-manager.sh start
+Icon=folder-download
+Terminal=false
+Categories=Network;FileTransfer;
+StartupNotify=false
+NoDisplay=true
+X-GNOME-Autostart-enabled=true
+X-KDE-autostart-after=panel

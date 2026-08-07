@@ -1,0 +1,11 @@
+[Unit]
+Description=Sanchala Backup - Remote Backup Timer
+Documentation=man:restic(1)
+
+[Timer]
+OnCalendar=*-*-* 02:00:00
+Persistent=true
+RandomizedDelaySec=30min
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,31 @@
+[Desktop Action gdrive]
+Name=Google Drive
+Icon=google-drive
+Exec=sanchala-cloud add gdrive
+
+[Desktop Action dropbox]
+Name=Dropbox
+Icon=dropbox
+Exec=sanchala-cloud add dropbox
+
+[Desktop Action onedrive]
+Name=Microsoft OneDrive
+Icon=onedrive
+Exec=sanchala-cloud add onedrive
+
+[Desktop Action nextcloud]
+Name=Nextcloud
+Icon=nextcloud
+Exec=sanchala-cloud add nextcloud
+
+[Desktop Entry]
+Type=Application
+Name=Sanchala Cloud
+Name[id]=Sanchala Cloud
+Comment=Connect to cloud storage services
+Comment[id]=Hubungkan ke layanan penyimpanan cloud
+Icon=folder-cloud
+Exec=sanchala-cloud config
+Categories=Settings;System;
+Keywords=cloud;storage;sync;drive;dropbox;onedrive;
+Actions=gdrive;dropbox;onedrive;nextcloud;

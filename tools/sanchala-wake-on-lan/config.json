@@ -1,0 +1,23 @@
+{
+  "name": "sanchala-wake-on-lan",
+  "version": "1.0.0",
+  "description": "Wake computers remotely over the network",
+  "author": "Sanchala OS Team",
+  "category": "Network",
+  "settings": {
+    "devices": [],
+    "defaultPort": 9,
+    "broadcastAddress": "255.255.255.255",
+    "useSecureOn": false,
+    "magicPacketRetries": 3,
+    "retryInterval": 1000,
+    "verifyWake": true,
+    "verifyTimeout": 60,
+    "verifyMethod": "ping",
+    "schedules": [],
+    "history": true,
+    "historySize": 100,
+    "notifications": true
+  },
+  "permissions": ["network"]
+}

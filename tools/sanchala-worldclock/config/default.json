@@ -1,0 +1,8 @@
+{
+  "clocks": [
+    {"city": "Local", "tz": "local"}
+  ],
+  "format_24h": true,
+  "show_seconds": false,
+  "show_date": true
+}

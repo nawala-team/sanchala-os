@@ -1,0 +1,66 @@
+# ============================================
+# SANCHALA OS - File Preview Configuration
+# ============================================
+# Enhanced preview handlers for Dolphin
+# ============================================
+
+[General]
+# Maximum file size for local previews (100MB)
+MaximumLocalSize=104857600
+# Maximum file size for remote previews (10MB)
+MaximumRemoteSize=10485760
+
+[Previews]
+# Enable previews for common types
+image=true
+video=true
+audio=true
+text=true
+pdf=true
+font=true
+archive=true
+
+# Image format previews
+jpeg=true
+png=true
+gif=true
+webp=true
+svg=true
+bmp=true
+tiff=true
+raw=true
+heic=true
+avif=true
+
+# Document previews
+pdf=true
+epub=true
+djvu=true
+chm=true
+markdown=true
+
+# Archive previews
+zip=true
+tar=true
+rar=true
+7z=true
+
+# Multimedia previews
+mp4=true
+mkv=true
+webm=true
+avi=true
+mov=true
+mp3=true
+flac=true
+ogg=true
+
+# Code/text previews
+code=true
+plaintext=true
+
+[Thumbnails]
+# Thumbnail cache size (256MB)
+CacheSize=268435456
+# Thumbnail quality
+Quality=90

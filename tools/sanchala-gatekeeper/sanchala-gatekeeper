@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: GPL-3.0
+# Sanchala Gatekeeper - Application Execution Control
+set -euo pipefail
+
+VERSION="1.0.0"
+CONFIG_DIR="/etc/sanchala/gatekeeper"
+AUDIT_LOG="/var/log/sanchala/gatekeeper-audit.log"
+
+RED='\033[0;31m' GREEN='\033[0;32m' YELLOW='\033[1;33m' BLUE='\033[0;34m' NC='\033[0m'
+
+log_audit() { echo "[$(date -Iseconds)] $1: ${2:-}" >> "$AUDIT_LOG" 2>/dev/null || true; }
+check_root() { [[ $EUID -eq 0 ]] || { echo -e "${RED}✗ Root required${NC}"; exit 1; }; }
+init_config() { mkdir -p "$CONFIG_DIR"; [[ -f "$CONFIG_DIR/policy" ]] || echo "standard" > "$CONFIG_DIR/policy"; }
+
+cmd_status() {
+    init_config
+    echo -e "${BLUE}Gatekeeper Status${NC}"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "Policy: $(cat "$CONFIG_DIR/policy")"
+    echo -e "\nPolicies: anywhere, standard, strict, lockdown"
+}
+
+cmd_verify() {
+    local file="$1"
+    [[ -f "$file" ]] || { echo -e "${RED}✗ File not found${NC}"; exit 1; }
+    echo -e "${BLUE}Verifying: $file${NC}"
+    local hash
+    hash=$(sha256sum "$file" | cut -d' ' -f1)
+    echo "SHA256: $hash"
+    file "$file" | grep -q ELF && echo -e "${GREEN}✓ Valid executable${NC}" || echo "Not an ELF binary"
+}
+
+cmd_allow() {
+    check_root; init_config
+    echo "$1" >> "$CONFIG_DIR/allowed"
+    sort -u -o "$CONFIG_DIR/allowed" "$CONFIG_DIR/allowed"
+    log_audit "ALLOW" "$1"
+    echo -e "${GREEN}✓ Allowed: $1${NC}"
+}
+
+cmd_block() {
+    check_root; init_config
+    echo "$1" >> "$CONFIG_DIR/blocked"
+    sort -u -o "$CONFIG_DIR/blocked" "$CONFIG_DIR/blocked"
+    log_audit "BLOCK" "$1"
+    echo -e "${RED}✓ Blocked: $1${NC}"
+}
+
+cmd_policy() {
+    check_root
+    [[ "$1" =~ ^(anywhere|standard|strict|lockdown)$ ]] || { echo -e "${RED}✗ Invalid policy${NC}"; exit 1; }
+    echo "$1" > "$CONFIG_DIR/policy"
+    log_audit "POLICY" "$1"
+    echo -e "${GREEN}✓ Policy set: $1${NC}"
+}
+
+case "${1:-status}" in
+    status) cmd_status ;; verify) cmd_verify "$2" ;; allow) cmd_allow "$2" ;;
+    block) cmd_block "$2" ;; policy) cmd_policy "$2" ;;
+    list) echo "Allowed:"; cat "$CONFIG_DIR/allowed" 2>/dev/null || true; echo "Blocked:"; cat "$CONFIG_DIR/blocked" 2>/dev/null || true ;;
+    *) echo "Usage: sanchala-gatekeeper {status|verify FILE|allow APP|block APP|policy LEVEL|list}" ;;
+esac

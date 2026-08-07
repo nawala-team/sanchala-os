@@ -1,0 +1,75 @@
+/* Sanchala OS GTK4 Theme - Light Variant */
+@import url("resource:///org/gtk/libgtk/theme/Default/gtk-base.css");
+
+@define-color accent_bg_color #3949AB;
+@define-color accent_fg_color #FFFFFF;
+@define-color accent_color #3949AB;
+@define-color destructive_bg_color #FF1744;
+@define-color destructive_fg_color #FFFFFF;
+@define-color success_bg_color #00C853;
+@define-color success_fg_color #FFFFFF;
+@define-color warning_bg_color #FFB300;
+@define-color warning_fg_color rgba(0,0,0,0.8);
+@define-color error_bg_color #FF1744;
+@define-color error_fg_color #FFFFFF;
+
+@define-color window_bg_color #F5F5F5;
+@define-color window_fg_color #212121;
+@define-color view_bg_color #FFFFFF;
+@define-color view_fg_color #212121;
+@define-color headerbar_bg_color #3949AB;
+@define-color headerbar_fg_color #FFFFFF;
+@define-color headerbar_border_color shade(#3949AB, 0.8);
+@define-color headerbar_backdrop_color shade(#3949AB, 0.9);
+@define-color card_bg_color #FFFFFF;
+@define-color card_fg_color #212121;
+@define-color dialog_bg_color #FFFFFF;
+@define-color dialog_fg_color #212121;
+@define-color popover_bg_color #FFFFFF;
+@define-color popover_fg_color #212121;
+@define-color sidebar_bg_color #FAFAFA;
+@define-color sidebar_fg_color #212121;
+@define-color sidebar_border_color #E0E0E0;
+
+@define-color borders #E0E0E0;
+@define-color scrollbar_outline_color alpha(white, 0.2);
+
+window.background { background-color: @window_bg_color; color: @window_fg_color; }
+window.csd { border-radius: 12px; }
+
+headerbar {
+    background: linear-gradient(to bottom, @headerbar_bg_color, shade(@headerbar_bg_color, 0.95));
+    color: @headerbar_fg_color;
+    border-radius: 12px 12px 0 0;
+    min-height: 42px;
+}
+headerbar:backdrop { background: @headerbar_backdrop_color; }
+
+.navigation-sidebar { background: @sidebar_bg_color; border-right: 1px solid @sidebar_border_color; }
+.navigation-sidebar row { border-radius: 8px; margin: 2px 6px; }
+.navigation-sidebar row:selected { background: @accent_bg_color; color: @accent_fg_color; }
+
+button { border-radius: 8px; padding: 6px 16px; transition: all 150ms ease; }
+button.suggested-action { background: @accent_bg_color; color: @accent_fg_color; }
+button.destructive-action { background: @destructive_bg_color; color: @destructive_fg_color; }
+
+entry { border-radius: 8px; padding: 8px 12px; }
+entry:focus { outline: 2px solid alpha(@accent_bg_color, 0.3); outline-offset: -2px; }
+
+switch { border-radius: 9999px; }
+switch:checked { background: @accent_bg_color; }
+
+checkbutton check, radiobutton radio { border-radius: 4px; }
+checkbutton check:checked, radiobutton radio:checked { background: @accent_bg_color; color: @accent_fg_color; }
+
+progressbar > trough > progress { background: linear-gradient(to right, @accent_bg_color, #536DFE); border-radius: 9999px; }
+
+scale > trough > highlight { background: @accent_bg_color; }
+
+notebook > header > tabs > tab:checked { border-bottom: 2px solid @accent_bg_color; }
+
+popover.background { background: @popover_bg_color; border-radius: 12px; }
+menu { background: @popover_bg_color; border-radius: 12px; }
+menu modelbutton:hover { background: @accent_bg_color; color: @accent_fg_color; border-radius: 8px; }
+
+tooltip { background: @card_bg_color; border-radius: 8px; }

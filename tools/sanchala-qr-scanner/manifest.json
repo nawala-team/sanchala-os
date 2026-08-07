@@ -1,0 +1,10 @@
+{
+    "name": "Sanchala QR Scanner",
+    "version": "2.0.0",
+    "description": "QR code generator and scanner",
+    "category": "Productivity",
+    "icon": "📱",
+    "launch": "./qr-scanner.sh",
+    "author": "Sanchala OS",
+    "features": ["Generate QR codes", "WiFi QR codes", "Contact QR", "Camera scanning", "Image scanning"]
+}

@@ -1,0 +1,14 @@
+# Sanchala Cleaner - Package Cache Rules
+# Custom paths for package cache cleanup
+
+# Pacman cache (Arch-based)
+/var/cache/pacman/pkg
+
+# AUR helper caches
+/home/*/.cache/yay
+/home/*/.cache/paru
+/home/*/.cache/pikaur
+/home/*/.cache/trizen
+
+# Flatpak unused
+# Note: Use 'flatpak uninstall --unused' instead

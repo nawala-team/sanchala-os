@@ -1,0 +1,13 @@
+# ============================================================================
+# SANCHALA OS - Akonadi Client Configuration
+# ============================================================================
+# Client-side Akonadi settings
+# ============================================================================
+
+[%General]
+# Enable email indexing for search
+EnableIndexing=true
+
+[Startup]
+# Start Akonadi on login (for quick calendar widget access)
+StartServer=true

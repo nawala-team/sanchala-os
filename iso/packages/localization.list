@@ -1,0 +1,74 @@
+# ============================================
+# SANCHALA OS - Localization Packages
+# ============================================
+# i18n/l10n infrastructure for 50+ languages
+# ============================================
+
+# ===========================================
+# Core Locale Support
+# ===========================================
+glibc
+glibc-locales
+
+# ===========================================
+# Input Method Framework
+# ===========================================
+fcitx5
+fcitx5-configtool
+fcitx5-gtk
+fcitx5-qt
+
+# ===========================================
+# CJK Input Methods
+# ===========================================
+fcitx5-chinese-addons
+fcitx5-anthy
+fcitx5-hangul
+fcitx5-kkc
+
+# ===========================================
+# Other Input Methods
+# ===========================================
+fcitx5-unikey
+fcitx5-m17n
+fcitx5-libthai
+
+# ===========================================
+# KDE/Plasma Translations
+# ===========================================
+kde-l10n-ar
+kde-l10n-de
+kde-l10n-es
+kde-l10n-fr
+kde-l10n-id
+kde-l10n-it
+kde-l10n-ja
+kde-l10n-ko
+kde-l10n-nl
+kde-l10n-pl
+kde-l10n-pt_BR
+kde-l10n-ru
+kde-l10n-tr
+kde-l10n-vi
+kde-l10n-zh_CN
+kde-l10n-zh_TW
+
+# ===========================================
+# Spell Checking
+# ===========================================
+hunspell
+hunspell-en_us
+hunspell-en_gb
+aspell
+
+# ===========================================
+# Text-to-Speech (Accessibility)
+# ===========================================
+speech-dispatcher
+espeak-ng
+
+# ===========================================
+# Translation Tools (Development)
+# ===========================================
+gettext
+translate-toolkit

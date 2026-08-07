@@ -1,0 +1,101 @@
+#!/bin/bash
+# SANCHALA-MAGNIFIER - Screen Magnification Tool for Sanchala OS
+# WCAG 2.1 AAA Compliant | Copyright (c) 2025 Sanchala OS Project
+set -euo pipefail
+
+VERSION="1.0.0"
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/sanchala/accessibility"
+CONFIG_FILE="$CONFIG_DIR/magnifier.conf"
+PID_FILE="/tmp/sanchala-magnifier.pid"
+
+declare -A MAG=([zoom]=2.0 [mode]=full [follow]=mouse [smooth]=true [invert]=false [crosshair]=false)
+
+mkdir -p "$CONFIG_DIR"
+
+load_config() { [[ -f "$CONFIG_FILE" ]] && source "$CONFIG_FILE"; }
+save_config() { declare -p MAG > "$CONFIG_FILE"; }
+
+detect_backend() {
+    command -v xmag &>/dev/null && echo "xmag" && return
+    command -v kmag &>/dev/null && echo "kmag" && return
+    command -v gnome-magnifier &>/dev/null && echo "gnome" && return
+    [[ -n "${WAYLAND_DISPLAY:-}" ]] && echo "wayland" && return
+    echo "xrandr"
+}
+
+apply_zoom_xrandr() {
+    local zoom="${MAG[zoom]}" output
+    output=$(xrandr --query | grep " connected" | head -1 | cut -d' ' -f1)
+    [[ -z "$output" ]] && echo "No display found" && return 1
+    local scale=$(echo "scale=2; 1/$zoom" | bc)
+    xrandr --output "$output" --scale "${scale}x${scale}" 2>/dev/null
+}
+
+apply_zoom_gnome() {
+    gsettings set org.gnome.desktop.a11y.magnifier mag-factor "${MAG[zoom]}"
+    gsettings set org.gnome.desktop.a11y.magnifier screen-position "${MAG[mode]}"
+    gsettings set org.gnome.desktop.a11y.magnifier mouse-tracking "${MAG[follow]}"
+    gsettings set org.gnome.desktop.a11y.magnifier lens-mode $([[ "${MAG[mode]}" == "lens" ]] && echo true || echo false)
+    gsettings set org.gnome.desktop.a11y.applications screen-magnifier-enabled true
+}
+
+apply_zoom_kde() {
+    kwriteconfig5 --file kaccessrc --group ScreenMagnifier --key Enabled true
+    kwriteconfig5 --file kaccessrc --group ScreenMagnifier --key ScaleFactor "${MAG[zoom]}"
+    qdbus org.kde.KWin /Effects org.kde.kwin.Effects.loadEffect "zoom" 2>/dev/null ||:
+}
+
+start_magnifier() {
+    load_config
+    local backend=$(detect_backend)
+    echo "Starting magnifier (backend: $backend, zoom: ${MAG[zoom]}x)"
+    
+    case "$backend" in
+        gnome) apply_zoom_gnome ;;
+        kde|kmag) apply_zoom_kde ;;
+        xrandr) apply_zoom_xrandr ;;
+        wayland) echo "Use compositor zoom (Super+scroll)" ;;
+        xmag) xmag -mag "${MAG[zoom]}" & echo $! > "$PID_FILE" ;;
+    esac
+    echo "Magnifier active at ${MAG[zoom]}x"
+}
+
+stop_magnifier() {
+    gsettings set org.gnome.desktop.a11y.applications screen-magnifier-enabled false 2>/dev/null ||:
+    kwriteconfig5 --file kaccessrc --group ScreenMagnifier --key Enabled false 2>/dev/null ||:
+    [[ -f "$PID_FILE" ]] && kill "$(cat "$PID_FILE")" 2>/dev/null ||:; rm -f "$PID_FILE"
+    xrandr --output "$(xrandr | grep ' connected' | cut -d' ' -f1)" --scale 1x1 2>/dev/null ||:
+    echo "Magnifier stopped"
+}
+
+set_zoom() {
+    local z="$1"
+    (( $(echo "$z >= 1.0 && $z <= 16.0" | bc -l) )) || { echo "Zoom must be 1.0-16.0"; return 1; }
+    MAG[zoom]="$z"; save_config; start_magnifier
+}
+
+set_mode() {
+    case "$1" in
+        full|lens|split-top|split-bottom|split-left|split-right) MAG[mode]="$1"; save_config ;;
+        *) echo "Modes: full, lens, split-top/bottom/left/right"; return 1 ;;
+    esac
+}
+
+status() {
+    load_config
+    echo "Magnifier Status:"
+    echo "  Zoom: ${MAG[zoom]}x | Mode: ${MAG[mode]} | Follow: ${MAG[follow]}"
+    echo "  Smooth: ${MAG[smooth]} | Invert: ${MAG[invert]} | Backend: $(detect_backend)"
+}
+
+case "${1:-status}" in
+    start|on) start_magnifier ;; stop|off) stop_magnifier ;; status) status ;;
+    toggle) gsettings get org.gnome.desktop.a11y.applications screen-magnifier-enabled 2>/dev/null | grep -q true && stop_magnifier || start_magnifier ;;
+    --zoom|-z) set_zoom "$2" ;; --mode|-m) set_mode "$2" ;;
+    --follow) MAG[follow]="$2"; save_config; echo "Follow: $2" ;;
+    --invert) MAG[invert]="$2"; save_config ;;
+    zoom-in|+) MAG[zoom]=$(echo "${MAG[zoom]} + 0.5" | bc); save_config; start_magnifier ;;
+    zoom-out|-) MAG[zoom]=$(echo "${MAG[zoom]} - 0.5" | bc); save_config; start_magnifier ;;
+    --help|-h) echo "Usage: sanchala-magnifier {start|stop|toggle|zoom-in|zoom-out|--zoom N|--mode MODE}" ;;
+    --version|-v) echo "v$VERSION" ;; *) echo "Unknown: $1"; exit 1 ;;
+esac

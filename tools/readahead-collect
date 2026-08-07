@@ -1,0 +1,61 @@
+#!/bin/bash
+# ============================================================================
+# SANCHALA OS - Readahead Collector Script
+# ============================================================================
+# Version: 1.0 | Collect files accessed during boot for prefetching
+# Usage: Run during early boot to collect, then replay on subsequent boots
+# ============================================================================
+
+set -euo pipefail
+
+PACKFILE="/var/lib/sanchala/readahead.pack"
+COLLECT_TIME=60  # Seconds to collect after boot
+MIN_SIZE=4096    # Minimum file size to include
+MAX_FILES=1000   # Maximum files to track
+
+mkdir -p "$(dirname "$PACKFILE")"
+
+echo "Collecting boot file access patterns for ${COLLECT_TIME}s..."
+
+# Use fatrace to monitor file access (filesystem access tracer)
+if command -v fatrace &>/dev/null; then
+    timeout "$COLLECT_TIME" fatrace -c -o /tmp/readahead-collect.raw 2>/dev/null || true
+    
+    # Process collected data: filter, deduplicate, sort by access time
+    if [[ -f /tmp/readahead-collect.raw ]]; then
+        cat /tmp/readahead-collect.raw | \
+            grep -E '^[RO]' | \
+            awk '{print $NF}' | \
+            sort -u | \
+            while read -r file; do
+                if [[ -f "$file" && -r "$file" ]]; then
+                    size=$(stat -c%s "$file" 2>/dev/null || echo 0)
+                    if [[ "$size" -ge "$MIN_SIZE" ]]; then
+                        echo "$file"
+                    fi
+                fi
+            done | head -n "$MAX_FILES" > "$PACKFILE"
+        
+        rm -f /tmp/readahead-collect.raw
+        echo "Collected $(wc -l < "$PACKFILE") files to $PACKFILE"
+    fi
+else
+    # Fallback: collect from commonly accessed boot paths
+    echo "fatrace not available, using static boot file list"
+    
+    cat > "$PACKFILE" << 'BOOTFILES'
+/usr/lib/systemd/systemd
+/usr/lib/systemd/libsystemd-shared.so
+/usr/lib/libsystemd.so.0
+/usr/lib/libc.so.6
+/usr/lib/ld-linux-x86-64.so.2
+/usr/share/dbus-1/system.d/org.freedesktop.systemd1.conf
+/etc/machine-id
+/etc/passwd
+/etc/group
+/etc/nsswitch.conf
+/usr/lib/libnss_files.so.2
+BOOTFILES
+fi
+
+echo "Readahead collection complete"

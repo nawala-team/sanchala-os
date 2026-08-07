@@ -1,0 +1,8 @@
+{
+  "enabled": false,
+  "temperature": 4500,
+  "schedule": "sunset",
+  "start_time": "20:00",
+  "end_time": "06:00",
+  "transition_duration": 30
+}

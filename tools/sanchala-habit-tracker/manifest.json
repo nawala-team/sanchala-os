@@ -1,0 +1,10 @@
+{
+    "name": "Sanchala Habit Tracker",
+    "version": "2.0.0",
+    "description": "Build better habits with tracking",
+    "category": "Productivity",
+    "icon": "✅",
+    "launch": "./habit-tracker.sh",
+    "author": "Sanchala OS",
+    "features": ["Daily habit logging", "Streak tracking", "Progress visualization", "Custom habits"]
+}

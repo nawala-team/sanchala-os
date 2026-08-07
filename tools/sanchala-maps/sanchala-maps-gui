@@ -1,0 +1,105 @@
+#!/usr/bin/env python3
+"""Sanchala Maps - Navigation and Maps"""
+import sys, json
+from pathlib import Path
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+
+class MapsApp(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Sanchala Maps")
+        self.setMinimumSize(900, 600)
+        self.data_dir = Path.home() / ".local/share/sanchala/maps"
+        self.data_dir.mkdir(parents=True, exist_ok=True)
+        self.saved = self.load()
+        self.init_ui()
+    
+    def init_ui(self):
+        self.setStyleSheet("QMainWindow{background:#1e1e2e;}QLabel{color:#cdd6f4;}QPushButton{background:#313244;color:#cdd6f4;border:none;padding:10px;border-radius:6px;}QPushButton:hover{background:#45475a;}QLineEdit{background:#313244;color:#cdd6f4;border:none;border-radius:20px;padding:12px 20px;}")
+        c = QWidget(); self.setCentralWidget(c); m = QVBoxLayout(c)
+        
+        # Search bar
+        top = QHBoxLayout()
+        self.search = QLineEdit(); self.search.setPlaceholderText("🔍 Search places, addresses...")
+        self.search.returnPressed.connect(self.do_search)
+        top.addWidget(self.search)
+        for txt, slot in [("🔍", self.do_search), ("📍", self.my_loc), ("🗺️", self.layers)]:
+            b = QPushButton(txt); b.setFixedSize(44, 44); b.clicked.connect(slot); top.addWidget(b)
+        m.addLayout(top)
+        
+        # Map area
+        main = QHBoxLayout()
+        self.map = QLabel("🗺️ Map View\n\nClick to explore\nUse search to find places")
+        self.map.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.map.setStyleSheet("background:#2c3e50;border-radius:10px;font-size:18px;min-height:400px;")
+        self.map.mousePressEvent = self.map_click
+        main.addWidget(self.map, 3)
+        
+        # Sidebar
+        side = QVBoxLayout()
+        self.info = QLabel("📍 Location Info"); self.info.setStyleSheet("font-size:16px;font-weight:bold;")
+        side.addWidget(self.info)
+        self.details = QLabel("Search for a place or\nclick on the map")
+        self.details.setWordWrap(True); side.addWidget(self.details)
+        
+        for txt in ["🚗 Directions", "⭐ Save Place", "📤 Share"]:
+            b = QPushButton(txt); side.addWidget(b)
+            if "Save" in txt: b.clicked.connect(self.save_place)
+        
+        side.addWidget(QLabel("⭐ Saved Places")); self.saved_list = QListWidget()
+        self.saved_list.setStyleSheet("background:#313244;border-radius:6px;color:#cdd6f4;max-height:150px;")
+        self.refresh_saved(); side.addWidget(self.saved_list)
+        side.addStretch()
+        main.addLayout(side, 1)
+        m.addLayout(main)
+        
+        # Bottom controls
+        bot = QHBoxLayout()
+        for txt in ["➖", "➕", "🧭 North", "🛰️ Satellite", "🚶 Street View"]:
+            b = QPushButton(txt); bot.addWidget(b)
+        m.addLayout(bot)
+    
+    def load(self):
+        f = self.data_dir / "saved.json"
+        return json.loads(f.read_text()) if f.exists() else []
+    
+    def save(self):
+        (self.data_dir / "saved.json").write_text(json.dumps(self.saved))
+    
+    def refresh_saved(self):
+        self.saved_list.clear()
+        for p in self.saved: self.saved_list.addItem(f"⭐ {p['name']}")
+    
+    def do_search(self):
+        q = self.search.text()
+        if q:
+            self.info.setText(f"📍 {q}")
+            self.details.setText(f"Showing results for:\n{q}\n\nCoordinates: 12.9716° N, 77.5946° E")
+            self.map.setText(f"🗺️ Map View\n\n📍 {q}\n\n[Map tiles would display here]")
+    
+    def my_loc(self):
+        self.info.setText("📍 My Location")
+        self.details.setText("Current location:\n12.9716° N, 77.5946° E\n\nBangalore, India")
+    
+    def layers(self):
+        dlg = QDialog(self); dlg.setWindowTitle("Map Layers"); l = QVBoxLayout(dlg)
+        for layer in ["🗺️ Default", "🛰️ Satellite", "🏔️ Terrain", "🚗 Traffic", "🚌 Transit", "🚴 Cycling"]:
+            cb = QCheckBox(layer); cb.setStyleSheet("color:#cdd6f4;"); l.addWidget(cb)
+            if "Default" in layer: cb.setChecked(True)
+        b = QPushButton("Apply"); b.clicked.connect(dlg.accept); l.addWidget(b)
+        dlg.exec()
+    
+    def map_click(self, e):
+        self.info.setText("📍 Selected Point")
+        self.details.setText(f"Clicked at:\nX: {e.pos().x()}, Y: {e.pos().y()}\n\nDrag to pan map")
+    
+    def save_place(self):
+        name = self.info.text().replace("📍 ", "")
+        if name and name != "Location Info":
+            self.saved.append({"name": name}); self.save(); self.refresh_saved()
+            self.statusBar().showMessage(f"Saved: {name}", 2000)
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv); w = MapsApp(); w.show(); sys.exit(app.exec())

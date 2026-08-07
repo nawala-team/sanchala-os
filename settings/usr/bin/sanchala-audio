@@ -1,0 +1,121 @@
+#!/bin/bash
+# ============================================
+# SANCHALA OS - Audio Control Script
+# ============================================
+# Command-line tool for audio management
+# ============================================
+
+set -e
+
+SCRIPT_NAME="sanchala-audio"
+VERSION="1.0.0"
+CONFIG_DIR="/etc/sanchala/audio"
+EQ_PRESETS_DIR="$CONFIG_DIR/eq-presets"
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+NC='\033[0m'
+
+print_header() {
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${CYAN}  🔊 Sanchala Audio Manager v${VERSION}${NC}"
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+}
+
+print_success() { echo -e "${GREEN}✓${NC} $1"; }
+print_error() { echo -e "${RED}✗${NC} $1"; }
+print_info() { echo -e "${BLUE}ℹ${NC} $1"; }
+
+# Volume Control
+get_volume() { wpctl get-volume @DEFAULT_AUDIO_SINK@ | awk '{print int($2 * 100)}'; }
+
+set_volume() {
+    local volume=$1
+    [[ $volume -lt 0 ]] && volume=0
+    [[ $volume -gt 100 ]] && volume=100
+    wpctl set-volume @DEFAULT_AUDIO_SINK@ "${volume}%"
+    print_success "Volume set to ${volume}%"
+}
+
+volume_up() { wpctl set-volume @DEFAULT_AUDIO_SINK@ "${1:-5}%+"; print_success "Volume increased"; }
+volume_down() { wpctl set-volume @DEFAULT_AUDIO_SINK@ "${1:-5}%-"; print_success "Volume decreased"; }
+toggle_mute() { wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle; print_info "Mute toggled"; }
+
+# Device Management
+list_sinks() {
+    echo -e "${CYAN}Audio Output Devices:${NC}"
+    wpctl status | sed -n '/Audio/,/Video/p' | grep -E "^\s+\*?\s+[0-9]+" | head -20
+}
+
+list_sources() {
+    echo -e "${CYAN}Audio Input Devices:${NC}"
+    pw-cli ls Node | grep -E "node.name.*alsa_input|node.description" | head -20
+}
+
+set_default_sink() { wpctl set-default "$1"; print_success "Default output set to $1"; }
+set_default_source() { wpctl set-default "$1"; print_success "Default input set to $1"; }
+
+# EQ Presets
+list_eq_presets() {
+    echo -e "${CYAN}Available EQ Presets:${NC}"
+    for preset in "$EQ_PRESETS_DIR"/*.conf; do
+        [[ -f "$preset" ]] || continue
+        local name=$(basename "$preset" .conf)
+        local desc=$(grep "^Description=" "$preset" 2>/dev/null | cut -d= -f2)
+        printf "  ${GREEN}%-20s${NC} %s\n" "$name" "$desc"
+    done
+}
+
+# Bluetooth
+bluetooth_status() {
+    echo -e "${CYAN}Bluetooth Audio Status:${NC}"
+    local bt=$(pw-cli ls Node 2>/dev/null | grep -c "bluez" || echo "0")
+    [[ $bt -gt 0 ]] && print_success "Connected: $bt device(s)" || print_info "No devices"
+}
+
+# Status
+show_status() {
+    print_header; echo ""
+    systemctl --user is-active pipewire.service &>/dev/null && print_success "PipeWire: Running" || print_error "PipeWire: Stopped"
+    systemctl --user is-active wireplumber.service &>/dev/null && print_success "WirePlumber: Running" || print_error "WirePlumber: Stopped"
+    echo ""; echo -e "Volume: ${GREEN}$(get_volume 2>/dev/null || echo N/A)%${NC}"
+}
+
+restart_audio() {
+    print_info "Restarting audio services..."
+    systemctl --user restart pipewire pipewire-pulse wireplumber
+    sleep 1; print_success "Audio services restarted"
+}
+
+show_usage() {
+    print_header; echo ""
+    cat << 'EOF'
+Usage: sanchala-audio <command> [options]
+
+Volume:   volume [get|set|up|down]  |  mute
+Devices:  sinks | sources | set-sink <id> | set-source <id>
+EQ:       eq [list|apply <preset>]
+Bluetooth: bt [status|list]
+System:   status | restart | help
+EOF
+}
+
+# Main
+case "${1:-help}" in
+    volume) case "${2:-get}" in get) echo "$(get_volume)%";; set) set_volume "$3";; up) volume_up "$3";; down) volume_down "$3";; esac;;
+    mute) toggle_mute;;
+    sinks|devices) list_sinks;;
+    sources) list_sources;;
+    set-sink) set_default_sink "$2";;
+    set-source) set_default_source "$2";;
+    eq) case "${2:-list}" in list) list_eq_presets;; apply) print_info "Applying $3...";; esac;;
+    bt) case "${2:-status}" in status) bluetooth_status;; list) pw-cli ls Node | grep bluez;; esac;;
+    status) show_status;;
+    restart) restart_audio;;
+    help|--help|-h) show_usage;;
+    *) print_error "Unknown: $1"; show_usage; exit 1;;
+esac

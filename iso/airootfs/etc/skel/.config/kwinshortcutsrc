@@ -1,0 +1,62 @@
+# ============================================
+# SANCHALA OS - KWin Window Shortcuts
+# ============================================
+# Standard Linux Ctrl-based shortcuts
+# ============================================
+
+[kwin]
+Activate Window Demanding Attention=Ctrl+Alt+A
+Close Window=Alt+F4
+Expose=Ctrl+F9
+ExposeAll=Ctrl+F10
+ExposeClass=Ctrl+F7
+Kill Window=Ctrl+Alt+Escape
+MaximizeWindow=Super+Up
+MinimizeWindow=Super+Down
+Overview=Super+Tab
+Show Desktop=Super+D
+ShowDesktopGrid=Super+F8
+Switch One Desktop Down=Super+Ctrl+Down
+Switch One Desktop Up=Super+Ctrl+Up
+Switch One Desktop to the Left=Super+Ctrl+Left
+Switch One Desktop to the Right=Super+Ctrl+Right
+Switch Window Down=Super+Alt+Down
+Switch Window Left=Super+Alt+Left
+Switch Window Right=Super+Alt+Right
+Switch Window Up=Super+Alt+Up
+Switch to Desktop 1=Super+1
+Switch to Desktop 2=Super+2
+Switch to Desktop 3=Super+3
+Switch to Desktop 4=Super+4
+Walk Through Windows=Alt+Tab
+Walk Through Windows (Reverse)=Alt+Shift+Tab
+Walk Through Windows of Current Application=Alt+`
+Walk Through Windows of Current Application (Reverse)=Alt+~
+Window Above Other Windows=Super+T
+Window Close=Alt+F4
+Window Fullscreen=F11
+Window Grow Horizontal=Super+Ctrl+=
+Window Maximize=Super+Up
+Window Minimize=Super+Down
+Window Move Center=Super+C
+Window On All Desktops=Super+A
+Window One Desktop Down=Super+Shift+Ctrl+Down
+Window One Desktop Up=Super+Shift+Ctrl+Up
+Window One Desktop to the Left=Super+Shift+Ctrl+Left
+Window One Desktop to the Right=Super+Shift+Ctrl+Right
+Window Operations Menu=Alt+F3
+Window Quick Tile Bottom=Super+Shift+Down
+Window Quick Tile Bottom Left=Super+Shift+J
+Window Quick Tile Bottom Right=Super+Shift+K
+Window Quick Tile Left=Super+Left
+Window Quick Tile Right=Super+Right
+Window Quick Tile Top=Super+Shift+Up
+Window Quick Tile Top Left=Super+Shift+U
+Window Quick Tile Top Right=Super+Shift+I
+Window to Desktop 1=Super+Shift+1
+Window to Desktop 2=Super+Shift+2
+Window to Desktop 3=Super+Shift+3
+Window to Desktop 4=Super+Shift+4
+view_actual_size=Super+0
+view_zoom_in=Super+=
+view_zoom_out=Super+-

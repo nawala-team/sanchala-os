@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
+  "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<node name="/id/sanchala/Welcome1">
+  <interface name="id.sanchala.Welcome1">
+    <!-- Wizard Control -->
+    <method name="Launch">
+      <arg name="options" type="a{sv}" direction="in"/>
+      <arg name="success" type="b" direction="out"/>
+    </method>
+    
+    <method name="GetCurrentPage">
+      <arg name="page" type="s" direction="out"/>
+      <arg name="progress" type="u" direction="out"/>
+    </method>
+    
+    <method name="SetPageData">
+      <arg name="page" type="s" direction="in"/>
+      <arg name="data" type="s" direction="in"/>
+      <arg name="success" type="b" direction="out"/>
+    </method>
+    
+    <method name="NavigateNext">
+      <arg name="new_page" type="s" direction="out"/>
+    </method>
+    
+    <method name="NavigateBack">
+      <arg name="new_page" type="s" direction="out"/>
+    </method>
+    
+    <method name="SkipPage">
+      <arg name="success" type="b" direction="out"/>
+    </method>
+    
+    <!-- Tour Control -->
+    <method name="StartTour">
+      <arg name="tour_id" type="s" direction="in"/>
+      <arg name="success" type="b" direction="out"/>
+    </method>
+    
+    <method name="GetAvailableTours">
+      <arg name="tours" type="a(ssu)" direction="out"/>
+    </method>
+    
+    <method name="TourNext"/>
+    <method name="TourPrevious"/>
+    <method name="TourExit"/>
+    
+    <!-- Tips -->
+    <method name="GetNextTip">
+      <arg name="context" type="s" direction="in"/>
+      <arg name="tip_json" type="s" direction="out"/>
+    </method>
+    
+    <method name="DismissTip">
+      <arg name="tip_id" type="s" direction="in"/>
+      <arg name="forever" type="b" direction="in"/>
+    </method>
+    
+    <!-- State -->
+    <method name="IsFirstBootComplete">
+      <arg name="complete" type="b" direction="out"/>
+    </method>
+    
+    <method name="Reset"/>
+    
+    <!-- Signals -->
+    <signal name="PageChanged">
+      <arg name="page" type="s"/>
+      <arg name="progress" type="u"/>
+    </signal>
+    
+    <signal name="SetupComplete">
+      <arg name="duration_secs" type="u"/>
+    </signal>
+    
+    <signal name="TourStepChanged">
+      <arg name="tour_id" type="s"/>
+      <arg name="step" type="u"/>
+      <arg name="total" type="u"/>
+    </signal>
+    
+    <signal name="TipAvailable">
+      <arg name="tip_id" type="s"/>
+      <arg name="context" type="s"/>
+    </signal>
+  </interface>
+</node>

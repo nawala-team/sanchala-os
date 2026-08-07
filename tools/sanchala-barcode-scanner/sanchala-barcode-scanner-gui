@@ -1,0 +1,103 @@
+#!/usr/bin/env python3
+"""Sanchala Barcode Scanner - QR and Barcode Scanner"""
+import sys, json
+from datetime import datetime
+from pathlib import Path
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+
+class BarcodeApp(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Sanchala Barcode Scanner")
+        self.setMinimumSize(500, 550)
+        self.data_dir = Path.home() / ".local/share/sanchala/barcode"
+        self.data_dir.mkdir(parents=True, exist_ok=True)
+        self.history = self.load()
+        self.init_ui()
+    
+    def init_ui(self):
+        self.setStyleSheet("QMainWindow{background:#1a1a2e;}QLabel{color:#fff;}QPushButton{background:#16213e;color:#fff;border:none;padding:12px;border-radius:8px;}QPushButton:hover{background:#1f4068;}QLineEdit{background:#16213e;color:#fff;border:none;border-radius:8px;padding:12px;}")
+        c = QWidget(); self.setCentralWidget(c); m = QVBoxLayout(c)
+        m.setContentsMargins(20,20,20,20)
+        
+        # Viewfinder
+        self.view = QLabel("📷\n\nPoint camera at QR/Barcode\nor load image")
+        self.view.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.view.setStyleSheet("background:#0f0f1a;border-radius:15px;min-height:250px;font-size:16px;")
+        m.addWidget(self.view)
+        
+        # Controls
+        ctrl = QHBoxLayout()
+        scan = QPushButton("📷 Scan"); scan.setStyleSheet("background:#e94560;")
+        scan.clicked.connect(self.scan)
+        load = QPushButton("🖼️ Load Image"); load.clicked.connect(self.load_image)
+        gen = QPushButton("➕ Generate"); gen.clicked.connect(self.generate)
+        ctrl.addWidget(scan); ctrl.addWidget(load); ctrl.addWidget(gen)
+        m.addLayout(ctrl)
+        
+        # Result
+        self.result = QLineEdit(); self.result.setPlaceholderText("Scan result will appear here...")
+        self.result.setReadOnly(True)
+        m.addWidget(self.result)
+        
+        # Actions
+        acts = QHBoxLayout()
+        for txt, slot in [("📋 Copy", self.copy), ("🌐 Open", self.open_url), ("📤 Share", None)]:
+            b = QPushButton(txt)
+            if slot: b.clicked.connect(slot)
+            acts.addWidget(b)
+        m.addLayout(acts)
+        
+        # History
+        m.addWidget(QLabel("📜 History"))
+        self.hist_list = QListWidget()
+        self.hist_list.setStyleSheet("background:#16213e;border-radius:8px;max-height:120px;")
+        self.hist_list.itemClicked.connect(lambda i: self.result.setText(i.text()))
+        m.addWidget(self.hist_list)
+        self.refresh_history()
+    
+    def load(self):
+        f = self.data_dir / "history.json"
+        return json.loads(f.read_text()) if f.exists() else []
+    
+    def save(self):
+        (self.data_dir / "history.json").write_text(json.dumps(self.history[-50:]))
+    
+    def refresh_history(self):
+        self.hist_list.clear()
+        for h in reversed(self.history[-10:]): self.hist_list.addItem(h["data"])
+    
+    def scan(self):
+        # Simulated scan
+        data = f"https://sanchala.os/scan/{datetime.now().strftime('%H%M%S')}"
+        self.result.setText(data)
+        self.history.append({"data": data, "time": datetime.now().isoformat(), "type": "QR"})
+        self.save(); self.refresh_history()
+        self.statusBar().showMessage("Scanned successfully!", 2000)
+    
+    def load_image(self):
+        path, _ = QFileDialog.getOpenFileName(self, "Load Image", "", "Images (*.png *.jpg *.jpeg)")
+        if path:
+            self.view.setText(f"📷\n\nLoaded: {Path(path).name}")
+            self.scan()
+    
+    def generate(self):
+        text, ok = QInputDialog.getText(self, "Generate QR", "Enter text/URL:")
+        if ok and text:
+            self.view.setText(f"▪▪▪▪▪▪▪\n▪     ▪\n▪ QR  ▪\n▪     ▪\n▪▪▪▪▪▪▪\n\n{text[:20]}...")
+            self.result.setText(text)
+    
+    def copy(self):
+        if self.result.text():
+            QApplication.clipboard().setText(self.result.text())
+            self.statusBar().showMessage("Copied!", 2000)
+    
+    def open_url(self):
+        url = self.result.text()
+        if url.startswith("http"):
+            QDesktopServices.openUrl(QUrl(url))
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv); w = BarcodeApp(); w.show(); sys.exit(app.exec())

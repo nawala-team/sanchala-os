@@ -1,0 +1,51 @@
+#!/usr/bin/env python3
+"""Sanchala Family Sharing - Share subscriptions with family"""
+import json,secrets
+from datetime import datetime,timedelta
+from pathlib import Path
+
+class FamilySharing:
+    def __init__(self):
+        self.base=Path(__file__).parent
+        self.members=self.base/"members";self.members.mkdir(parents=True,exist_ok=True)
+        self.data=self.base/"lib/families.json";self.base.joinpath("lib").mkdir(exist_ok=True)
+        self.families=json.load(open(self.data))if self.data.exists()else{}
+        self.config={"max_members":6,"shared_storage_gb":200}
+    def _save(self):json.dump(self.families,open(self.data,'w'),indent=2)
+    def create(self,organizer,name):
+        fid=f"FAM-{secrets.token_hex(6).upper()}"
+        self.families[fid]={"id":fid,"name":name,"organizer":organizer,"created":datetime.now().isoformat(),
+            "members":[{"aid":organizer,"role":"organizer","joined":datetime.now().isoformat()}],
+            "subscriptions":[],"parental":{}}
+        self._save();return{"success":True,"family_id":fid}
+    def invite(self,fid,inviter,email):
+        if fid not in self.families:return{"success":False,"error":"Not found"}
+        f=self.families[fid]
+        if f["organizer"]!=inviter:return{"success":False,"error":"Not organizer"}
+        if len(f["members"])>=self.config["max_members"]:return{"success":False,"error":"Full"}
+        code=secrets.token_hex(4).upper()
+        json.dump({"fid":fid,"email":email,"exp":(datetime.now()+timedelta(days=7)).isoformat()},
+                  open(self.members/f"inv_{code}.json",'w'))
+        return{"success":True,"code":code}
+    def join(self,code,aid):
+        inv=self.members/f"inv_{code}.json"
+        if not inv.exists():return{"success":False,"error":"Invalid code"}
+        d=json.load(open(inv))
+        if datetime.now()>datetime.fromisoformat(d["exp"]):inv.unlink();return{"success":False,"error":"Expired"}
+        self.families[d["fid"]]["members"].append({"aid":aid,"role":"member","joined":datetime.now().isoformat()})
+        self._save();inv.unlink();return{"success":True,"family_id":d["fid"]}
+    def get(self,fid):return self.families.get(fid)
+
+if __name__=="__main__":
+    import argparse;p=argparse.ArgumentParser();s=p.add_subparsers(dest="c")
+    c=s.add_parser("create");c.add_argument("--organizer",required=True);c.add_argument("--name",required=True)
+    i=s.add_parser("invite");i.add_argument("--family-id",required=True);i.add_argument("--inviter",required=True);i.add_argument("--email",required=True)
+    j=s.add_parser("join");j.add_argument("--code",required=True);j.add_argument("--account-id",required=True)
+    sh=s.add_parser("show");sh.add_argument("--family-id",required=True)
+    s.add_parser("status");a=p.parse_args();fs=FamilySharing()
+    if a.c=="create":print(json.dumps(fs.create(a.organizer,a.name),indent=2))
+    elif a.c=="invite":print(json.dumps(fs.invite(a.family_id,a.inviter,a.email),indent=2))
+    elif a.c=="join":print(json.dumps(fs.join(a.code,a.account_id),indent=2))
+    elif a.c=="show":print(json.dumps(fs.get(a.family_id),indent=2))
+    elif a.c=="status":print(f"Family Sharing\nFamilies: {len(fs.families)}\nMax: {fs.config['max_members']}")
+    else:p.print_help()

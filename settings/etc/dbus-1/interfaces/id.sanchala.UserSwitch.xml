@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
+  "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<node name="/id/sanchala/UserSwitch">
+  <interface name="id.sanchala.UserSwitch">
+    <!-- Switch to another user -->
+    <method name="SwitchToUser">
+      <arg name="username" type="s" direction="in"/>
+      <arg name="success" type="b" direction="out"/>
+    </method>
+    
+    <!-- List active sessions -->
+    <method name="ListActiveSessions">
+      <arg name="sessions" type="a(ssb)" direction="out"/>
+      <!-- Array of (username, display_name, is_active) -->
+    </method>
+    
+    <!-- Get switch timing stats -->
+    <method name="GetSwitchStats">
+      <arg name="last_switch_ms" type="u" direction="out"/>
+      <arg name="avg_switch_ms" type="u" direction="out"/>
+    </method>
+    
+    <!-- Lock and show switch screen -->
+    <method name="LockAndSwitch">
+      <arg name="success" type="b" direction="out"/>
+    </method>
+    
+    <!-- Signals -->
+    <signal name="SwitchStarted">
+      <arg name="from_user" type="s"/>
+      <arg name="to_user" type="s"/>
+    </signal>
+    
+    <signal name="SwitchCompleted">
+      <arg name="to_user" type="s"/>
+      <arg name="duration_ms" type="u"/>
+    </signal>
+    
+    <signal name="SessionAdded">
+      <arg name="username" type="s"/>
+    </signal>
+    
+    <signal name="SessionRemoved">
+      <arg name="username" type="s"/>
+    </signal>
+  </interface>
+</node>

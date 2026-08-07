@@ -1,0 +1,10 @@
+{
+    "name": "Sanchala Mindmap",
+    "version": "2.0.0",
+    "description": "Visual mind mapping tool",
+    "category": "Productivity",
+    "icon": "🧠",
+    "launch": "./mindmap.sh",
+    "author": "Sanchala OS",
+    "features": ["Create mind maps", "Add/edit nodes", "Export to Markdown", "ASCII visualization"]
+}

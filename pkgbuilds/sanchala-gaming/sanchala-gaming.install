@@ -1,0 +1,27 @@
+post_install() {
+    echo "==> Sanchala Gaming installed!"
+    echo ""
+    echo "  Quick Start:"
+    echo "    sanchala-gaming start    # Enable game mode"
+    echo "    sanchala-gaming status   # Check status"
+    echo "    sanchala-gaming gpu      # Show GPU info"
+    echo ""
+    echo "  For Steam:"
+    echo "    - Run 'sanchala-gaming steam-optimize'"
+    echo "    - Enable Steam Play in Steam Settings"
+    echo ""
+    echo "  For Proton-GE:"
+    echo "    sanchala-gaming proton-ge"
+    echo ""
+    echo "  Controller setup: reboot or run 'sudo udevadm control --reload'"
+    echo ""
+}
+
+post_upgrade() {
+    post_install
+}
+
+post_remove() {
+    echo "==> Sanchala Gaming removed"
+    echo "  Note: User configs in ~/.config/sanchala/gaming preserved"
+}

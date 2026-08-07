@@ -1,0 +1,103 @@
+#!/usr/bin/env python3
+"""Sanchala Calendar - Calendar Application"""
+import sys, json, calendar
+from datetime import datetime
+from pathlib import Path
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+
+class CalendarApp(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Sanchala Calendar")
+        self.setMinimumSize(800, 600)
+        self.data_dir = Path.home() / ".local/share/sanchala/calendar"
+        self.data_dir.mkdir(parents=True, exist_ok=True)
+        self.events = self.load_events()
+        self.current = datetime.now()
+        self.init_ui()
+    
+    def init_ui(self):
+        self.setStyleSheet("QMainWindow{background:#1e1e2e;}QLabel{color:#cdd6f4;}QPushButton{background:#313244;color:#cdd6f4;border:none;padding:8px;border-radius:6px;}QPushButton:hover{background:#45475a;}")
+        c = QWidget(); self.setCentralWidget(c); m = QHBoxLayout(c)
+        
+        left = QVBoxLayout()
+        nav = QHBoxLayout()
+        self.prev = QPushButton("◀"); self.prev.clicked.connect(lambda: self.nav(-1))
+        self.lbl = QLabel(); self.lbl.setStyleSheet("font-size:18px;font-weight:bold;")
+        self.nxt = QPushButton("▶"); self.nxt.clicked.connect(lambda: self.nav(1))
+        nav.addWidget(self.prev); nav.addWidget(self.lbl,1); nav.addWidget(self.nxt)
+        left.addLayout(nav)
+        
+        self.tbl = QTableWidget(6,7)
+        self.tbl.setHorizontalHeaderLabels(["S","M","T","W","T","F","S"])
+        self.tbl.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.tbl.verticalHeader().setVisible(False)
+        self.tbl.cellClicked.connect(self.sel)
+        self.tbl.setStyleSheet("background:#1e1e2e;color:#cdd6f4;")
+        left.addWidget(self.tbl)
+        m.addLayout(left, 2)
+        
+        right = QVBoxLayout()
+        self.dlbl = QLabel("Events"); self.dlbl.setStyleSheet("font-size:16px;font-weight:bold;")
+        right.addWidget(self.dlbl)
+        self.lst = QListWidget(); self.lst.setStyleSheet("background:#313244;border-radius:8px;color:#cdd6f4;")
+        right.addWidget(self.lst)
+        add = QPushButton("+ Add Event"); add.setStyleSheet("background:#89b4fa;color:#1e1e2e;")
+        add.clicked.connect(self.add_event); right.addWidget(add)
+        m.addLayout(right, 1)
+        self.refresh()
+    
+    def load_events(self):
+        f = self.data_dir/"events.json"
+        return json.loads(f.read_text()) if f.exists() else {}
+    
+    def save_events(self):
+        (self.data_dir/"events.json").write_text(json.dumps(self.events))
+    
+    def nav(self, d):
+        m = self.current.month + d
+        y = self.current.year + (m-1)//12
+        self.current = self.current.replace(year=y, month=((m-1)%12)+1, day=1)
+        self.refresh()
+    
+    def refresh(self):
+        self.lbl.setText(self.current.strftime("%B %Y"))
+        cal = calendar.monthcalendar(self.current.year, self.current.month)
+        today = datetime.now()
+        for r in range(6):
+            for c in range(7):
+                d = cal[r][c] if r < len(cal) else 0
+                it = QTableWidgetItem(str(d) if d else "")
+                it.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+                if d:
+                    ds = f"{self.current.year}-{self.current.month:02d}-{d:02d}"
+                    if ds in self.events: it.setBackground(QColor("#89b4fa")); it.setForeground(QColor("#1e1e2e"))
+                    if d==today.day and self.current.month==today.month and self.current.year==today.year:
+                        it.setBackground(QColor("#f38ba8"))
+                self.tbl.setItem(r, c, it)
+    
+    def sel(self, r, c):
+        it = self.tbl.item(r, c)
+        if it and it.text():
+            ds = f"{self.current.year}-{self.current.month:02d}-{int(it.text()):02d}"
+            self.dlbl.setText(f"Events: {ds}")
+            self.lst.clear()
+            for e in self.events.get(ds, []): self.lst.addItem(f"• {e['time']} {e['title']}")
+    
+    def add_event(self):
+        dlg = QDialog(self); dlg.setWindowTitle("Add Event"); dlg.setMinimumWidth(300)
+        l = QFormLayout(dlg)
+        t = QLineEdit(); d = QDateEdit(QDate.currentDate()); tm = QTimeEdit(QTime.currentTime())
+        l.addRow("Title:", t); l.addRow("Date:", d); l.addRow("Time:", tm)
+        b = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok|QDialogButtonBox.StandardButton.Cancel)
+        b.accepted.connect(dlg.accept); b.rejected.connect(dlg.reject); l.addRow(b)
+        if dlg.exec() == QDialog.DialogCode.Accepted and t.text():
+            ds = d.date().toString("yyyy-MM-dd")
+            if ds not in self.events: self.events[ds] = []
+            self.events[ds].append({"title":t.text(),"time":tm.time().toString("HH:mm")})
+            self.save_events(); self.refresh()
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv); w = CalendarApp(); w.show(); sys.exit(app.exec())

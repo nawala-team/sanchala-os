@@ -1,0 +1,10 @@
+[Unit]
+Description=Sanchala Package Cache Cleanup Timer
+
+[Timer]
+OnCalendar=monthly
+Persistent=true
+RandomizedDelaySec=1d
+
+[Install]
+WantedBy=timers.target

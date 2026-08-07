@@ -1,0 +1,14 @@
+[Desktop Entry]
+Name=Sanchala Cloud
+Comment=Cloud storage status and sync
+Icon=folder-cloud
+Type=Service
+X-KDE-ServiceTypes=Plasma/Applet
+X-Plasma-API=declarativeappletscript
+X-Plasma-MainScript=ui/main.qml
+X-KDE-PluginInfo-Author=Sanchala Team
+X-KDE-PluginInfo-Email=cloud@sanchala.id
+X-KDE-PluginInfo-Name=org.sanchala.cloud
+X-KDE-PluginInfo-Version=1.0
+X-KDE-PluginInfo-Category=System Information
+X-KDE-PluginInfo-License=GPL-3.0

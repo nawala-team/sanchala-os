@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=WiFi Analyzer
+GenericName=Wireless Network Analyzer
+Comment=Analyze WiFi networks, channels, and signal strength
+Exec=sanchala-wifi-analyzer
+Icon=network-wireless
+Terminal=false
+Type=Application
+Categories=Network;Monitor;System;
+Keywords=wifi;wireless;signal;channel;network;analyzer;
+StartupNotify=true
+X-GNOME-UsesNotifications=true

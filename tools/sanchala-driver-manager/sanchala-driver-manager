@@ -1,0 +1,59 @@
+#!/bin/bash
+# Sanchala Driver Manager - Hardware Driver Management
+set -euo pipefail
+
+list_hardware() {
+    echo "=== Hardware Devices ==="
+    lspci -nn 2>/dev/null | head -20 || echo "lspci not available"
+}
+
+list_drivers() {
+    echo "=== Loaded Kernel Modules ==="
+    lsmod | head -20
+}
+
+detect_gpu() {
+    echo "=== GPU Detection ==="
+    lspci -nn | grep -iE "vga|3d|display" || echo "No GPU detected"
+    echo
+    if command -v nvidia-smi &>/dev/null; then
+        echo "NVIDIA Driver: Installed"
+        nvidia-smi --query-gpu=driver_version --format=csv,noheader 2>/dev/null || true
+    elif lsmod | grep -q amdgpu; then
+        echo "AMD GPU Driver: amdgpu (loaded)"
+    elif lsmod | grep -q i915; then
+        echo "Intel GPU Driver: i915 (loaded)"
+    else
+        echo "Using: Open-source drivers"
+    fi
+}
+
+install_driver() {
+    local driver="$1"
+    case "$driver" in
+        nvidia)
+            echo "Installing NVIDIA drivers..."
+            pacman -S nvidia nvidia-utils nvidia-settings --noconfirm || echo "Install failed"
+            ;;
+        amd)
+            echo "AMD drivers are included in the kernel (amdgpu)"
+            pacman -S mesa vulkan-radeon --noconfirm || true
+            ;;
+        intel)
+            echo "Intel drivers are included in the kernel (i915)"
+            pacman -S mesa vulkan-intel --noconfirm || true
+            ;;
+        *)
+            echo "Unknown driver: $driver"
+            ;;
+    esac
+}
+
+case "${1:-status}" in
+    status) detect_gpu ;;
+    hardware|-h) list_hardware ;;
+    modules|-m) list_drivers ;;
+    install|-i) install_driver "$2" ;;
+    gui) exec sanchala-driver-manager-gui ;;
+    *) echo "Usage: $0 {status|hardware|modules|install|gui}" ;;
+esac

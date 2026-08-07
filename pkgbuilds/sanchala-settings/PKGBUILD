@@ -1,0 +1,39 @@
+# Maintainer: Sanchala Team <dev@sanchala.id>
+
+pkgname=sanchala-settings
+pkgver=1.0.0
+pkgrel=1
+pkgdesc='Sanchala OS default settings and configurations'
+arch=('any')
+url='https://sanchala.id'
+license=('GPL3')
+groups=('sanchala')
+depends=(
+    'plasma-desktop'
+    'plasma-workspace'
+    'kde-gtk-config'
+    'breeze'
+    'breeze-gtk'
+)
+optdepends=(
+    'latte-dock: macOS-style dock'
+    'kvantum: advanced theming'
+)
+install=sanchala-settings.install
+
+package() {
+    # Plasma configuration
+    install -dm755 "$pkgdir/etc/skel/.config"
+    cp -r "$srcdir/config/"* "$pkgdir/etc/skel/.config/"
+    
+    # Color schemes
+    install -Dm644 "$srcdir/SanchalaDark.colors" \
+        "$pkgdir/usr/share/color-schemes/SanchalaDark.colors"
+    install -Dm644 "$srcdir/SanchalaLight.colors" \
+        "$pkgdir/usr/share/color-schemes/SanchalaLight.colors"
+    
+    # Global KDE defaults
+    install -dm755 "$pkgdir/etc/xdg"
+    install -Dm644 "$srcdir/kdeglobals" "$pkgdir/etc/xdg/kdeglobals"
+    install -Dm644 "$srcdir/kwinrc" "$pkgdir/etc/xdg/kwinrc"
+}

@@ -1,0 +1,16 @@
+{
+    "name": "Sanchala Translate",
+    "version": "2.0.0",
+    "description": "Multi-language translation tool",
+    "category": "Productivity",
+    "icon": "🌐",
+    "launch": "./translate.sh",
+    "author": "Sanchala OS",
+    "features": [
+        "20+ language support",
+        "Quick translation",
+        "Language detection",
+        "File translation",
+        "Translation history"
+    ]
+}

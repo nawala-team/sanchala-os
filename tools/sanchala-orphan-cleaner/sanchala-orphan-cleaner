@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: GPL-3.0
+# Sanchala Orphan Cleaner - Remove Orphaned Items
+set -euo pipefail
+VERSION="1.0.0"
+PROGRAM_NAME="sanchala-orphan-cleaner"
+RED="\033[0;31m" GREEN="\033[0;32m" YELLOW="\033[1;33m" BLUE="\033[0;34m" NC="\033[0m" BOLD="\033[1m"
+print_info() { echo -e "${BLUE}i $1${NC}"; }
+print_success() { echo -e "${GREEN}ok $1${NC}"; }
+print_warning() { echo -e "${YELLOW}! $1${NC}"; }
+print_error() { echo -e "${RED}x $1${NC}"; }
+check_root() { [[ $EUID -eq 0 ]] || { print_error "Root required"; exit 1; }; }
+show_help() {
+cat << HELP
+SANCHALA ORPHAN CLEANER - Remove Orphaned Items
+USAGE: sanchala-orphan-cleaner <COMMAND>
+COMMANDS:
+  scan              Scan for orphans
+  packages          List orphaned packages
+  remove-packages   Remove orphaned packages
+  configs           Find orphaned configs
+  cache             Clean package cache
+  kernels           List old kernels
+  remove-kernels    Remove old kernels
+  docker            Clean Docker orphans
+  flatpak           Clean Flatpak orphans
+  all               Full cleanup
+OPTIONS:
+  -h, --help        Show this help
+HELP
+}
+get_pm() { command -v apt &>/dev/null && echo "apt" && return; command -v dnf &>/dev/null && echo "dnf" && return; command -v pacman &>/dev/null && echo "pacman" && return; echo "unknown"; }
+cmd_scan() { echo -e "${BOLD}Orphan Scan:${NC}"; echo "Packages: $(cmd_packages 2>/dev/null | wc -l)"; echo "Kernels: $(cmd_kernels 2>/dev/null | wc -l)"; }
+cmd_packages() { case $(get_pm) in apt) deborphan 2>/dev/null || apt list --installed 2>/dev/null | grep auto;; dnf) dnf repoquery --extras 2>/dev/null;; pacman) pacman -Qtdq 2>/dev/null;; esac | head -30; }
+cmd_remove_packages() { print_info "Removing orphans..."; case $(get_pm) in apt) apt-get autoremove -y;; dnf) dnf autoremove -y;; pacman) pacman -Qtdq | xargs -r pacman -Rns --noconfirm;; esac; print_success "Done"; }
+cmd_configs() { echo -e "${BOLD}Orphaned Configs:${NC}"; case $(get_pm) in apt) dpkg -l | grep "^rc";; dnf) find /etc -name "*.rpmsave" 2>/dev/null;; pacman) find /etc -name "*.pacnew" 2>/dev/null;; esac; }
+cmd_cache() { print_info "Cleaning cache..."; case $(get_pm) in apt) apt-get clean;; dnf) dnf clean all;; pacman) pacman -Sc --noconfirm;; esac; print_success "Done"; }
+cmd_kernels() { local c=$(uname -r); echo -e "${BOLD}Old Kernels (current: $c):${NC}"; case $(get_pm) in apt) dpkg -l | grep linux-image | grep -v "$c";; dnf) rpm -qa kernel | grep -v "$c";; esac; }
+cmd_remove_kernels() { local c=$(uname -r); print_warning "Removing old kernels..."; case $(get_pm) in apt) dpkg -l | grep linux-image | grep -v "$c" | awk '{print $2}' | xargs -r apt-get remove -y;; esac; print_success "Done"; }
+cmd_docker() { command -v docker &>/dev/null || { print_warning "Docker not installed"; return; }; print_info "Cleaning Docker..."; docker system prune -af 2>/dev/null; print_success "Done"; }
+cmd_flatpak() { command -v flatpak &>/dev/null || { print_warning "Flatpak not installed"; return; }; print_info "Cleaning Flatpak..."; flatpak uninstall --unused -y 2>/dev/null; print_success "Done"; }
+cmd_all() { echo -e "${BOLD}Full Cleanup${NC}"; read -p "Continue? (y/n): " a; [[ "$a" == "y" ]] || exit 0; cmd_remove_packages; cmd_cache; cmd_remove_kernels; cmd_docker; cmd_flatpak; print_success "Complete"; }
+main() {
+    case "${1:-help}" in
+        scan) cmd_scan;; packages) cmd_packages;; remove-packages) check_root; cmd_remove_packages;;
+        configs) cmd_configs;; cache) check_root; cmd_cache;; kernels) cmd_kernels;;
+        remove-kernels) check_root; cmd_remove_kernels;; docker) check_root; cmd_docker;;
+        flatpak) cmd_flatpak;; all) check_root; cmd_all;;
+        -h|--help|help) show_help;; --version) echo "$PROGRAM_NAME $VERSION";; *) print_error "Unknown: $1"; exit 1;;
+    esac
+}
+main "$@"

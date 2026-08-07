@@ -1,0 +1,72 @@
+# Maintainer: Sanchala Team <team@sanchala.id>
+pkgname=sanchala-ai
+pkgver=1.0.0
+pkgrel=1
+pkgdesc="Privacy-first local AI assistant for Sanchala OS"
+arch=('x86_64' 'aarch64')
+url="https://github.com/sanchala-os/sanchala-ai"
+license=('GPL3')
+depends=(
+    'python'
+    'python-gobject'
+    'tesseract'
+    'tesseract-data-eng'
+)
+optdepends=(
+    'ollama: Local LLM runtime (required for chat)'
+    'tesseract-data-ind: Indonesian OCR'
+    'tesseract-data-jpn: Japanese OCR'
+    'tesseract-data-chi_sim: Chinese Simplified OCR'
+)
+makedepends=('python-setuptools')
+backup=('etc/sanchala/ai.conf')
+source=("$pkgname-$pkgver.tar.gz")
+sha256sums=('SKIP')
+
+package() {
+    cd "$srcdir/$pkgname-$pkgver"
+    
+    # Binaries
+    install -Dm755 bin/sanchala-ai "$pkgdir/usr/bin/sanchala-ai"
+    install -Dm755 bin/sanchala-ocr "$pkgdir/usr/bin/sanchala-ocr"
+    install -Dm755 bin/sanchala-suggest "$pkgdir/usr/bin/sanchala-suggest"
+    install -Dm755 bin/sanchala-ai-models "$pkgdir/usr/bin/sanchala-ai-models"
+    install -Dm755 lib/sanchala_aid.py "$pkgdir/usr/bin/sanchala-aid"
+    
+    # Library
+    install -Dm644 lib/sanchala_aid.py "$pkgdir/usr/lib/sanchala-ai/sanchala_aid.py"
+    
+    # Systemd
+    install -Dm644 systemd/sanchala-aid.service "$pkgdir/usr/lib/systemd/user/sanchala-aid.service"
+    
+    # D-Bus
+    install -Dm644 dbus/id.sanchala.AI.service "$pkgdir/usr/share/dbus-1/services/id.sanchala.AI.service"
+    install -Dm644 dbus/id.sanchala.AI.conf "$pkgdir/usr/share/dbus-1/system.d/id.sanchala.AI.conf"
+    
+    # Config
+    install -Dm644 config/config.json "$pkgdir/usr/share/sanchala-ai/config.json"
+    
+    # Plasma widget
+    install -Dm644 plasma/metadata.desktop "$pkgdir/usr/share/plasma/plasmoids/id.sanchala.ai.plasmoid/metadata.desktop"
+    install -Dm644 plasma/contents/ui/main.qml "$pkgdir/usr/share/plasma/plasmoids/id.sanchala.ai.plasmoid/contents/ui/main.qml"
+    
+    # Documentation
+    install -Dm644 README.md "$pkgdir/usr/share/doc/$pkgname/README.md"
+}
+
+post_install() {
+    echo ""
+    echo "==> Sanchala AI installed!"
+    echo ""
+    echo "To use the AI assistant, install Ollama and download a model:"
+    echo "  curl -fsSL https://ollama.com/install.sh | sh"
+    echo "  ollama pull llama3.2:3b"
+    echo ""
+    echo "Enable the daemon:"
+    echo "  systemctl --user enable --now sanchala-aid"
+    echo ""
+    echo "Usage:"
+    echo "  sanchala-ai chat \"Hello\""
+    echo "  sanchala-ocr image.png"
+    echo ""
+}

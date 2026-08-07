@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: GPL-3.0
+# Sanchala Backup - Pacman Hook Handler
+
+set -euo pipefail
+
+ACTION="$1"
+PRE_SNAPSHOT_FILE="/tmp/sanchala-backup-pre-number"
+
+case "$ACTION" in
+    pre)
+        # Create pre snapshot and save number
+        NUM=$(snapper -c root create --type pre \
+            --cleanup-algorithm number \
+            --description "pacman pre" \
+            --print-number)
+        echo "$NUM" > "$PRE_SNAPSHOT_FILE"
+        ;;
+    post)
+        # Create post snapshot linked to pre
+        if [[ -f "$PRE_SNAPSHOT_FILE" ]]; then
+            PRE_NUM=$(cat "$PRE_SNAPSHOT_FILE")
+            snapper -c root create --type post \
+                --pre-number "$PRE_NUM" \
+                --cleanup-algorithm number \
+                --description "pacman post"
+            rm -f "$PRE_SNAPSHOT_FILE"
+        else
+            # No pre snapshot, create single
+            snapper -c root create \
+                --cleanup-algorithm number \
+                --description "pacman (no pre)"
+        fi
+        
+        # Update GRUB if grub-btrfs is installed
+        if command -v grub-btrfsd &>/dev/null; then
+            systemctl try-reload-or-restart grub-btrfsd 2>/dev/null || true
+        fi
+        ;;
+esac

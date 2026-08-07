@@ -1,0 +1,104 @@
+#!/bin/bash
+# ============================================================================
+# SANCHALA OS - Bluetooth Auto-Connect Service
+# ============================================================================
+# Automatically reconnects to paired devices on startup/wake
+# ============================================================================
+
+set -euo pipefail
+
+LOG_TAG="sanchala-bt-autoconnect"
+MAX_RETRIES=5
+RETRY_DELAY=2
+
+log() {
+    logger -t "$LOG_TAG" "$1"
+    echo "[$(date '+%H:%M:%S')] $1"
+}
+
+# Wait for Bluetooth service to be ready
+wait_for_bluetooth() {
+    local count=0
+    while ! bluetoothctl show &>/dev/null && (( count < 30 )); do
+        sleep 1
+        ((count++))
+    done
+    
+    if (( count >= 30 )); then
+        log "ERROR: Bluetooth service not available"
+        exit 1
+    fi
+}
+
+# Get list of paired devices that should auto-connect
+get_autoconnect_devices() {
+    # Devices with audio profiles are prioritized
+    bluetoothctl devices Paired | while read -r _ mac _; do
+        local info
+        info=$(bluetoothctl info "$mac" 2>/dev/null || echo "")
+        
+        # Check if trusted (should auto-connect)
+        if echo "$info" | grep -q "Trusted: yes"; then
+            echo "$mac"
+        fi
+    done
+}
+
+# Try to connect to a device
+try_connect() {
+    local mac="$1"
+    local name
+    name=$(bluetoothctl info "$mac" 2>/dev/null | grep "Alias:" | cut -d: -f2- | xargs)
+    
+    log "Attempting to connect: ${name:-$mac}"
+    
+    local retry=0
+    while (( retry < MAX_RETRIES )); do
+        if bluetoothctl connect "$mac" &>/dev/null; then
+            log "Connected: ${name:-$mac}"
+            return 0
+        fi
+        
+        ((retry++))
+        sleep "$RETRY_DELAY"
+    done
+    
+    log "Failed to connect: ${name:-$mac} (after $MAX_RETRIES attempts)"
+    return 1
+}
+
+# Main auto-connect routine
+main() {
+    log "Starting Bluetooth auto-connect"
+    
+    wait_for_bluetooth
+    
+    # Ensure Bluetooth is powered on
+    bluetoothctl power on &>/dev/null
+    
+    # Small delay for adapter initialization
+    sleep 2
+    
+    # Get devices and try to connect
+    local devices
+    devices=$(get_autoconnect_devices)
+    
+    if [[ -z "$devices" ]]; then
+        log "No devices configured for auto-connect"
+        exit 0
+    fi
+    
+    # Connect to each device
+    local connected=0
+    while read -r mac; do
+        if [[ -n "$mac" ]]; then
+            if try_connect "$mac"; then
+                ((connected++))
+            fi
+        fi
+    done <<< "$devices"
+    
+    log "Auto-connect complete: $connected device(s) connected"
+}
+
+main "$@"

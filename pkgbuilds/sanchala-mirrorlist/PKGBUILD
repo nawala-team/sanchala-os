@@ -1,0 +1,16 @@
+# Maintainer: Sanchala Team <dev@sanchala.id>
+
+pkgname=sanchala-mirrorlist
+pkgver=1.0.0
+pkgrel=1
+pkgdesc='Sanchala OS mirror list for pacman'
+arch=('any')
+url='https://sanchala.id'
+license=('GPL3')
+groups=('sanchala')
+backup=('etc/pacman.d/sanchala-mirrorlist')
+
+package() {
+    install -Dm644 "$srcdir/sanchala-mirrorlist" \
+        "$pkgdir/etc/pacman.d/sanchala-mirrorlist"
+}

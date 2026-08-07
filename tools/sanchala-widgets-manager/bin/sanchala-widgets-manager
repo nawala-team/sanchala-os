@@ -1,0 +1,111 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0
+# Sanchala Widgets Manager - Desktop widgets management
+"""Manage desktop widgets with beautiful, customizable panels"""
+
+import sys, json, argparse, subprocess
+from pathlib import Path
+
+VERSION = "1.0.0"
+CONFIG_DIR = Path.home() / ".config" / "sanchala" / "widgets"
+
+class WidgetsConfig:
+    def __init__(self):
+        CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+        self.file = CONFIG_DIR / "config.json"
+        self.data = self._load()
+    
+    def _load(self):
+        defaults = {"widgets": [], "available": [
+            {"id": "clock", "name": "Clock", "desc": "Analog/Digital clock", "icon": "🕐"},
+            {"id": "weather", "name": "Weather", "desc": "Weather conditions", "icon": "🌤️"},
+            {"id": "calendar", "name": "Calendar", "desc": "Monthly calendar", "icon": "📅"},
+            {"id": "system", "name": "System Monitor", "desc": "CPU, RAM, Disk", "icon": "📊"},
+            {"id": "notes", "name": "Sticky Notes", "desc": "Quick notes", "icon": "📝"},
+            {"id": "music", "name": "Music Player", "desc": "Now playing", "icon": "🎵"},
+            {"id": "todo", "name": "Todo List", "desc": "Task list", "icon": "✅"},
+            {"id": "quotes", "name": "Quotes", "desc": "Daily inspiration", "icon": "💬"},
+        ]}
+        if self.file.exists():
+            try: defaults.update(json.load(open(self.file)))
+            except: pass
+        return defaults
+    
+    def save(self):
+        with open(self.file, 'w') as f: json.dump(self.data, f, indent=2)
+
+def cmd_list(args):
+    config = WidgetsConfig()
+    print("\n📦 Available Widgets:\n")
+    for w in config.data["available"]:
+        active = "✓" if any(a["id"] == w["id"] for a in config.data["widgets"]) else " "
+        print(f"  [{active}] {w['icon']} {w['name']:15} - {w['desc']}")
+    print()
+    return 0
+
+def cmd_add(args):
+    config = WidgetsConfig()
+    widget_id = args.widget
+    
+    avail = next((w for w in config.data["available"] if w["id"] == widget_id), None)
+    if not avail:
+        print(f"❌ Unknown widget: {widget_id}")
+        return 1
+    
+    if any(w["id"] == widget_id for w in config.data["widgets"]):
+        print(f"Widget '{widget_id}' already active")
+        return 0
+    
+    config.data["widgets"].append({"id": widget_id, "position": args.position or "right", 
+                                    "size": args.size or "medium"})
+    config.save()
+    print(f"✅ Added widget: {avail['name']}")
+    
+    # Apply to Plasma if available
+    subprocess.run(["plasmactl", "widget", "add", widget_id], capture_output=True)
+    return 0
+
+def cmd_remove(args):
+    config = WidgetsConfig()
+    config.data["widgets"] = [w for w in config.data["widgets"] if w["id"] != args.widget]
+    config.save()
+    print(f"✅ Removed widget: {args.widget}")
+    return 0
+
+def cmd_active(args):
+    config = WidgetsConfig()
+    print("\n🖼️  Active Widgets:\n")
+    if not config.data["widgets"]:
+        print("  No active widgets")
+    for w in config.data["widgets"]:
+        avail = next((a for a in config.data["available"] if a["id"] == w["id"]), {})
+        print(f"  {avail.get('icon', '📦')} {avail.get('name', w['id']):15} [{w.get('position', 'right')}]")
+    print()
+    return 0
+
+def cmd_configure(args):
+    # Open Plasma widget settings
+    subprocess.run(["plasmactl", "editmode"], capture_output=True)
+    subprocess.run(["kcmshell5", "plasma-desktop"], capture_output=True)
+    return 0
+
+def main():
+    p = argparse.ArgumentParser(prog="sanchala-widgets-manager", description="📦 Widgets Manager")
+    p.add_argument("--version", action="version", version=f"%(prog)s {VERSION}")
+    sub = p.add_subparsers(dest="cmd")
+    
+    sub.add_parser("list", help="List available widgets")
+    s = sub.add_parser("add", help="Add widget"); s.add_argument("widget")
+    s.add_argument("-p", "--position", choices=["left","right","top","bottom"])
+    s.add_argument("-s", "--size", choices=["small","medium","large"])
+    s = sub.add_parser("remove", aliases=["rm"], help="Remove widget"); s.add_argument("widget")
+    sub.add_parser("active", help="Show active widgets")
+    sub.add_parser("configure", help="Open widget settings")
+    
+    args = p.parse_args()
+    cmds = {"list": cmd_list, "add": cmd_add, "remove": cmd_remove, "rm": cmd_remove,
+            "active": cmd_active, "configure": cmd_configure}
+    if args.cmd in cmds: return cmds[args.cmd](args)
+    return cmd_list(args)
+
+if __name__ == "__main__": sys.exit(main())

@@ -1,0 +1,10 @@
+{
+    "name": "Sanchala Clipboard Manager",
+    "version": "2.0.0",
+    "description": "Advanced clipboard history manager",
+    "category": "Productivity",
+    "icon": "📋",
+    "launch": "./clipboard-manager.sh",
+    "author": "Sanchala OS",
+    "features": ["Clipboard history", "Saved snippets", "Quick copy", "Cross-platform support"]
+}

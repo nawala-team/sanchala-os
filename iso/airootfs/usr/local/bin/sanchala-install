@@ -1,0 +1,17 @@
+#!/bin/bash
+#
+# SANCHALA OS - Quick Installer Launcher
+#
+
+# Check if running as live user
+if [ "$USER" != "sanchala" ] && [ "$USER" != "root" ]; then
+    echo "Please run from Sanchala OS live environment"
+    exit 1
+fi
+
+# Launch Calamares installer
+if command -v calamares &> /dev/null; then
+    pkexec calamares
+else
+    kdialog --error "Installer not found. Please boot from Sanchala OS live media."
+fi

@@ -1,0 +1,106 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0
+# Sanchala Shortcuts Help - Keyboard shortcuts reference
+"""Display and manage keyboard shortcuts for the desktop"""
+
+import sys, json, argparse
+from pathlib import Path
+
+VERSION = "1.0.0"
+CONFIG_DIR = Path.home() / ".config" / "sanchala" / "shortcuts"
+
+SHORTCUTS = {
+    "Desktop": [
+        ("Super", "Open Overview"),
+        ("Super + A", "Application Menu"),
+        ("Super + D", "Show Desktop"),
+        ("Super + L", "Lock Screen"),
+        ("Super + E", "File Manager"),
+        ("Super + T", "Terminal"),
+        ("Super + Space", "Spotlight Search"),
+    ],
+    "Windows": [
+        ("Alt + Tab", "Switch Windows"),
+        ("Alt + F4", "Close Window"),
+        ("Super + ↑", "Maximize"),
+        ("Super + ↓", "Minimize/Restore"),
+        ("Super + ←/→", "Snap Left/Right"),
+        ("Alt + F7", "Move Window"),
+        ("Alt + F8", "Resize Window"),
+    ],
+    "Workspaces": [
+        ("Super + 1-9", "Switch to Workspace"),
+        ("Super + Shift + 1-9", "Move Window to Workspace"),
+        ("Ctrl + Alt + ↑/↓", "Navigate Workspaces"),
+        ("Super + Scroll", "Cycle Workspaces"),
+    ],
+    "Screenshots": [
+        ("Print", "Full Screenshot"),
+        ("Alt + Print", "Window Screenshot"),
+        ("Shift + Print", "Area Screenshot"),
+        ("Ctrl + Print", "Screenshot to Clipboard"),
+    ],
+    "System": [
+        ("Ctrl + Alt + Delete", "Log Out"),
+        ("Ctrl + Alt + T", "Terminal"),
+        ("Super + R", "Run Command"),
+        ("Super + S", "Settings"),
+    ],
+    "Accessibility": [
+        ("Super + +/-", "Zoom In/Out"),
+        ("Super + 0", "Reset Zoom"),
+        ("Alt + Super + S", "Screen Reader"),
+    ]
+}
+
+def cmd_show(args):
+    category = args.category
+    if category and category not in SHORTCUTS:
+        print(f"Unknown category. Available: {', '.join(SHORTCUTS.keys())}")
+        return 1
+    
+    print("\n⌨️  Keyboard Shortcuts\n" + "━"*50)
+    
+    cats = [category] if category else SHORTCUTS.keys()
+    for cat in cats:
+        print(f"\n  {cat}:")
+        for key, action in SHORTCUTS[cat]:
+            print(f"    {key:25} {action}")
+    print()
+    return 0
+
+def cmd_search(args):
+    query = args.query.lower()
+    print(f"\n🔍 Shortcuts matching '{args.query}':\n")
+    found = False
+    for cat, shortcuts in SHORTCUTS.items():
+        for key, action in shortcuts:
+            if query in key.lower() or query in action.lower():
+                print(f"  {key:25} {action}  ({cat})")
+                found = True
+    if not found: print("  No matching shortcuts found")
+    print()
+    return 0
+
+def cmd_categories(args):
+    print("\n📂 Categories:")
+    for cat in SHORTCUTS.keys():
+        print(f"  • {cat} ({len(SHORTCUTS[cat])} shortcuts)")
+    print()
+    return 0
+
+def main():
+    p = argparse.ArgumentParser(prog="sanchala-shortcuts-help", description="⌨️ Shortcuts Help")
+    p.add_argument("--version", action="version", version=f"%(prog)s {VERSION}")
+    sub = p.add_subparsers(dest="cmd")
+    s = sub.add_parser("show", help="Show shortcuts"); s.add_argument("category", nargs="?")
+    s = sub.add_parser("search", help="Search shortcuts"); s.add_argument("query")
+    sub.add_parser("categories", help="List categories")
+    sub.add_parser("gui", help="Open GUI")
+    args = p.parse_args()
+    cmds = {"show": cmd_show, "search": cmd_search, "categories": cmd_categories,
+            "gui": lambda a: __import__('os').system("kcmshell5 keys &") or 0}
+    if args.cmd in cmds: return cmds[args.cmd](args)
+    return cmd_show(argparse.Namespace(category=None))
+
+if __name__ == "__main__": sys.exit(main())

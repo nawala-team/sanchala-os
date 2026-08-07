@@ -1,0 +1,39 @@
+# Maintainer: Sanchala Team <dev@sanchala.id>
+
+pkgname=sanchala-icons
+pkgver=1.0.0
+pkgrel=1
+pkgdesc='Sanchala OS icon theme based on Papirus'
+arch=('any')
+url='https://sanchala.id'
+license=('GPL3')
+groups=('sanchala')
+depends=('papirus-icon-theme')
+optdepends=('hicolor-icon-theme: base icon theme')
+
+package() {
+    # Install Sanchala-specific icons
+    install -dm755 "$pkgdir/usr/share/icons/Sanchala"
+    
+    # Copy icon theme
+    cp -r "$srcdir/icons/"* "$pkgdir/usr/share/icons/Sanchala/"
+    
+    # Install index.theme
+    install -Dm644 "$srcdir/index.theme" \
+        "$pkgdir/usr/share/icons/Sanchala/index.theme"
+    
+    # Update icon cache hook
+    install -Dm644 /dev/stdin "$pkgdir/usr/share/libalpm/hooks/sanchala-icons.hook" << 'EOF'
+[Trigger]
+Type = Path
+Operation = Install
+Operation = Upgrade
+Operation = Remove
+Target = usr/share/icons/Sanchala/*
+
+[Action]
+Description = Updating Sanchala icon cache...
+When = PostTransaction
+Exec = /usr/bin/gtk-update-icon-cache -ftq /usr/share/icons/Sanchala
+EOF
+}

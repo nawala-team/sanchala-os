@@ -1,0 +1,39 @@
+# ============================================================================
+# SANCHALA OS - Akonadi Server Configuration
+# ============================================================================
+# Backend for KDE PIM suite (Kontact, KOrganizer, KAddressBook, KMail)
+# Optimized for performance and reliability
+# ============================================================================
+
+[%General]
+# Database driver: QSQLITE (default, no external server)
+# Alternative: QMYSQL (requires MariaDB), QPSQL (requires PostgreSQL)
+Driver=QSQLITE
+
+# External server (leave empty for embedded SQLite)
+ExternalServer=false
+
+[QSQLITE]
+# SQLite-specific optimizations
+Name=akonadi
+# Enable Write-Ahead Logging for better performance
+WAL=true
+
+[Debug]
+# Disable by default for production
+Tracer=null
+
+[Search]
+# Enable Xapian full-text search
+Manager=Agent
+
+[IntervalCheck]
+# Sync interval for resources (minutes)
+Interval=15
+
+[Startup]
+# Auto-start on first PIM app launch
+StartServer=true
+
+# Show notification on startup errors
+ShowNotifications=true

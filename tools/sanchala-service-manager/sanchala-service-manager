@@ -1,0 +1,49 @@
+#!/bin/bash
+# Sanchala Service Manager - Systemd Service Management
+set -euo pipefail
+
+list_services() {
+    local filter="${1:-}"
+    echo "=== System Services ==="
+    if [[ -n "$filter" ]]; then
+        systemctl list-units --type=service --all | grep -i "$filter"
+    else
+        systemctl list-units --type=service --state=running | head -30
+    fi
+}
+
+service_status() {
+    systemctl status "$1" 2>/dev/null || echo "Service not found: $1"
+}
+
+service_start() {
+    systemctl start "$1" && echo "Started: $1"
+}
+
+service_stop() {
+    systemctl stop "$1" && echo "Stopped: $1"
+}
+
+service_restart() {
+    systemctl restart "$1" && echo "Restarted: $1"
+}
+
+service_enable() {
+    systemctl enable "$1" && echo "Enabled: $1"
+}
+
+service_disable() {
+    systemctl disable "$1" && echo "Disabled: $1"
+}
+
+case "${1:-list}" in
+    list|-l) list_services "${2:-}" ;;
+    status|-s) service_status "$2" ;;
+    start) service_start "$2" ;;
+    stop) service_stop "$2" ;;
+    restart|-r) service_restart "$2" ;;
+    enable|-e) service_enable "$2" ;;
+    disable|-d) service_disable "$2" ;;
+    gui) exec sanchala-service-manager-gui ;;
+    *) echo "Usage: $0 {list|status|start|stop|restart|enable|disable|gui}" ;;
+esac

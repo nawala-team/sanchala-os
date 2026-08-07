@@ -1,0 +1,116 @@
+# ============================================
+# SANCHALA OS - Global Keyboard Shortcuts
+# ============================================
+# Standard Linux Ctrl-based shortcuts
+# With comprehensive accessibility shortcuts
+# ============================================
+
+[ksmserver]
+Lock Session=Ctrl+Alt+L,Ctrl+Alt+L,Lock Session
+Log Out=Ctrl+Alt+Delete,Ctrl+Alt+Delete,Log Out
+
+[kwin]
+Walk Through Windows=Alt+Tab,Alt+Tab,Walk Through Windows
+Walk Through Windows (Reverse)=Alt+Shift+Tab,Alt+Shift+Tab,Walk Through Windows (Reverse)
+Walk Through Windows of Current Application=Alt+`,Alt+`,Walk Through Windows of Current Application
+Window Close=Alt+F4,Alt+F4,Close Window
+Window Maximize=Super+Up,Super+Up,Maximize Window
+Window Minimize=Super+Down,Super+Down,Minimize Window
+Window Fullscreen=F11,F11,Make Window Fullscreen
+Window Quick Tile Left=Super+Left,Super+Left,Quick Tile Left
+Window Quick Tile Right=Super+Right,Super+Right,Quick Tile Right
+Window Quick Tile Top=Super+Shift+Up,none,Quick Tile Top
+Window Quick Tile Bottom=Super+Shift+Down,none,Quick Tile Bottom
+Window Move Center=Super+C,none,Move Window to Center
+Switch to Desktop 1=Super+1,Super+1,Switch to Desktop 1
+Switch to Desktop 2=Super+2,Super+2,Switch to Desktop 2
+Switch to Desktop 3=Super+3,Super+3,Switch to Desktop 3
+Switch to Desktop 4=Super+4,Super+4,Switch to Desktop 4
+Switch One Desktop to the Left=Super+Ctrl+Left,Super+Ctrl+Left,Switch One Desktop Left
+Switch One Desktop to the Right=Super+Ctrl+Right,Super+Ctrl+Right,Switch One Desktop Right
+Window to Desktop 1=Super+Shift+1,none,Move Window to Desktop 1
+Window to Desktop 2=Super+Shift+2,none,Move Window to Desktop 2
+Window to Desktop 3=Super+Shift+3,none,Move Window to Desktop 3
+Window to Desktop 4=Super+Shift+4,none,Move Window to Desktop 4
+Overview=Super+Tab,Super+Tab,Toggle Overview
+ShowDesktopGrid=Super+F8,Super+F8,Show Desktop Grid
+Expose=Ctrl+F9,Ctrl+F9,Toggle Present Windows
+Show Desktop=Super+D,Super+D,Peek at Desktop
+Window Above Other Windows=Super+T,none,Keep Window Above Others
+Kill Window=Ctrl+Alt+Escape,Ctrl+Alt+Escape,Kill Window
+Window Operations Menu=Alt+F3,Alt+F3,Window Operations Menu
+view_zoom_in=Super+=,Super+=,Zoom In
+view_zoom_out=Super+-,Super+-,Zoom Out
+view_actual_size=Super+0,Super+0,Actual Size
+Toggle Night Color=Super+Shift+N,none,Toggle Night Color
+
+[org.kde.dolphin.desktop]
+_launch=Super+E,Super+E,Dolphin File Manager
+
+[org.kde.konsole.desktop]
+_launch=Ctrl+Alt+T,Ctrl+Alt+T,Konsole Terminal
+
+[org.kde.krunner.desktop]
+_launch=Alt+F2\tSuper+Space,Alt+F2,KRunner
+
+[org.kde.spectacle.desktop]
+RectangularRegionScreenShot=Shift+Print,Shift+Print,Capture Rectangular Region
+FullScreenScreenShot=Print,Print,Capture Entire Desktop
+ActiveWindowScreenShot=Alt+Print,Alt+Print,Capture Active Window
+
+[org.kde.ksysguard.desktop]
+_launch=Ctrl+Shift+Escape,none,System Monitor
+
+[systemsettings.desktop]
+_launch=Super+I,Super+I,System Settings
+
+[plasmashell]
+activate application launcher=Super,Super,Activate Application Launcher
+show-on-mouse-pos=Super+V,Super+V,Show Clipboard at Mouse Position
+clipboard_action=Ctrl+Alt+X,none,Enable Clipboard Actions
+manage activities=Super+Q,Super+Q,Show Activity Switcher
+show dashboard=Ctrl+F12,Ctrl+F12,Show Desktop Dashboard
+
+[kmix]
+decrease_volume=Volume Down,Volume Down,Decrease Volume
+increase_volume=Volume Up,Volume Up,Increase Volume
+mute=Volume Mute,Volume Mute,Mute
+
+[mediacontrol]
+nextmedia=Media Next,Media Next,Media Next
+playpausemedia=Media Play,Media Play,Play/Pause Media
+previousmedia=Media Previous,Media Previous,Media Previous
+stopmedia=Media Stop,Media Stop,Stop Media Playback
+
+# ============================================
+# Accessibility Shortcuts
+# ============================================
+[kaccess]
+Toggle Screen Reader On and Off=Alt+Super+S,Alt+Super+S,Toggle Screen Reader
+
+[sanchala-accessibility]
+# Screen Reader
+toggle_screen_reader=Alt+Super+S,Alt+Super+S,Toggle Screen Reader (Orca)
+
+# Visual Accessibility
+toggle_high_contrast=Super+Alt+H,Super+Alt+H,Toggle High Contrast Mode
+toggle_large_text=Super+Alt+T,none,Toggle Large Text
+toggle_magnifier=Super+Alt+M,none,Toggle Screen Magnifier
+toggle_color_invert=Super+Alt+I,none,Toggle Color Inversion
+
+# Keyboard Accessibility
+toggle_sticky_keys=none,none,Toggle Sticky Keys
+toggle_mouse_keys=Alt+Shift+Num_Lock,Alt+Shift+Num_Lock,Toggle Mouse Keys
+
+# Quick Access
+open_accessibility_settings=Super+U,Super+U,Open Accessibility Settings
+
+# Skip Links (for web/document navigation)
+skip_to_main=Alt+1,Alt+1,Skip to Main Content
+skip_to_nav=Alt+2,Alt+2,Skip to Navigation
+skip_to_search=Alt+3,Alt+3,Skip to Search
+
+# Focus Notification
+focus_notification=Super+N,Super+N,Focus Notification
+dismiss_notification=Super+Shift+N,none,Dismiss Notification
+

@@ -1,0 +1,22 @@
+[Desktop Entry]
+Name=Sanchala Browser
+GenericName=Web Browser
+Comment=Browse the web with maximum privacy and security
+Exec=sanchala-browser %U
+Icon=sanchala-browser
+Terminal=false
+Type=Application
+Categories=Network;WebBrowser;
+MimeType=text/html;text/xml;application/xhtml+xml;application/xml;application/vnd.mozilla.xul+xml;application/rss+xml;application/rdf+xml;x-scheme-handler/http;x-scheme-handler/https;
+StartupNotify=true
+StartupWMClass=sanchala-browser
+Keywords=Internet;WWW;Browser;Web;Privacy;Security;
+Actions=new-window;new-private-window;
+
+[Desktop Action new-window]
+Name=New Window
+Exec=sanchala-browser --new-window
+
+[Desktop Action new-private-window]
+Name=New Private Window
+Exec=sanchala-browser --private

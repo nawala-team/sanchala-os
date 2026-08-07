@@ -1,0 +1,27 @@
+# Sanchala Scheduler - Temp Files Cleanup Template
+# SPDX-License-Identifier: GPL-3.0
+
+[template]
+name = "temp-cleanup"
+description = "Clean temporary files daily"
+category = "maintenance"
+icon = "trash-empty"
+
+[task]
+name = "temp-cleanup"
+description = "Daily Temp Files Cleanup"
+command = '''
+find /tmp -user $USER -atime +7 -delete 2>/dev/null || true
+find ~/.cache -atime +30 -type f -delete 2>/dev/null || true
+'''
+working_directory = "~"
+
+[schedule]
+type = "calendar"
+calendar = "*-*-* 05:30:00"
+persistent = true
+
+[options]
+notify_on_complete = false
+notify_on_failure = false
+log_output = true

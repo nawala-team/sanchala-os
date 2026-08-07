@@ -1,0 +1,80 @@
+{
+  "version": 1,
+  "commands": {
+    "lock-screen": {
+      "name": "Lock Screen",
+      "command": "loginctl lock-session",
+      "icon": "system-lock-screen"
+    },
+    "suspend": {
+      "name": "Suspend",
+      "command": "systemctl suspend",
+      "icon": "system-suspend"
+    },
+    "screenshot": {
+      "name": "Take Screenshot",
+      "command": "spectacle -b -f",
+      "icon": "spectacle"
+    },
+    "mute-toggle": {
+      "name": "Toggle Mute",
+      "command": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
+      "icon": "audio-volume-muted"
+    },
+    "volume-up": {
+      "name": "Volume Up",
+      "command": "pactl set-sink-volume @DEFAULT_SINK@ +5%",
+      "icon": "audio-volume-high"
+    },
+    "volume-down": {
+      "name": "Volume Down",
+      "command": "pactl set-sink-volume @DEFAULT_SINK@ -5%",
+      "icon": "audio-volume-low"
+    },
+    "play-pause": {
+      "name": "Play/Pause",
+      "command": "playerctl play-pause",
+      "icon": "media-playback-start"
+    },
+    "next-track": {
+      "name": "Next Track",
+      "command": "playerctl next",
+      "icon": "media-skip-forward"
+    },
+    "prev-track": {
+      "name": "Previous Track",
+      "command": "playerctl previous",
+      "icon": "media-skip-backward"
+    },
+    "open-browser": {
+      "name": "Open Browser",
+      "command": "xdg-open https://",
+      "icon": "internet-web-browser"
+    },
+    "open-file-manager": {
+      "name": "Open File Manager",
+      "command": "dolphin",
+      "icon": "system-file-manager"
+    },
+    "open-terminal": {
+      "name": "Open Terminal",
+      "command": "konsole",
+      "icon": "utilities-terminal"
+    },
+    "toggle-dark-mode": {
+      "name": "Toggle Dark Mode",
+      "command": "sanchala-theme toggle",
+      "icon": "weather-clear-night"
+    },
+    "show-desktop": {
+      "name": "Show Desktop",
+      "command": "qdbus org.kde.kglobalaccel /component/kwin invokeShortcut 'Show Desktop'",
+      "icon": "user-desktop"
+    },
+    "clipboard-history": {
+      "name": "Show Clipboard History",
+      "command": "qdbus org.kde.kglobalaccel /component/klipper invokeShortcut 'show-klipper-popup'",
+      "icon": "edit-paste"
+    }
+  }
+}

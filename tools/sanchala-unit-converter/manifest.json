@@ -1,0 +1,10 @@
+{
+    "name": "Sanchala Unit Converter",
+    "version": "2.0.0",
+    "description": "Universal unit conversion tool",
+    "category": "Productivity",
+    "icon": "📐",
+    "launch": "./unit-converter.sh",
+    "author": "Sanchala OS",
+    "features": ["Length conversion", "Weight conversion", "Temperature", "Volume", "Data size", "Currency"]
+}

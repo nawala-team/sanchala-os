@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Sanchala Character Map
+Comment=Unicode character browser
+Exec=sanchala-charmap
+Icon=accessories-character-map
+Terminal=false
+Type=Application
+Categories=Utility;
+Keywords=character;unicode;emoji;symbols;

@@ -1,0 +1,146 @@
+#!/bin/bash
+# ============================================================================
+# SANCHALA OS - Fingerprint Enrollment Tool
+# ============================================================================
+set -euo pipefail
+
+RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'
+BLUE='\033[0;34m'; CYAN='\033[0;36m'; NC='\033[0m'; BOLD='\033[1m'
+
+declare -A FINGERS=(
+    ["right-thumb"]="Right Thumb" ["right-index-finger"]="Right Index"
+    ["right-middle-finger"]="Right Middle" ["right-ring-finger"]="Right Ring"
+    ["right-little-finger"]="Right Little" ["left-thumb"]="Left Thumb"
+    ["left-index-finger"]="Left Index" ["left-middle-finger"]="Left Middle"
+    ["left-ring-finger"]="Left Ring" ["left-little-finger"]="Left Little"
+)
+
+print_header() {
+    echo -e "\n${CYAN}╔════════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${CYAN}║${NC}${BOLD}        🖐️  SANCHALA OS - Fingerprint Setup              ${NC}${CYAN}║${NC}"
+    echo -e "${CYAN}╚════════════════════════════════════════════════════════════╝${NC}\n"
+}
+
+print_success() { echo -e "${GREEN}✓${NC} $1"; }
+print_error() { echo -e "${RED}✗${NC} $1"; }
+print_info() { echo -e "${BLUE}ℹ${NC} $1"; }
+print_warning() { echo -e "${YELLOW}⚠${NC} $1"; }
+
+check_deps() {
+    command -v fprintd-enroll &>/dev/null || {
+        print_error "Missing fprintd. Install: sudo pacman -S fprintd"
+        exit 1
+    }
+}
+
+start_service() {
+    systemctl is-active --quiet fprintd.service || sudo systemctl start fprintd.service
+}
+
+detect_scanner() {
+    echo -e "${BLUE}Detecting fingerprint scanner...${NC}"
+    local out=$(fprintd-list "$USER" 2>&1 | head -1)
+    if echo "$out" | grep -qi "no devices"; then
+        print_error "No fingerprint scanner detected!"
+        exit 1
+    fi
+    print_success "Scanner detected"
+}
+
+list_fingers() {
+    echo -e "\n${BOLD}Enrolled fingerprints:${NC}"
+    local enrolled=$(fprintd-list "$USER" 2>/dev/null | tail -n +2 || true)
+    if [[ -z "$enrolled" ]] || echo "$enrolled" | grep -qi "no fingers"; then
+        echo -e "  ${YELLOW}None enrolled${NC}"
+        return 1
+    fi
+    echo "$enrolled" | while read -r f; do
+        [[ -n "$f" ]] && echo -e "  ${GREEN}✓${NC} ${FINGERS[$(echo $f | xargs)]:-$f}"
+    done
+}
+
+enroll_finger() {
+    local finger="$1"
+    echo -e "\n${BOLD}Enrolling: ${FINGERS[$finger]:-$finger}${NC}"
+    echo "Place finger on scanner repeatedly..."
+    fprintd-enroll -f "$finger" "$USER" && print_success "Enrolled!" || print_error "Failed"
+}
+
+delete_all() {
+    read -rp "Delete ALL fingerprints? [y/N] " r
+    [[ "$r" =~ ^[Yy] ]] && fprintd-delete "$USER" 2>/dev/null && print_success "Deleted"
+}
+
+verify() {
+    echo -e "\n${BOLD}Verifying...${NC} Place enrolled finger on scanner."
+    timeout 30 fprintd-verify "$USER" && print_success "Verified!" || print_error "Failed"
+}
+
+interactive_enroll() {
+    local i=1 fingers=()
+    echo -e "\n${BOLD}Select finger to enroll:${NC}\n"
+    for h in right left; do
+        echo -e "${CYAN}${h^} Hand:${NC}"
+        for f in thumb index-finger middle-finger ring-finger little-finger; do
+            local key="${h}-${f}"
+            printf "  %2d) %s\n" "$i" "${FINGERS[$key]}"
+            fingers+=("$key")
+            ((i++))
+        done
+        echo
+    done
+    read -rp "Enter number (1-10): " choice
+    [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 1 ] && [ "$choice" -le 10 ] && \
+        enroll_finger "${fingers[$((choice-1))]}" || print_error "Invalid selection"
+}
+
+guided_setup() {
+    print_header
+    echo -e "${BOLD}Welcome to Fingerprint Setup!${NC}\n"
+    echo "Set up fingerprint auth like Apple Touch ID.\n"
+    check_deps; start_service; detect_scanner; list_fingers || true
+    
+    local recommended=(right-index-finger left-index-finger right-thumb)
+    for finger in "${recommended[@]}"; do
+        read -rp "\nEnroll ${FINGERS[$finger]}? [Y/n] " r
+        [[ ! "$r" =~ ^[Nn] ]] && enroll_finger "$finger"
+    done
+    
+    echo -e "\n${BOLD}Setup Complete!${NC}"
+    list_fingers || true
+    read -rp "\nTest fingerprint? [Y/n] " r
+    [[ ! "$r" =~ ^[Nn] ]] && verify
+}
+
+show_help() {
+    cat << EOF
+${BOLD}SANCHALA OS - Fingerprint Tool${NC}
+
+USAGE: sanchala-fingerprint [COMMAND]
+
+COMMANDS:
+    setup       Guided setup (default)
+    enroll      Interactive enrollment
+    delete-all  Delete all fingerprints
+    list        List enrolled fingerprints
+    verify      Test verification
+    help        Show this help
+
+SUPPORTED: Goodix, Synaptics, Elan, Validity scanners
+EOF
+}
+
+main() {
+    local cmd="${1:-setup}"
+    case "$cmd" in
+        setup) guided_setup ;;
+        enroll) check_deps; start_service; detect_scanner; interactive_enroll ;;
+        delete-all) check_deps; delete_all ;;
+        list) check_deps; list_fingers ;;
+        verify) check_deps; start_service; verify ;;
+        help|--help|-h) show_help ;;
+        *) print_error "Unknown: $cmd"; show_help; exit 1 ;;
+    esac
+}
+
+main "$@"

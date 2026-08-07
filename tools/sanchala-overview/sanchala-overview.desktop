@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Overview
+Comment=Show all windows and workspaces overview
+GenericName=Desktop Overview
+Exec=sanchala-overview
+Icon=view-fullscreen
+Type=Application
+Categories=Utility;DesktopSettings;
+Keywords=overview;windows;workspaces;expose;mission-control;
+StartupNotify=false
+NoDisplay=true

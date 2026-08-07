@@ -1,0 +1,15 @@
+[Unit]
+Description=Sanchala OS Display Hotplug Handler
+Documentation=man:sanchala-display-hotplug(8)
+After=graphical.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/lib/sanchala/display-hotplug
+TimeoutSec=30
+
+# Run as user session for desktop integration
+# This is triggered by udev, runs system-wide, then notifies user session
+
+[Install]
+WantedBy=multi-user.target

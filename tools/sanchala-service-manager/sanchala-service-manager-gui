@@ -1,0 +1,103 @@
+#!/usr/bin/env python3
+"""Sanchala Service Manager GUI"""
+import sys, subprocess
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+
+class ServiceManager(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Sanchala Service Manager")
+        self.setMinimumSize(650, 500)
+        self.init_ui()
+        self.load_services()
+    
+    def init_ui(self):
+        w = QWidget()
+        self.setCentralWidget(w)
+        layout = QVBoxLayout(w)
+        
+        # Search
+        search_row = QHBoxLayout()
+        search_row.addWidget(QLabel("Search:"))
+        self.search = QLineEdit()
+        self.search.textChanged.connect(self.filter_services)
+        search_row.addWidget(self.search)
+        self.show_all = QCheckBox("Show all")
+        self.show_all.toggled.connect(self.load_services)
+        search_row.addWidget(self.show_all)
+        layout.addLayout(search_row)
+        
+        # Service list
+        self.service_list = QTreeWidget()
+        self.service_list.setHeaderLabels(["Service", "Status", "Enabled"])
+        self.service_list.setAlternatingRowColors(True)
+        self.service_list.setSortingEnabled(True)
+        layout.addWidget(self.service_list)
+        
+        # Buttons
+        btn_row = QHBoxLayout()
+        for name, cb in [("Start", self.start_service), ("Stop", self.stop_service),
+                         ("Restart", self.restart_service), ("Enable", self.enable_service),
+                         ("Disable", self.disable_service)]:
+            btn = QPushButton(name)
+            btn.clicked.connect(cb)
+            btn_row.addWidget(btn)
+        btn_row.addStretch()
+        refresh_btn = QPushButton("Refresh")
+        refresh_btn.clicked.connect(self.load_services)
+        btn_row.addWidget(refresh_btn)
+        layout.addLayout(btn_row)
+    
+    def load_services(self):
+        self.service_list.clear()
+        state = "--all" if self.show_all.isChecked() else "--state=running"
+        try:
+            out = subprocess.check_output(
+                ["systemctl", "list-units", "--type=service", state, "--no-pager", "--no-legend"],
+                text=True
+            )
+            for line in out.strip().split("\n"):
+                if not line:
+                    continue
+                parts = line.split()
+                if len(parts) >= 4:
+                    name = parts[0].replace(".service", "")
+                    status = parts[2] if len(parts) > 2 else "unknown"
+                    item = QTreeWidgetItem([name, status, ""])
+                    if status == "running":
+                        item.setForeground(1, QColor("#27ae60"))
+                    elif status == "failed":
+                        item.setForeground(1, QColor("#e74c3c"))
+                    self.service_list.addTopLevelItem(item)
+        except: pass
+    
+    def filter_services(self, text):
+        for i in range(self.service_list.topLevelItemCount()):
+            item = self.service_list.topLevelItem(i)
+            item.setHidden(text.lower() not in item.text(0).lower())
+    
+    def get_selected_service(self):
+        item = self.service_list.currentItem()
+        return f"{item.text(0)}.service" if item else None
+    
+    def run_systemctl(self, action):
+        service = self.get_selected_service()
+        if service:
+            result = subprocess.run(["pkexec", "systemctl", action, service], capture_output=True, text=True)
+            self.load_services()
+            if result.returncode != 0:
+                QMessageBox.warning(self, "Error", result.stderr)
+    
+    def start_service(self): self.run_systemctl("start")
+    def stop_service(self): self.run_systemctl("stop")
+    def restart_service(self): self.run_systemctl("restart")
+    def enable_service(self): self.run_systemctl("enable")
+    def disable_service(self): self.run_systemctl("disable")
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    w = ServiceManager()
+    w.show()
+    sys.exit(app.exec())

@@ -1,0 +1,85 @@
+{
+  "_comment": "SANCHALA OS - Browser Seccomp Profile",
+  "_version": "2.0",
+  "_description": "Seccomp filter for web browsers (Firefox, Brave, Chromium)",
+  "defaultAction": "SCMP_ACT_ERRNO",
+  "defaultErrnoRet": 1,
+  "archMap": [
+    {
+      "architecture": "SCMP_ARCH_X86_64",
+      "subArchitectures": ["SCMP_ARCH_X86", "SCMP_ARCH_X32"]
+    },
+    {
+      "architecture": "SCMP_ARCH_AARCH64",
+      "subArchitectures": ["SCMP_ARCH_ARM"]
+    }
+  ],
+  "syscalls": [
+    {
+      "names": [
+        "read", "write", "readv", "writev", "pread64", "pwrite64",
+        "open", "openat", "openat2", "close", "close_range",
+        "stat", "fstat", "lstat", "newfstatat", "statx",
+        "poll", "ppoll", "select", "pselect6",
+        "lseek", "mmap", "mprotect", "munmap", "brk",
+        "ioctl", "access", "faccessat", "faccessat2",
+        "pipe", "pipe2", "dup", "dup2", "dup3",
+        "socket", "connect", "accept", "accept4",
+        "sendto", "recvfrom", "sendmsg", "recvmsg",
+        "shutdown", "bind", "listen", "getsockname", "getpeername",
+        "socketpair", "setsockopt", "getsockopt",
+        "clone", "clone3", "fork", "vfork", "execve", "execveat",
+        "exit", "exit_group", "wait4", "waitid",
+        "kill", "tkill", "tgkill",
+        "uname", "getuid", "getgid", "geteuid", "getegid",
+        "getpid", "getppid", "gettid", "getpgid", "getpgrp",
+        "setpgid", "setsid", "getgroups", "setgroups",
+        "fcntl", "flock", "fsync", "fdatasync",
+        "truncate", "ftruncate", "getdents", "getdents64",
+        "getcwd", "chdir", "fchdir",
+        "rename", "renameat", "renameat2",
+        "mkdir", "mkdirat", "rmdir",
+        "link", "linkat", "unlink", "unlinkat",
+        "symlink", "symlinkat", "readlink", "readlinkat",
+        "chmod", "fchmod", "fchmodat",
+        "chown", "fchown", "fchownat", "lchown",
+        "umask", "gettimeofday", "getrlimit", "prlimit64",
+        "getrusage", "sysinfo", "times",
+        "rt_sigaction", "rt_sigprocmask", "rt_sigreturn",
+        "rt_sigsuspend", "rt_sigpending", "rt_sigtimedwait",
+        "sigaltstack", "signalfd", "signalfd4",
+        "nanosleep", "clock_nanosleep", "clock_gettime", "clock_getres",
+        "futex", "set_robust_list", "get_robust_list",
+        "epoll_create", "epoll_create1", "epoll_ctl", "epoll_wait", "epoll_pwait",
+        "eventfd", "eventfd2", "timerfd_create", "timerfd_settime", "timerfd_gettime",
+        "inotify_init", "inotify_init1", "inotify_add_watch", "inotify_rm_watch",
+        "prctl", "arch_prctl", "set_tid_address",
+        "sched_yield", "sched_getaffinity", "sched_setaffinity",
+        "madvise", "mincore", "mlock", "munlock",
+        "mremap", "msync", "memfd_create", "membarrier",
+        "getrandom", "copy_file_range", "splice", "sendfile",
+        "statfs", "fstatfs", "utimensat",
+        "capget", "seccomp",
+        "setresuid", "setresgid", "setuid", "setgid",
+        "unshare", "setns"
+      ],
+      "action": "SCMP_ACT_ALLOW"
+    },
+    {
+      "names": ["prctl"],
+      "action": "SCMP_ACT_ALLOW",
+      "args": [
+        {"index": 0, "value": 38, "op": "SCMP_CMP_EQ"}
+      ],
+      "comment": "Allow PR_SET_NO_NEW_PRIVS"
+    },
+    {
+      "names": ["prctl"],
+      "action": "SCMP_ACT_ALLOW", 
+      "args": [
+        {"index": 0, "value": 15, "op": "SCMP_CMP_EQ"}
+      ],
+      "comment": "Allow PR_SET_NAME"
+    }
+  ]
+}

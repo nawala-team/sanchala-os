@@ -1,0 +1,92 @@
+#!/usr/bin/env python3
+"""Sanchala Region & Language Settings GUI"""
+import sys, subprocess, os
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+
+LANGUAGES = [
+    ("en_US.UTF-8", "English (United States)"),
+    ("en_GB.UTF-8", "English (United Kingdom)"),
+    ("de_DE.UTF-8", "German (Germany)"),
+    ("fr_FR.UTF-8", "French (France)"),
+    ("es_ES.UTF-8", "Spanish (Spain)"),
+    ("it_IT.UTF-8", "Italian (Italy)"),
+    ("pt_BR.UTF-8", "Portuguese (Brazil)"),
+    ("ru_RU.UTF-8", "Russian (Russia)"),
+    ("ja_JP.UTF-8", "Japanese (Japan)"),
+    ("zh_CN.UTF-8", "Chinese (Simplified)"),
+    ("ko_KR.UTF-8", "Korean (Korea)"),
+    ("ar_SA.UTF-8", "Arabic (Saudi Arabia)"),
+]
+
+class RegionSettings(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Sanchala Region & Language")
+        self.setMinimumSize(450, 350)
+        self.init_ui()
+        self.load_settings()
+    
+    def init_ui(self):
+        w = QWidget()
+        self.setCentralWidget(w)
+        layout = QVBoxLayout(w)
+        
+        # Language
+        lang_grp = QGroupBox("Language")
+        lang_l = QVBoxLayout(lang_grp)
+        self.lang_combo = QComboBox()
+        for code, name in LANGUAGES:
+            self.lang_combo.addItem(name, code)
+        lang_l.addWidget(self.lang_combo)
+        layout.addWidget(lang_grp)
+        
+        # Formats
+        fmt_grp = QGroupBox("Regional Formats")
+        fmt_l = QFormLayout(fmt_grp)
+        self.date_combo = QComboBox()
+        self.date_combo.addItems(["MM/DD/YYYY", "DD/MM/YYYY", "YYYY-MM-DD"])
+        fmt_l.addRow("Date Format:", self.date_combo)
+        self.time_combo = QComboBox()
+        self.time_combo.addItems(["12-hour (AM/PM)", "24-hour"])
+        fmt_l.addRow("Time Format:", self.time_combo)
+        self.first_day = QComboBox()
+        self.first_day.addItems(["Sunday", "Monday"])
+        fmt_l.addRow("First day of week:", self.first_day)
+        layout.addWidget(fmt_grp)
+        
+        # Number format
+        num_grp = QGroupBox("Numbers")
+        num_l = QFormLayout(num_grp)
+        self.decimal = QComboBox()
+        self.decimal.addItems(["Period (.)", "Comma (,)"])
+        num_l.addRow("Decimal separator:", self.decimal)
+        self.thousands = QComboBox()
+        self.thousands.addItems(["Comma (,)", "Period (.)", "Space"])
+        num_l.addRow("Thousands separator:", self.thousands)
+        layout.addWidget(num_grp)
+        
+        layout.addStretch()
+        
+        apply_btn = QPushButton("Apply")
+        apply_btn.clicked.connect(self.apply_settings)
+        layout.addWidget(apply_btn)
+    
+    def load_settings(self):
+        lang = os.environ.get("LANG", "en_US.UTF-8")
+        for i in range(self.lang_combo.count()):
+            if self.lang_combo.itemData(i) == lang:
+                self.lang_combo.setCurrentIndex(i)
+                break
+    
+    def apply_settings(self):
+        locale = self.lang_combo.currentData()
+        subprocess.run(["localectl", "set-locale", f"LANG={locale}"])
+        QMessageBox.information(self, "Applied", f"Region set to {locale}\nPlease log out for changes to take effect.")
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    w = RegionSettings()
+    w.show()
+    sys.exit(app.exec())

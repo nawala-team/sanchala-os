@@ -1,0 +1,80 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0
+# Sanchala Disk Utility GUI
+
+import sys, subprocess
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtGui import QIcon, QStandardItemModel, QStandardItem
+
+class DiskUtility(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Sanchala Disk Utility")
+        self.setWindowIcon(QIcon.fromTheme("drive-harddisk"))
+        self.setMinimumSize(700, 500)
+        self.setup_ui()
+        self.refresh()
+        
+    def setup_ui(self):
+        central = QWidget()
+        self.setCentralWidget(central)
+        layout = QVBoxLayout(central)
+        
+        toolbar = QHBoxLayout()
+        for txt, slot in [("Refresh", self.refresh), ("Mount", self.mount),
+                          ("Unmount", self.unmount), ("SMART", self.smart)]:
+            b = QPushButton(txt); b.clicked.connect(slot); toolbar.addWidget(b)
+        toolbar.addStretch()
+        layout.addLayout(toolbar)
+        
+        self.tree = QTreeView()
+        self.model = QStandardItemModel()
+        self.model.setHorizontalHeaderLabels(["Device", "Size", "Type", "Mount", "Model"])
+        self.tree.setModel(self.model)
+        self.tree.setAlternatingRowColors(True)
+        layout.addWidget(self.tree)
+        
+        self.status = QStatusBar()
+        self.setStatusBar(self.status)
+        
+    def refresh(self):
+        self.model.removeRows(0, self.model.rowCount())
+        try:
+            out = subprocess.check_output(["lsblk", "-o", "NAME,SIZE,TYPE,MOUNTPOINT,MODEL", "-r"],
+                text=True).strip().split('\n')[1:]
+            for line in out:
+                parts = line.split() + [""] * 5
+                row = [QStandardItem(p) for p in parts[:5]]
+                self.model.appendRow(row)
+        except: pass
+        self.status.showMessage("Refreshed")
+        
+    def get_selected(self):
+        idx = self.tree.currentIndex()
+        if idx.isValid():
+            return "/dev/" + self.model.item(idx.row(), 0).text().lstrip("├└─ ")
+        return None
+        
+    def mount(self):
+        dev = self.get_selected()
+        if dev:
+            subprocess.run(["sanchala-disk-utility", "mount", dev])
+            self.refresh()
+            
+    def unmount(self):
+        dev = self.get_selected()
+        if dev:
+            subprocess.run(["sanchala-disk-utility", "unmount", dev])
+            self.refresh()
+            
+    def smart(self):
+        dev = self.get_selected()
+        if dev:
+            out = subprocess.getoutput(f"smartctl -H {dev} 2>/dev/null")
+            QMessageBox.information(self, "SMART", out or "No SMART data")
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    win = DiskUtility(); win.show()
+    sys.exit(app.exec())

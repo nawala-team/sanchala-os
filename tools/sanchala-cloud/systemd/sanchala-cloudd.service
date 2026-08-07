@@ -1,0 +1,28 @@
+[Unit]
+Description=Sanchala Cloud Sync Daemon
+Documentation=man:sanchala-cloud(1)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/lib/sanchala-cloud/sanchala-cloudd.py
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+RestartSec=10
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=%h/Cloud %h/.config/sanchala-cloud %h/.local/share/sanchala-cloud
+PrivateTmp=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+
+# Resource limits
+MemoryMax=512M
+CPUQuota=50%
+
+[Install]
+WantedBy=default.target

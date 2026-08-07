@@ -1,0 +1,3 @@
+[D-BUS Service]
+Name=id.sanchala.AI
+Exec=/usr/bin/sanchala-aid --daemon

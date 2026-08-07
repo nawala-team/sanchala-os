@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE policyconfig PUBLIC
+ "-//freedesktop//DTD PolicyKit Policy Configuration 1.0//EN"
+ "http://www.freedesktop.org/standards/PolicyKit/1/policyconfig.dtd">
+<policyconfig>
+  <vendor>Sanchala OS</vendor>
+  <vendor_url>https://sanchala.id</vendor_url>
+  <icon_name>folder-cloud</icon_name>
+
+  <action id="org.sanchala.cloud.mount">
+    <description>Mount cloud storage</description>
+    <description xml:lang="id">Pasang penyimpanan cloud</description>
+    <message>Authentication is required to mount cloud storage</message>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>yes</allow_active>
+    </defaults>
+  </action>
+
+  <action id="org.sanchala.cloud.configure">
+    <description>Configure cloud accounts</description>
+    <description xml:lang="id">Konfigurasi akun cloud</description>
+    <message>Authentication is required to configure cloud accounts</message>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>yes</allow_active>
+    </defaults>
+  </action>
+
+  <action id="org.sanchala.cloud.encrypt">
+    <description>Enable cloud encryption</description>
+    <description xml:lang="id">Aktifkan enkripsi cloud</description>
+    <message>Authentication is required to enable encryption</message>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_self</allow_active>
+    </defaults>
+  </action>
+</policyconfig>

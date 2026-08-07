@@ -1,0 +1,28 @@
+# Sanchala Cleaner - Automatic System Maintenance Service
+# /etc/systemd/system/sanchala-cleaner.service
+# SPDX-License-Identifier: GPL-3.0
+
+[Unit]
+Description=Sanchala OS Automatic System Maintenance
+Documentation=man:sanchala-cleaner(8)
+After=network.target
+ConditionACPower=true
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/sanchala-cleaner clean --yes
+Nice=19
+IOSchedulingClass=idle
+IOSchedulingPriority=7
+
+# Security hardening
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/var/cache/pacman/pkg /var/log /var/lib/sanchala /tmp /var/tmp
+ProtectHome=read-only
+
+# Timeout for long cleanup operations
+TimeoutStartSec=30min
+
+[Install]
+WantedBy=multi-user.target

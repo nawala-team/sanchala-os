@@ -1,0 +1,45 @@
+#!/usr/bin/env python3
+"""Sanchala Suggest - Smart search suggestions"""
+
+import sys
+import json
+import argparse
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent.parent / "lib"))
+
+def main():
+    parser = argparse.ArgumentParser(prog="sanchala-suggest", description="Smart search suggestions")
+    parser.add_argument("query", nargs="*", help="Search query")
+    parser.add_argument("-n", "--limit", type=int, default=10, help="Max suggestions")
+    parser.add_argument("--json", action="store_true", help="JSON output")
+    parser.add_argument("--record", metavar="QUERY", help="Record a search")
+    args = parser.parse_args()
+    
+    from sanchala_aid import SmartSuggestions, Config
+    suggestions = SmartSuggestions(Config())
+    
+    if args.record:
+        suggestions.record_search(args.record)
+        print(f"Recorded: {args.record}")
+        return
+    
+    query = " ".join(args.query) if args.query else ""
+    if not query:
+        parser.print_help()
+        return
+    
+    results = suggestions.get_suggestions(query, args.limit)
+    
+    if args.json:
+        print(json.dumps(results, indent=2))
+    else:
+        if results:
+            for item in results:
+                icon = "📜" if item["type"] == "history" else "💡"
+                print(f"  {icon} {item['text']}")
+        else:
+            print("No suggestions found")
+
+if __name__ == "__main__":
+    main()

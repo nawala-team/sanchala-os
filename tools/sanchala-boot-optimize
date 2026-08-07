@@ -1,0 +1,101 @@
+#!/bin/bash
+# ============================================================================
+# SANCHALA OS - Boot Optimization Script
+# ============================================================================
+# Version: 1.0 | Analyze and optimize systemd boot
+# Usage: sanchala-boot-optimize [analyze|optimize|report]
+# ============================================================================
+
+set -euo pipefail
+
+SCRIPT_NAME="sanchala-boot-optimize"
+TARGET_BOOT_TIME=3.0
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+print_header() {
+    echo -e "${BLUE}══════════════════════════════════════════${NC}"
+    echo -e "${BLUE}  SANCHALA OS Boot Optimizer${NC}"
+    echo -e "${BLUE}══════════════════════════════════════════${NC}"
+    echo
+}
+
+analyze_boot() {
+    echo -e "${YELLOW}▶ Boot Time Analysis${NC}"
+    echo "────────────────────────────────────────"
+    
+    systemd-analyze
+    echo
+    
+    echo -e "${YELLOW}▶ Critical Path${NC}"
+    systemd-analyze critical-chain --no-pager 2>/dev/null || systemd-analyze critical-chain
+    echo
+    
+    echo -e "${YELLOW}▶ Slowest Services (Top 15)${NC}"
+    systemd-analyze blame | head -15
+    echo
+    
+    echo -e "${YELLOW}▶ Recommendations${NC}"
+    
+    # NetworkManager-wait-online
+    if systemctl is-enabled NetworkManager-wait-online.service &>/dev/null; then
+        echo -e "${YELLOW}!${NC} NetworkManager-wait-online.service delays boot"
+        echo "  Disable: sudo systemctl disable NetworkManager-wait-online.service"
+    fi
+    
+    # Check initramfs compression
+    if [[ -f /etc/mkinitcpio.conf ]]; then
+        local compression
+        compression=$(grep "^COMPRESSION=" /etc/mkinitcpio.conf | cut -d'"' -f2 || echo "default")
+        if [[ "$compression" != "lz4" ]]; then
+            echo -e "${YELLOW}!${NC} Initramfs not using lz4 compression"
+            echo "  Set COMPRESSION=\"lz4\" in /etc/mkinitcpio.conf"
+        fi
+    fi
+}
+
+optimize_boot() {
+    echo -e "${YELLOW}▶ Applying Boot Optimizations${NC}"
+    
+    if [[ $EUID -ne 0 ]]; then
+        echo "Error: Requires root. Run: sudo $SCRIPT_NAME optimize"
+        exit 1
+    fi
+    
+    # Disable NetworkManager-wait-online
+    if systemctl is-enabled NetworkManager-wait-online.service &>/dev/null; then
+        echo "Disabling NetworkManager-wait-online.service..."
+        systemctl disable NetworkManager-wait-online.service
+    fi
+    
+    echo -e "${GREEN}✓ Boot optimizations applied${NC}"
+    echo "Reboot and run: $SCRIPT_NAME analyze"
+}
+
+generate_report() {
+    local report_file="/tmp/sanchala-boot-report-$(date +%Y%m%d-%H%M%S).txt"
+    
+    {
+        echo "SANCHALA OS Boot Report - $(date)"
+        echo "Kernel: $(uname -r)"
+        echo
+        systemd-analyze
+        echo
+        systemd-analyze blame
+    } > "$report_file"
+    
+    echo "Report saved to: $report_file"
+}
+
+print_header
+case "${1:-analyze}" in
+    analyze|a) analyze_boot ;;
+    optimize|o) optimize_boot ;;
+    report|r) generate_report ;;
+    *) echo "Usage: $SCRIPT_NAME [analyze|optimize|report]" ;;
+esac

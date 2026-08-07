@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Sanchala PDF Viewer
+Comment=PDF Document Viewer
+Exec=sanchala-pdf-viewer %F
+Icon=application-pdf
+Terminal=false
+Type=Application
+Categories=Office;Viewer;
+MimeType=application/pdf;

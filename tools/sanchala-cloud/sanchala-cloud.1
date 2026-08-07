@@ -1,0 +1,50 @@
+.TH SANCHALA-CLOUD 1 "August 2026" "Sanchala OS" "User Commands"
+.SH NAME
+sanchala-cloud \- Cloud storage integration for Sanchala OS
+.SH SYNOPSIS
+.B sanchala-cloud
+[\fIOPTIONS\fR] [\fICOMMAND\fR]
+.SH DESCRIPTION
+.B sanchala-cloud
+integrates cloud storage providers (Google Drive, OneDrive, Dropbox,
+Nextcloud) into the Sanchala file manager with local encryption support.
+.SH COMMANDS
+.TP
+.B add \fIPROVIDER\fR
+Add cloud storage account
+.TP
+.B remove \fIACCOUNT\fR
+Remove cloud account
+.TP
+.B list
+List configured accounts
+.TP
+.B sync \fR[\fIACCOUNT\fR]
+Trigger sync
+.TP
+.B status
+Show sync status
+.SH PROVIDERS
+gdrive, onedrive, dropbox, nextcloud, webdav, s3
+.SH OPTIONS
+.TP
+.B \-\-encrypt
+Enable client-side encryption
+.TP
+.B \-\-json
+Output in JSON format
+.TP
+.B \-h, \-\-help
+Show help message
+.SH FILES
+.TP
+.I ~/.config/sanchala-cloud/
+Account configurations
+.TP
+.I ~/Cloud/
+Default mount point
+.SH SEE ALSO
+.BR rclone (1),
+.BR sanchala-backup (1)
+.SH AUTHOR
+Sanchala OS Team <dev@sanchala.id>

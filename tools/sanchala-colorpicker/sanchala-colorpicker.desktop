@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Sanchala Color Picker
+Comment=Professional color picking tool
+Exec=sanchala-colorpicker
+Icon=color-picker
+Terminal=false
+Type=Application
+Categories=Utility;Graphics;
+Keywords=color;picker;hex;rgb;

@@ -1,0 +1,92 @@
+#!/usr/bin/env python3
+"""Sanchala Startup Manager GUI"""
+import sys, os, subprocess
+from pathlib import Path
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+
+AUTOSTART = Path.home() / ".config" / "autostart"
+
+class StartupManager(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Sanchala Startup Manager")
+        self.setMinimumSize(500, 400)
+        self.init_ui()
+        self.load_entries()
+    
+    def init_ui(self):
+        w = QWidget()
+        self.setCentralWidget(w)
+        layout = QVBoxLayout(w)
+        
+        # List
+        self.list = QTreeWidget()
+        self.list.setHeaderLabels(["Name", "Command", "Status"])
+        self.list.setAlternatingRowColors(True)
+        layout.addWidget(self.list)
+        
+        # Buttons
+        btns = QHBoxLayout()
+        for name, cb in [("Add", self.add_entry), ("Remove", self.remove_entry),
+                         ("Enable", self.enable_entry), ("Disable", self.disable_entry)]:
+            btn = QPushButton(name)
+            btn.clicked.connect(cb)
+            btns.addWidget(btn)
+        btns.addStretch()
+        layout.addLayout(btns)
+    
+    def load_entries(self):
+        self.list.clear()
+        AUTOSTART.mkdir(parents=True, exist_ok=True)
+        for f in AUTOSTART.glob("*.desktop"):
+            name, exe, hidden = f.stem, "", False
+            for line in f.read_text().splitlines():
+                if line.startswith("Name="): name = line.split("=", 1)[1]
+                elif line.startswith("Exec="): exe = line.split("=", 1)[1]
+                elif line.startswith("Hidden=true"): hidden = True
+            item = QTreeWidgetItem([name, exe, "Disabled" if hidden else "Enabled"])
+            item.setData(0, Qt.ItemDataRole.UserRole, str(f))
+            self.list.addTopLevelItem(item)
+    
+    def add_entry(self):
+        name, ok = QInputDialog.getText(self, "Add Entry", "Name:")
+        if ok and name:
+            exe, ok = QInputDialog.getText(self, "Add Entry", "Command:")
+            if ok and exe:
+                f = AUTOSTART / f"{name}.desktop"
+                f.write_text(f"[Desktop Entry]\nType=Application\nName={name}\nExec={exe}\nHidden=false\n")
+                self.load_entries()
+    
+    def remove_entry(self):
+        item = self.list.currentItem()
+        if item:
+            path = item.data(0, Qt.ItemDataRole.UserRole)
+            if path and QMessageBox.question(self, "Confirm", f"Remove {item.text(0)}?") == QMessageBox.StandardButton.Yes:
+                Path(path).unlink()
+                self.load_entries()
+    
+    def enable_entry(self):
+        self.set_hidden(False)
+    
+    def disable_entry(self):
+        self.set_hidden(True)
+    
+    def set_hidden(self, hidden):
+        item = self.list.currentItem()
+        if item:
+            path = Path(item.data(0, Qt.ItemDataRole.UserRole))
+            content = path.read_text()
+            if "Hidden=" in content:
+                content = content.replace("Hidden=true", f"Hidden={str(hidden).lower()}").replace("Hidden=false", f"Hidden={str(hidden).lower()}")
+            else:
+                content += f"Hidden={str(hidden).lower()}\n"
+            path.write_text(content)
+            self.load_entries()
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    w = StartupManager()
+    w.show()
+    sys.exit(app.exec())

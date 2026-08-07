@@ -1,0 +1,45 @@
+.TH SANCHALA-PRIVACY 1 "August 2026" "Sanchala OS" "User Commands"
+.SH NAME
+sanchala-privacy \- Privacy management center for Sanchala OS
+.SH SYNOPSIS
+.B sanchala-privacy
+[\fIOPTIONS\fR] [\fICOMMAND\fR]
+.SH DESCRIPTION
+.B sanchala-privacy
+provides centralized privacy controls including telemetry settings,
+location services, camera/microphone access, and tracker blocking.
+.SH COMMANDS
+.TP
+.B status
+Show privacy status overview
+.TP
+.B dashboard
+Open privacy dashboard
+.TP
+.B telemetry \fR[\fBon\fR|\fBoff\fR|\fBstatus\fR]
+Manage telemetry settings
+.TP
+.B location \fR[\fBon\fR|\fBoff\fR|\fBstatus\fR]
+Manage location services
+.TP
+.B trackers
+Show blocked trackers statistics
+.SH OPTIONS
+.TP
+.B \-\-json
+Output in JSON format
+.TP
+.B \-h, \-\-help
+Show help message
+.SH FILES
+.TP
+.I /etc/sanchala/privacy/privacy.toml
+System privacy settings
+.TP
+.I ~/.config/sanchala/privacy.toml
+User privacy preferences
+.SH SEE ALSO
+.BR sanchala-guardian (1),
+.BR sanchala-permissions (1)
+.SH AUTHOR
+Sanchala OS Team <dev@sanchala.id>

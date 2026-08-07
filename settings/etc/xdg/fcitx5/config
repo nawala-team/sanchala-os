@@ -1,0 +1,60 @@
+# ============================================================================
+# SANCHALA OS - Fcitx5 IME Configuration
+# ============================================================================
+# Location: /etc/xdg/fcitx5/config
+# System-wide input method configuration for CJK support
+# ============================================================================
+
+[Hotkey]
+# Trigger input method switching
+TriggerKeys=Control+space
+# Alternative trigger
+AltTriggerKeys=Shift_L
+# Enumerate input methods
+EnumerateForwardKeys=Control+Shift_L
+EnumerateBackwardKeys=Control+Shift_R
+# Toggle between first and current input method
+EnumerateSkipFirst=False
+
+[Hotkey/ActivateKeys]
+0=Control+space
+
+[Hotkey/DeactivateKeys]
+0=Control+space
+
+[Hotkey/PrevPage]
+0=Up
+1=Page_Up
+
+[Hotkey/NextPage]
+0=Down
+1=Page_Down
+
+[Hotkey/PrevCandidate]
+0=Shift+Tab
+
+[Hotkey/NextCandidate]
+0=Tab
+
+[Behavior]
+# Show input method state in panel
+ShowInputMethodInformation=True
+ShowInputMethodInformationWhenFocusIn=False
+# Compact input method list
+CompactInputMethodInformation=True
+# Show first input method information
+ShowFirstInputMethodInformation=True
+# Default page size for candidate window
+DefaultPageSize=5
+# Share input state between applications
+ShareInputState=No
+# Use preedit in application when supported
+PreeditEnabledByDefault=True
+# Show preedit in application
+ShowPreedit=True
+
+[Behavior/PreloadInputMethod]
+# Preload input methods for faster switching
+0=pinyin
+1=mozc
+2=hangul

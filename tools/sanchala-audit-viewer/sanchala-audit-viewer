@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: GPL-3.0
+# Sanchala Audit Viewer - Security Audit Log Analyzer
+set -euo pipefail
+
+VERSION="1.0.0"
+AUDIT_DIRS=("/var/log/sanchala" "/var/log/audit" "/var/log")
+
+RED='\033[0;31m' GREEN='\033[0;32m' YELLOW='\033[1;33m' BLUE='\033[0;34m' NC='\033[0m'
+
+cmd_status() {
+    echo -e "${BLUE}Audit System Status${NC}"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    if systemctl is-active auditd &>/dev/null; then
+        echo -e "auditd: ${GREEN}running${NC}"
+    else
+        echo -e "auditd: ${YELLOW}not running${NC}"
+    fi
+    echo "Log files:"
+    local dir
+    for dir in "${AUDIT_DIRS[@]}"; do
+        [[ -d "$dir" ]] && find "$dir" -name "*.log" -o -name "audit*" 2>/dev/null | head -5
+    done
+}
+
+cmd_show() {
+    local filter="${1:-}" lines="${2:-50}"
+    echo -e "${BLUE}Recent Audit Events${NC}"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    if [[ -f /var/log/audit/audit.log ]]; then
+        if [[ -n "$filter" ]]; then
+            grep -i "$filter" /var/log/audit/audit.log | tail -"$lines"
+        else
+            tail -"$lines" /var/log/audit/audit.log
+        fi
+    else
+        local log
+        for log in /var/log/sanchala/*-audit.log; do
+            [[ -f "$log" ]] && { echo -e "\n${BLUE}$(basename "$log"):${NC}"; tail -20 "$log"; }
+        done
+    fi
+}
+
+cmd_search() {
+    local term="$1"
+    echo -e "${BLUE}Searching for: $term${NC}"
+    grep -rhi "$term" /var/log/sanchala/ /var/log/audit/ 2>/dev/null | tail -50 || echo "No matches"
+}
+
+cmd_logins() {
+    echo -e "${BLUE}Login History${NC}"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    last -20 2>/dev/null || echo "No login data"
+    echo -e "\n${BLUE}Failed Logins:${NC}"
+    lastb -10 2>/dev/null || journalctl -u sshd --no-pager -n20 2>/dev/null | grep -i fail || echo "None"
+}
+
+cmd_summary() {
+    echo -e "${BLUE}Security Audit Summary${NC}"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "Failed logins: $(lastb 2>/dev/null | wc -l || echo 0)"
+    echo "Sudo commands: $(grep -c sudo /var/log/auth.log 2>/dev/null || echo 0)"
+    [[ -f /var/log/audit/audit.log ]] && echo "Audit events: $(wc -l < /var/log/audit/audit.log)"
+}
+
+case "${1:-status}" in
+    status) cmd_status ;; show|view) cmd_show "${2:-}" "${3:-50}" ;;
+    search) cmd_search "$2" ;; logins) cmd_logins ;; summary) cmd_summary ;;
+    tail) tail -f /var/log/sanchala/*-audit.log /var/log/audit/audit.log 2>/dev/null ;;
+    *) echo "Usage: sanchala-audit-viewer {status|show [FILTER]|search TERM|logins|summary|tail}" ;;
+esac

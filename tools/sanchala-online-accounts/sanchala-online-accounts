@@ -1,0 +1,67 @@
+#!/usr/bin/env python3
+"""Sanchala Online Accounts - Manage third-party account integrations"""
+import json,secrets,base64
+from datetime import datetime,timedelta
+from pathlib import Path
+
+class OnlineAccounts:
+    def __init__(self):
+        self.base=Path(__file__).parent
+        self.providers_dir=self.base/"providers";self.providers_dir.mkdir(parents=True,exist_ok=True)
+        self.tokens_dir=self.base/"tokens";self.tokens_dir.mkdir(exist_ok=True)
+        self.data=self.base/"lib/accounts.json";self.base.joinpath("lib").mkdir(exist_ok=True)
+        self.state=json.load(open(self.data))if self.data.exists()else{"accounts":{},"providers":{}}
+        self._init_providers()
+    def _save(self):json.dump(self.state,open(self.data,'w'),indent=2)
+    def _init_providers(self):
+        self.state["providers"]={"google":{"name":"Google","oauth":True,"scopes":["email","calendar","drive"]},
+            "microsoft":{"name":"Microsoft","oauth":True,"scopes":["email","onedrive","calendar"]},
+            "github":{"name":"GitHub","oauth":True,"scopes":["repo","user"]},
+            "nextcloud":{"name":"Nextcloud","oauth":False,"type":"webdav"},
+            "imap":{"name":"IMAP Email","oauth":False,"type":"imap"}}
+    def list_providers(self):return self.state["providers"]
+    def add_account(self,provider,credentials):
+        if provider not in self.state["providers"]:return{"success":False,"error":"Unknown provider"}
+        aid=f"{provider}-{secrets.token_hex(4)}"
+        # Encrypt credentials in real impl
+        self.state["accounts"][aid]={"id":aid,"provider":provider,
+            "email":credentials.get("email"),"username":credentials.get("username"),
+            "added":datetime.now().isoformat(),"enabled":True,
+            "sync":{"mail":True,"calendar":True,"contacts":True,"files":False},
+            "last_sync":None}
+        # Store token securely
+        if credentials.get("token"):
+            json.dump({"token":credentials["token"],"expires":credentials.get("expires")},
+                open(self.tokens_dir/f"{aid}.json",'w'))
+        self._save();return{"success":True,"account_id":aid}
+    def remove_account(self,aid):
+        if aid in self.state["accounts"]:del self.state["accounts"][aid]
+        token_file=self.tokens_dir/f"{aid}.json"
+        if token_file.exists():token_file.unlink()
+        self._save();return{"success":True}
+    def set_sync(self,aid,**options):
+        if aid not in self.state["accounts"]:return{"success":False}
+        for k,v in options.items():
+            if k in self.state["accounts"][aid]["sync"]:self.state["accounts"][aid]["sync"][k]=v
+        self._save();return{"success":True}
+    def sync_account(self,aid):
+        if aid not in self.state["accounts"]:return{"success":False}
+        self.state["accounts"][aid]["last_sync"]=datetime.now().isoformat()
+        self._save();return{"success":True,"synced":list(k for k,v in self.state["accounts"][aid]["sync"].items()if v)}
+    def get_accounts(self):return list(self.state["accounts"].values())
+
+if __name__=="__main__":
+    import argparse;p=argparse.ArgumentParser();s=p.add_subparsers(dest="c")
+    s.add_parser("providers")
+    ad=s.add_parser("add");ad.add_argument("--provider",required=True);ad.add_argument("--email");ad.add_argument("--username")
+    rm=s.add_parser("remove");rm.add_argument("--account-id",required=True)
+    sy=s.add_parser("sync");sy.add_argument("--account-id",required=True)
+    s.add_parser("list");s.add_parser("status")
+    a=p.parse_args();oa=OnlineAccounts()
+    if a.c=="providers":print(json.dumps(oa.list_providers(),indent=2))
+    elif a.c=="add":print(json.dumps(oa.add_account(a.provider,{"email":a.email,"username":a.username}),indent=2))
+    elif a.c=="remove":print(json.dumps(oa.remove_account(a.account_id),indent=2))
+    elif a.c=="sync":print(json.dumps(oa.sync_account(a.account_id),indent=2))
+    elif a.c=="list":print(json.dumps(oa.get_accounts(),indent=2))
+    elif a.c=="status":print(f"Online Accounts\nAccounts: {len(oa.state['accounts'])}\nProviders: {list(oa.state['providers'].keys())}")
+    else:p.print_help()

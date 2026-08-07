@@ -1,0 +1,115 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0
+# Sanchala Character Map - Unicode character browser
+"""Browse and insert Unicode characters with search"""
+
+import sys, json, argparse, unicodedata
+from pathlib import Path
+
+VERSION = "1.0.0"
+DATA_DIR = Path.home() / ".local" / "share" / "sanchala" / "charmap"
+
+CATEGORIES = {
+    "emoji": "😀😃😄😁😆😅🤣😂🙂😊😇🥰😍🤩😘😗😚😋😛😜🤪😝",
+    "arrows": "←↑→↓↔↕↖↗↘↙⇐⇑⇒⇓⇔⇕⬅⬆➡⬇",
+    "math": "±×÷≠≈≤≥∞∑∏∫√∂∆∇∈∉∪∩⊂⊃",
+    "currency": "€£¥₹₽₿¢₴₸₺₼₾฿",
+    "symbols": "©®™℃℉°§¶†‡•◦‣※⁂",
+    "music": "♩♪♫♬🎵🎶🎼🎹🎸🎺🎻",
+    "stars": "★☆✡✦✧✩✪✫✬✭✮✯",
+    "hearts": "❤♥💕💖💗💘💙💚💛💜🖤🤍🤎",
+    "boxes": "─│┌┐└┘├┤┬┴┼═║╔╗╚╝╠╣╦╩╬",
+    "greek": "αβγδεζηθικλμνξοπρστυφχψω",
+    "technical": "⌘⌥⇧⌃⎋⏎⌫⌦⇥⇤␣"
+}
+
+class Favorites:
+    def __init__(self):
+        DATA_DIR.mkdir(parents=True, exist_ok=True)
+        self.file = DATA_DIR / "favorites.json"
+        self.data = json.load(open(self.file)) if self.file.exists() else []
+    def save(self): 
+        with open(self.file,'w') as f: json.dump(self.data, f)
+    def add(self, c): 
+        if c not in self.data: self.data.insert(0, c); self.save()
+    def remove(self, c):
+        if c in self.data: self.data.remove(c); self.save()
+
+def cmd_browse(args):
+    cat = args.category or "emoji"
+    if cat not in CATEGORIES:
+        print(f"Categories: {', '.join(CATEGORIES.keys())}")
+        return 1
+    print(f"\n🔤 {cat.title()} Characters:\n")
+    chars = CATEGORIES[cat]
+    for i, c in enumerate(chars):
+        try: name = unicodedata.name(c, "UNKNOWN")
+        except: name = "UNKNOWN"
+        print(f"  {c}  U+{ord(c):04X}  {name[:30]}")
+    print()
+    return 0
+
+def cmd_search(args):
+    query = args.query.upper()
+    print(f"\n🔍 Search: '{args.query}'\n")
+    count = 0
+    for i in range(0x10000):
+        try:
+            c = chr(i)
+            name = unicodedata.name(c, "")
+            if query in name:
+                print(f"  {c}  U+{i:04X}  {name}")
+                count += 1
+                if count >= 50: print("  ... (showing first 50)"); break
+        except: continue
+    if count == 0: print("  No matches found")
+    print()
+    return 0
+
+def cmd_info(args):
+    c = args.char
+    print(f"\n📝 Character Info: {c}\n" + "━"*35)
+    print(f"  Character: {c}")
+    print(f"  Codepoint: U+{ord(c):04X}")
+    try: print(f"  Name:      {unicodedata.name(c)}")
+    except: print("  Name:      (unknown)")
+    print(f"  Category:  {unicodedata.category(c)}")
+    print(f"  HTML:      &#{ord(c)};")
+    print(f"  CSS:       \\{ord(c):04X}")
+    print()
+    return 0
+
+def cmd_favorites(args):
+    fav = Favorites()
+    if not fav.data: print("No favorites. Add with: sanchala-charmap fav-add <char>"); return 0
+    print("\n⭐ Favorites:\n")
+    for c in fav.data[:30]:
+        try: name = unicodedata.name(c, "UNKNOWN")
+        except: name = "UNKNOWN"
+        print(f"  {c}  U+{ord(c):04X}  {name[:30]}")
+    print()
+    return 0
+
+def cmd_fav_add(args):
+    Favorites().add(args.char)
+    print(f"✅ Added '{args.char}' to favorites")
+    return 0
+
+def main():
+    p = argparse.ArgumentParser(prog="sanchala-charmap", description="🔤 Character Map")
+    p.add_argument("--version", action="version", version=f"%(prog)s {VERSION}")
+    sub = p.add_subparsers(dest="cmd")
+    s = sub.add_parser("browse", help="Browse category"); s.add_argument("category", nargs="?")
+    s = sub.add_parser("search", help="Search characters"); s.add_argument("query")
+    s = sub.add_parser("info", help="Character info"); s.add_argument("char")
+    sub.add_parser("favorites", aliases=["fav"], help="Show favorites")
+    s = sub.add_parser("fav-add", help="Add to favorites"); s.add_argument("char")
+    sub.add_parser("categories", help="List categories")
+    args = p.parse_args()
+    cmds = {"browse": cmd_browse, "search": cmd_search, "info": cmd_info, 
+            "favorites": cmd_favorites, "fav": cmd_favorites, "fav-add": cmd_fav_add,
+            "categories": lambda a: print("Categories:", ", ".join(CATEGORIES.keys())) or 0}
+    if args.cmd in cmds: return cmds[args.cmd](args)
+    return cmd_browse(argparse.Namespace(category="emoji"))
+
+if __name__ == "__main__": sys.exit(main())

@@ -1,0 +1,129 @@
+#!/usr/bin/env python3
+"""Sanchala Compass - Digital Compass"""
+import sys, math
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+
+class CompassWidget(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.bearing = 0
+        self.setMinimumSize(300, 300)
+    
+    def paintEvent(self, e):
+        p = QPainter(self)
+        p.setRenderHint(QPainter.RenderHint.Antialiasing)
+        
+        sz = min(self.width(), self.height())
+        cx, cy = self.width() // 2, self.height() // 2
+        r = sz // 2 - 20
+        
+        # Background
+        p.setBrush(QColor("#1a1a2e"))
+        p.setPen(Qt.PenStyle.NoPen)
+        p.drawEllipse(cx - r, cy - r, r * 2, r * 2)
+        
+        # Outer ring
+        p.setPen(QPen(QColor("#4a4a6a"), 3))
+        p.setBrush(Qt.BrushStyle.NoBrush)
+        p.drawEllipse(cx - r + 5, cy - r + 5, (r - 5) * 2, (r - 5) * 2)
+        
+        # Direction markers
+        p.save()
+        p.translate(cx, cy)
+        p.rotate(-self.bearing)
+        
+        dirs = [("N", 0, "#e74c3c"), ("E", 90, "#fff"), ("S", 180, "#fff"), ("W", 270, "#fff")]
+        for d, angle, color in dirs:
+            p.save()
+            p.rotate(angle)
+            p.setPen(QColor(color))
+            p.setFont(QFont("Sans", 16, QFont.Weight.Bold))
+            p.drawText(-10, -r + 35, d)
+            p.restore()
+        
+        # Tick marks
+        for i in range(72):
+            p.save()
+            p.rotate(i * 5)
+            p.setPen(QPen(QColor("#666"), 2 if i % 6 == 0 else 1))
+            l = 15 if i % 6 == 0 else 8
+            p.drawLine(0, -r + 10, 0, -r + 10 + l)
+            p.restore()
+        
+        p.restore()
+        
+        # Needle
+        p.save()
+        p.translate(cx, cy)
+        
+        # Red (north)
+        p.setBrush(QColor("#e74c3c"))
+        p.setPen(Qt.PenStyle.NoPen)
+        needle = QPolygon([QPoint(0, -r + 50), QPoint(-12, 0), QPoint(12, 0)])
+        p.drawPolygon(needle)
+        
+        # White (south)
+        p.setBrush(QColor("#ecf0f1"))
+        needle_s = QPolygon([QPoint(0, r - 50), QPoint(-12, 0), QPoint(12, 0)])
+        p.drawPolygon(needle_s)
+        
+        # Center
+        p.setBrush(QColor("#333"))
+        p.drawEllipse(-15, -15, 30, 30)
+        
+        p.restore()
+    
+    def set_bearing(self, b):
+        self.bearing = b
+        self.update()
+
+class CompassApp(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Sanchala Compass")
+        self.setFixedSize(400, 500)
+        self.setStyleSheet("QMainWindow{background:#0f0f23;}QLabel{color:#fff;}")
+        
+        c = QWidget(); self.setCentralWidget(c); m = QVBoxLayout(c)
+        m.setContentsMargins(20, 20, 20, 20)
+        
+        # Compass
+        self.compass = CompassWidget()
+        m.addWidget(self.compass)
+        
+        # Bearing display
+        self.bearing_lbl = QLabel("0°"); self.bearing_lbl.setStyleSheet("font-size:48px;font-weight:bold;")
+        self.bearing_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        m.addWidget(self.bearing_lbl)
+        
+        self.dir_lbl = QLabel("North"); self.dir_lbl.setStyleSheet("font-size:20px;color:#888;")
+        self.dir_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        m.addWidget(self.dir_lbl)
+        
+        # Coordinates
+        self.coords = QLabel("12.9716° N, 77.5946° E")
+        self.coords.setStyleSheet("color:#666;"); self.coords.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        m.addWidget(self.coords)
+        
+        # Simulate compass movement
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.update_compass)
+        self.timer.start(100)
+        self.angle = 0
+    
+    def update_compass(self):
+        import random
+        self.angle += random.uniform(-2, 2)
+        self.angle = self.angle % 360
+        self.compass.set_bearing(self.angle)
+        self.bearing_lbl.setText(f"{int(self.angle)}°")
+        
+        dirs = [(0, "North"), (45, "NE"), (90, "East"), (135, "SE"), (180, "South"), (225, "SW"), (270, "West"), (315, "NW")]
+        for a, d in dirs:
+            if abs(self.angle - a) < 22.5 or abs(self.angle - a - 360) < 22.5:
+                self.dir_lbl.setText(d); break
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv); w = CompassApp(); w.show(); sys.exit(app.exec())

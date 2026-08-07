@@ -1,0 +1,40 @@
+# Sanchala Parental Controls - Age Profile: Pre-Teen (8-12)
+# Moderate supervision with category blocking
+
+[screentime]
+daily_limit_minutes = 120
+schedule_start = "07:00"
+schedule_end = "20:00"
+bedtime = "21:00"
+weekend_bonus_minutes = 60
+
+[content_filter]
+level = "moderate"
+safe_search = true
+whitelist_only = false
+
+[blocked_categories]
+categories = [
+    "adult",
+    "violence",
+    "gambling",
+    "weapons",
+    "drugs",
+]
+
+[allowed_apps]
+apps = [
+    "org.kde.dolphin",
+    "org.mozilla.firefox",
+    "org.libreoffice.*",
+    "vlc",
+    "gimp",
+    "blender",
+    "org.kde.krita",
+]
+
+[restrictions]
+can_install_apps = false
+can_add_accounts = false
+can_change_settings = false
+can_use_terminal = false

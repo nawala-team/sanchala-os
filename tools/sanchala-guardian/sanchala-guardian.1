@@ -1,0 +1,139 @@
+.TH SANCHALA-GUARDIAN 1 "August 2026" "Sanchala OS" "User Commands"
+.SH NAME
+sanchala-guardian \- Security center and threat protection for Sanchala OS
+.SH SYNOPSIS
+.B sanchala-guardian
+[\fIOPTIONS\fR] [\fICOMMAND\fR] [\fIARGS\fR]
+.SH DESCRIPTION
+.B sanchala-guardian
+is the central security management tool for Sanchala OS. It provides
+real-time threat detection, permission management, AppArmor integration,
+and security policy enforcement.
+.SH COMMANDS
+.SS "Status and Overview"
+.TP
+.B status
+Display overall security status and health score
+.TP
+.B dashboard
+Open the graphical security dashboard
+.TP
+.B report
+Generate a security assessment report
+.SS "Threat Detection"
+.TP
+.B scan \fR[\fIPATH\fR]
+Scan file or directory for threats (uses ClamAV)
+.TP
+.B monitor \fR[\fBstart\fR|\fBstop\fR|\fBstatus\fR]
+Control real-time file monitoring
+.TP
+.B threats
+List detected threats and recommended actions
+.TP
+.B quarantine \fIFILE\fR
+Move suspicious file to quarantine
+.SS "Permission Management"
+.TP
+.B permissions \fR[\fIAPP\fR]
+List or manage application permissions
+.TP
+.B grant \fIAPP\fR \fIPERMISSION\fR
+Grant permission to application
+.TP
+.B revoke \fIAPP\fR \fIPERMISSION\fR
+Revoke permission from application
+.TP
+.B audit \fR[\fIAPP\fR]
+Show permission usage audit log
+.SS "AppArmor Management"
+.TP
+.B profiles
+List AppArmor profiles and status
+.TP
+.B enforce \fIPROFILE\fR
+Set profile to enforce mode
+.TP
+.B complain \fIPROFILE\fR
+Set profile to complain mode
+.SS "Firewall"
+.TP
+.B firewall \fR[\fBstatus\fR|\fBenable\fR|\fBdisable\fR]
+Manage firewall state
+.TP
+.B block \fIAPP\fR
+Block application network access
+.TP
+.B unblock \fIAPP\fR
+Allow application network access
+.SH OPTIONS
+.TP
+.B \-\-json
+Output in JSON format
+.TP
+.B \-q, \-\-quiet
+Suppress non-essential output
+.TP
+.B \-v, \-\-verbose
+Enable verbose output
+.TP
+.B \-h, \-\-help
+Show help message
+.TP
+.B \-\-version
+Show version information
+.SH EXAMPLES
+.TP
+Check security status:
+.B sanchala-guardian status
+.TP
+Scan downloads folder:
+.B sanchala-guardian scan ~/Downloads
+.TP
+List Firefox permissions:
+.B sanchala-guardian permissions firefox
+.TP
+Grant camera access:
+.B sanchala-guardian grant zoom camera
+.TP
+JSON output for scripting:
+.B sanchala-guardian status --json
+.SH FILES
+.TP
+.I /etc/sanchala/guardian/guardian.toml
+Main configuration file
+.TP
+.I /etc/sanchala/guardian/policies/
+Security policy definitions
+.TP
+.I /var/lib/sanchala/guardian/
+State and database files
+.TP
+.I /var/log/sanchala/guardian.log
+Log file
+.SH EXIT STATUS
+.TP
+.B 0
+Success
+.TP
+.B 1
+General error
+.TP
+.B 2
+Security threat detected
+.TP
+.B 3
+Permission denied
+.SH D-BUS INTERFACE
+.B org.sanchala.Guardian
+on the system bus provides programmatic access to all guardian functions.
+.SH SEE ALSO
+.BR sanchala-permissions (1),
+.BR apparmor (7),
+.BR aa-status (8),
+.BR clamav (1),
+.BR firewalld (1)
+.SH AUTHOR
+Sanchala OS Team <dev@sanchala.id>
+.SH COPYRIGHT
+Copyright \(co 2024-2026 Sanchala OS. License GPLv3+.

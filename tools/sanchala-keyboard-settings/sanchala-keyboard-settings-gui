@@ -1,0 +1,86 @@
+#!/usr/bin/env python3
+"""Sanchala Keyboard Settings GUI"""
+import sys, subprocess
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+
+class KeyboardSettings(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Sanchala Keyboard Settings")
+        self.setMinimumSize(450, 400)
+        self.init_ui()
+        self.load_settings()
+    
+    def init_ui(self):
+        w = QWidget()
+        self.setCentralWidget(w)
+        layout = QVBoxLayout(w)
+        
+        # Layout section
+        layout_grp = QGroupBox("Keyboard Layout")
+        layout_l = QVBoxLayout(layout_grp)
+        self.layout_combo = QComboBox()
+        self.layout_combo.addItems(["us - English (US)", "gb - English (UK)", "de - German", "fr - French", 
+                                    "es - Spanish", "it - Italian", "pt - Portuguese", "ru - Russian",
+                                    "jp - Japanese", "cn - Chinese", "kr - Korean", "ar - Arabic"])
+        layout_l.addWidget(self.layout_combo)
+        layout.addWidget(layout_grp)
+        
+        # Typing section
+        typing_grp = QGroupBox("Typing")
+        typing_l = QFormLayout(typing_grp)
+        self.repeat_delay = QSlider(Qt.Orientation.Horizontal)
+        self.repeat_delay.setRange(100, 1000)
+        self.repeat_delay.setValue(500)
+        typing_l.addRow("Repeat Delay:", self.repeat_delay)
+        self.repeat_rate = QSlider(Qt.Orientation.Horizontal)
+        self.repeat_rate.setRange(10, 100)
+        self.repeat_rate.setValue(30)
+        typing_l.addRow("Repeat Rate:", self.repeat_rate)
+        layout.addWidget(typing_grp)
+        
+        # Options
+        opt_grp = QGroupBox("Options")
+        opt_l = QVBoxLayout(opt_grp)
+        self.capslock_ctrl = QCheckBox("Map Caps Lock to Control")
+        self.numlock_on = QCheckBox("Turn on NumLock at startup")
+        opt_l.addWidget(self.capslock_ctrl)
+        opt_l.addWidget(self.numlock_on)
+        layout.addWidget(opt_grp)
+        
+        layout.addStretch()
+        
+        # Apply
+        apply_btn = QPushButton("Apply")
+        apply_btn.clicked.connect(self.apply_settings)
+        layout.addWidget(apply_btn)
+    
+    def load_settings(self):
+        try:
+            out = subprocess.check_output(["setxkbmap", "-query"], text=True)
+            for line in out.split("\n"):
+                if line.startswith("layout:"):
+                    layout = line.split(":")[1].strip()
+                    for i in range(self.layout_combo.count()):
+                        if self.layout_combo.itemText(i).startswith(layout):
+                            self.layout_combo.setCurrentIndex(i)
+                            break
+        except: pass
+    
+    def apply_settings(self):
+        layout = self.layout_combo.currentText().split(" - ")[0]
+        subprocess.run(["setxkbmap", layout])
+        delay = self.repeat_delay.value()
+        rate = self.repeat_rate.value()
+        subprocess.run(["xset", "r", "rate", str(delay), str(rate)])
+        if self.capslock_ctrl.isChecked():
+            subprocess.run(["setxkbmap", "-option", "ctrl:nocaps"])
+        QMessageBox.information(self, "Applied", "Keyboard settings applied.")
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    w = KeyboardSettings()
+    w.show()
+    sys.exit(app.exec())

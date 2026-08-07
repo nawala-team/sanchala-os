@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=Network Monitor
+GenericName=Network Traffic Monitor
+Comment=Real-time network traffic monitoring and analysis
+Exec=sanchala-network-monitor
+Icon=network-workgroup
+Terminal=false
+Type=Application
+Categories=Network;Monitor;System;
+Keywords=network;traffic;bandwidth;monitor;connections;packets;
+StartupNotify=true
+X-GNOME-UsesNotifications=true

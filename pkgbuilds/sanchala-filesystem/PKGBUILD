@@ -1,0 +1,29 @@
+# Maintainer: Sanchala Team <dev@sanchala.id>
+
+pkgname=sanchala-filesystem
+pkgver=1.0.0
+pkgrel=1
+pkgdesc='Sanchala OS filesystem and branding'
+arch=('any')
+url='https://sanchala.id'
+license=('GPL3')
+groups=('sanchala')
+depends=('filesystem')
+backup=('etc/os-release' 'etc/lsb-release' 'etc/issue' 'etc/motd')
+
+package() {
+    # OS identification files
+    install -Dm644 "$srcdir/os-release" "$pkgdir/etc/os-release"
+    install -Dm644 "$srcdir/lsb-release" "$pkgdir/etc/lsb-release"
+    install -Dm644 "$srcdir/sanchala-release" "$pkgdir/etc/sanchala-release"
+    install -Dm644 "$srcdir/issue" "$pkgdir/etc/issue"
+    install -Dm644 "$srcdir/motd" "$pkgdir/etc/motd"
+    
+    # Logo
+    install -Dm644 "$srcdir/sanchala-logo.svg" "$pkgdir/usr/share/pixmaps/sanchala-logo.svg"
+    install -Dm644 "$srcdir/sanchala-logo.png" "$pkgdir/usr/share/pixmaps/sanchala-logo.png"
+    
+    # Sanchala directories
+    install -dm755 "$pkgdir/etc/sanchala"
+    install -dm755 "$pkgdir/usr/share/sanchala"
+}

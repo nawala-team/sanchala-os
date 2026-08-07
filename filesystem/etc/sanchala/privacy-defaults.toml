@@ -1,0 +1,57 @@
+# Sanchala OS Privacy Defaults
+# Factory defaults - DO NOT MODIFY
+# User settings go in /etc/sanchala/privacy.toml
+
+[telemetry]
+# All telemetry OFF - this is the Sanchala promise
+crash_reports = false
+usage_statistics = false
+hardware_info = false
+app_diagnostics = false
+location_services = false
+search_suggestions = false
+spell_check_cloud = false
+font_rendering_cloud = false
+
+[permissions]
+# Full audit trail enabled
+audit_enabled = true
+audit_retention_days = 30
+notify_on_access = true
+auto_revoke_unused_days = 90
+
+# Default permission for new apps
+default_camera = "ask"
+default_microphone = "ask"
+default_location = "deny"
+default_contacts = "ask"
+default_full_disk = "deny"
+default_screen_recording = "deny"
+default_accessibility = "deny"
+default_input_monitoring = "deny"
+
+[network]
+# Maximum network privacy
+dns_over_https = true
+dns_over_https_provider = "quad9"  # Privacy-focused
+mac_randomization = true
+hostname_randomization = true
+ipv6_privacy_extensions = true
+block_telemetry_domains = true
+
+[data_retention]
+# Minimal retention
+recent_files_days = 7
+browser_history_days = 30
+search_history_days = 7
+clipboard_history_enabled = false
+thumbnail_cache_enabled = true
+location_history_enabled = false
+
+[indicators]
+# Privacy indicators enabled
+show_camera_indicator = true
+show_microphone_indicator = true
+show_location_indicator = true
+show_screen_recording_indicator = true
+indicator_position = "top-right"

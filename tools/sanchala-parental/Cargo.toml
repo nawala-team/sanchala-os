@@ -1,0 +1,39 @@
+[package]
+name = "sanchala-parental"
+version = "1.0.0"
+edition = "2021"
+authors = ["Sanchala OS Team"]
+description = "Parental Controls & Screen Time for Sanchala OS"
+license = "GPL-3.0"
+repository = "https://github.com/sanchala-os/sanchala-parental"
+
+[dependencies]
+tokio = { version = "1.35", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+toml = "0.8"
+chrono = { version = "0.4", features = ["serde"] }
+zbus = "4.0"                    # D-Bus integration
+rusqlite = { version = "0.30", features = ["bundled"] }
+log = "0.4"
+env_logger = "0.10"
+clap = { version = "4.4", features = ["derive"] }
+dirs = "5.0"
+notify-rust = "4"              # Desktop notifications
+sha2 = "0.10"                  # PIN hashing
+secrecy = "0.8"               # Secure memory
+nix = { version = "0.27", features = ["user", "signal", "process"] }
+
+[features]
+default = []
+gui = ["dep:gtk4", "dep:libadwaita"]
+gtk4 = { version = "0.7", optional = true }
+libadwaita = { version = "0.5", optional = true }
+
+[[bin]]
+name = "sanchala-parental"
+path = "src/main.rs"
+
+[[bin]]
+name = "sanchala-parental-daemon"
+path = "src/daemon.rs"

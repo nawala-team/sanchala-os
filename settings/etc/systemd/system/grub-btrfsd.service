@@ -1,0 +1,14 @@
+[Unit]
+Description=Sanchala Backup - GRUB Btrfs Snapshot Daemon
+Documentation=man:grub-btrfsd(8)
+After=local-fs.target
+ConditionPathExists=/.snapshots
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/grub-btrfsd --syslog --timeshift-auto /.snapshots
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Sanchala Weather
+Comment=Beautiful weather forecasting
+Exec=sanchala-weather
+Icon=weather-clear
+Terminal=false
+Type=Application
+Categories=Utility;
+Keywords=weather;forecast;temperature;rain;

@@ -1,0 +1,94 @@
+# ============================================================================
+# SANCHALA OS - Power Management udev Rules
+# ============================================================================
+# Version: 1.0 | Hardware-level power management rules
+# Location: /etc/udev/rules.d/60-sanchala-power.rules
+# ============================================================================
+
+# ============================================================================
+# PCI DEVICE POWER MANAGEMENT
+# ============================================================================
+
+# Enable runtime PM for all PCI devices by default
+ACTION=="add", SUBSYSTEM=="pci", ATTR{power/control}="auto"
+
+# Exception: Keep NVIDIA GPU always on (if using proprietary driver)
+# Uncomment if experiencing issues with hybrid graphics
+# ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{power/control}="on"
+
+# ============================================================================
+# USB DEVICE POWER MANAGEMENT
+# ============================================================================
+
+# Enable autosuspend for USB devices
+ACTION=="add", SUBSYSTEM=="usb", ATTR{power/control}="auto"
+ACTION=="add", SUBSYSTEM=="usb", ATTR{power/autosuspend}="2"
+
+# Keep USB hubs powered (improves device detection reliability)
+ACTION=="add", SUBSYSTEM=="usb", ATTR{bDeviceClass}=="09", ATTR{power/control}="on"
+
+# Exception: USB input devices (mice, keyboards) - prevent sleep issues
+ACTION=="add", SUBSYSTEM=="usb", ATTR{bInterfaceClass}=="03", ATTR{power/control}="on"
+
+# Exception: Webcams - prevent sleep/wake issues
+ACTION=="add", SUBSYSTEM=="usb", ATTR{bInterfaceClass}=="0e", ATTR{power/control}="on"
+
+# Exception: USB audio devices
+ACTION=="add", SUBSYSTEM=="usb", ATTR{bInterfaceClass}=="01", ATTR{power/control}="on"
+
+# ============================================================================
+# SATA/AHCI POWER MANAGEMENT
+# ============================================================================
+
+# Enable SATA link power management
+ACTION=="add", SUBSYSTEM=="scsi_host", KERNEL=="host*", ATTR{link_power_management_policy}="med_power_with_dipm"
+
+# ============================================================================
+# INTEL GRAPHICS POWER MANAGEMENT
+# ============================================================================
+
+# Intel GPU - enable RC6 deep sleep and frame buffer compression
+ACTION=="add", SUBSYSTEM=="drm", KERNEL=="card*", DRIVERS=="i915", ATTR{device/power/control}="auto"
+
+# ============================================================================
+# AMD GRAPHICS POWER MANAGEMENT
+# ============================================================================
+
+# AMD GPU - enable dynamic power management
+ACTION=="add", SUBSYSTEM=="drm", KERNEL=="card*", DRIVERS=="amdgpu", ATTR{device/power/control}="auto"
+
+# ============================================================================
+# NETWORK INTERFACE POWER MANAGEMENT
+# ============================================================================
+
+# Ethernet - enable power management when link is down
+ACTION=="add", SUBSYSTEM=="net", KERNEL=="eth*|enp*", RUN+="/usr/bin/ethtool -s %k wol d"
+
+# ============================================================================
+# BLUETOOTH POWER MANAGEMENT
+# ============================================================================
+
+# Enable Bluetooth runtime PM
+ACTION=="add", SUBSYSTEM=="bluetooth", ATTR{../../power/control}="auto"
+
+# ============================================================================
+# THUNDERBOLT POWER MANAGEMENT
+# ============================================================================
+
+# Enable Thunderbolt controller power management
+ACTION=="add", SUBSYSTEM=="thunderbolt", ATTR{power/control}="auto"
+
+# ============================================================================
+# AC ADAPTER EVENTS
+# ============================================================================
+
+# Notify power management on AC plug/unplug
+SUBSYSTEM=="power_supply", ATTR{type}=="Mains", ATTR{online}=="0", RUN+="/usr/bin/systemctl --no-block start sanchala-battery-mode.target"
+SUBSYSTEM=="power_supply", ATTR{type}=="Mains", ATTR{online}=="1", RUN+="/usr/bin/systemctl --no-block start sanchala-ac-mode.target"
+
+# ============================================================================
+# BATTERY EVENTS
+# ============================================================================
+
+# Critical battery level warning (handled by UPower, but backup rule)
+SUBSYSTEM=="power_supply", ATTR{type}=="Battery", ATTR{capacity}=="5", ATTR{status}=="Discharging", RUN+="/usr/bin/systemctl hibernate"

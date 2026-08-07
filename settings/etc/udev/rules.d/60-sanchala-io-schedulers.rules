@@ -1,0 +1,74 @@
+# ============================================================================
+# SANCHALA OS - I/O Scheduler Configuration
+# ============================================================================
+# Version: 1.0 | Auto-selects optimal scheduler based on device type
+# 
+# Scheduler Selection Strategy:
+#   NVMe SSD  → none (no scheduling needed, device handles queuing)
+#   SATA SSD  → mq-deadline (low latency, simple)
+#   HDD       → bfq (fair queuing, prevents starvation)
+#   USB       → mq-deadline (low latency for removable media)
+#   SD/MMC    → mq-deadline (optimized for flash media)
+#   Virtual   → none (hypervisor handles scheduling)
+# ============================================================================
+
+# ============================================================================
+# NVMe DEVICES - No Scheduler (Hardware Queue Management)
+# ============================================================================
+# NVMe drives have hardware multi-queue support; kernel scheduler adds overhead
+ACTION=="add|change", KERNEL=="nvme[0-9]*n[0-9]*", ATTR{queue/scheduler}="none"
+
+# ============================================================================
+# SATA/SCSI SSD - MQ-Deadline (Low Latency)
+# ============================================================================
+# mq-deadline provides low latency for SSDs while maintaining fairness
+# Detected via rotational flag = 0 (non-rotational = SSD)
+ACTION=="add|change", KERNEL=="sd[a-z]*", ATTR{queue/rotational}=="0", ATTR{queue/scheduler}="mq-deadline"
+
+# ============================================================================
+# SATA/SCSI HDD - BFQ (Budget Fair Queueing)
+# ============================================================================
+# BFQ provides excellent interactive responsiveness on HDDs
+# Prevents one process from monopolizing disk I/O
+# rotational = 1 indicates spinning disk
+ACTION=="add|change", KERNEL=="sd[a-z]*", ATTR{queue/rotational}=="1", ATTR{queue/scheduler}="bfq"
+
+# ============================================================================
+# VIRTUAL DISKS - None (Hypervisor Manages)
+# ============================================================================
+# VirtIO, Xen, VMware disks - let the hypervisor handle scheduling
+ACTION=="add|change", KERNEL=="vd[a-z]*", ATTR{queue/scheduler}="none"
+ACTION=="add|change", KERNEL=="xvd[a-z]*", ATTR{queue/scheduler}="none"
+
+# ============================================================================
+# REMOVABLE MEDIA - MQ-Deadline
+# ============================================================================
+# USB storage: low latency for quick file transfers
+ACTION=="add|change", KERNEL=="sd[a-z]*", ATTR{removable}=="1", ATTR{queue/scheduler}="mq-deadline"
+
+# SD/MMC cards: mq-deadline for flash optimization
+ACTION=="add|change", KERNEL=="mmcblk[0-9]*", ATTR{queue/scheduler}="mq-deadline"
+
+# ============================================================================
+# ADDITIONAL I/O OPTIMIZATIONS
+# ============================================================================
+
+# Read-ahead for rotational drives (HDD) - larger read-ahead improves sequential
+ACTION=="add|change", KERNEL=="sd[a-z]*", ATTR{queue/rotational}=="1", ATTR{queue/read_ahead_kb}="1024"
+
+# Read-ahead for SSDs - smaller is fine (random access is fast)
+ACTION=="add|change", KERNEL=="sd[a-z]*", ATTR{queue/rotational}=="0", ATTR{queue/read_ahead_kb}="256"
+
+# Read-ahead for NVMe - even smaller (extremely fast random access)
+ACTION=="add|change", KERNEL=="nvme[0-9]*n[0-9]*", ATTR{queue/read_ahead_kb}="128"
+
+# Disable NCQ for known problematic drives (add specific models if needed)
+# ACTION=="add|change", KERNEL=="sd[a-z]*", ATTR{device/model}=="PROBLEMATIC_MODEL", ATTR{device/queue_depth}="1"
+
+# ============================================================================
+# POWER MANAGEMENT FOR STORAGE
+# ============================================================================
+
+# Enable SATA Aggressive Link Power Management (ALPM) for SSDs on battery
+# This is handled by tlp/power-profiles-daemon, but set safe defaults
+ACTION=="add", SUBSYSTEM=="scsi_host", KERNEL=="host*", ATTR{link_power_management_policy}="med_power_with_dipm"

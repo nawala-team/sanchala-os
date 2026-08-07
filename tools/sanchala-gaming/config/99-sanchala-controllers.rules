@@ -1,0 +1,60 @@
+# ============================================
+# SANCHALA OS - Controller udev Rules
+# ============================================
+# Location: /usr/lib/udev/rules.d/99-sanchala-controllers.rules
+# ============================================
+
+# Xbox Controllers (USB)
+SUBSYSTEM=="usb", ATTRS{idVendor}=="045e", ATTRS{idProduct}=="028e", MODE="0666"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="045e", ATTRS{idProduct}=="028f", MODE="0666"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="045e", ATTRS{idProduct}=="0291", MODE="0666"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="045e", ATTRS{idProduct}=="02d1", MODE="0666"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="045e", ATTRS{idProduct}=="02dd", MODE="0666"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="045e", ATTRS{idProduct}=="02e3", MODE="0666"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="045e", ATTRS{idProduct}=="02ea", MODE="0666"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="045e", ATTRS{idProduct}=="0b12", MODE="0666"
+
+# Xbox One Elite
+SUBSYSTEM=="usb", ATTRS{idVendor}=="045e", ATTRS{idProduct}=="02e0", MODE="0666"
+
+# PlayStation DualShock 4
+SUBSYSTEM=="usb", ATTRS{idVendor}=="054c", ATTRS{idProduct}=="05c4", MODE="0666"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="054c", ATTRS{idProduct}=="09cc", MODE="0666"
+KERNEL=="hidraw*", ATTRS{idVendor}=="054c", ATTRS{idProduct}=="05c4", MODE="0666"
+KERNEL=="hidraw*", ATTRS{idVendor}=="054c", ATTRS{idProduct}=="09cc", MODE="0666"
+
+# PlayStation DualSense (PS5)
+SUBSYSTEM=="usb", ATTRS{idVendor}=="054c", ATTRS{idProduct}=="0ce6", MODE="0666"
+KERNEL=="hidraw*", ATTRS{idVendor}=="054c", ATTRS{idProduct}=="0ce6", MODE="0666"
+
+# Nintendo Switch Pro Controller
+SUBSYSTEM=="usb", ATTRS{idVendor}=="057e", ATTRS{idProduct}=="2009", MODE="0666"
+KERNEL=="hidraw*", ATTRS{idVendor}=="057e", ATTRS{idProduct}=="2009", MODE="0666"
+
+# Nintendo Joy-Con (L)
+KERNEL=="hidraw*", ATTRS{idVendor}=="057e", ATTRS{idProduct}=="2006", MODE="0666"
+
+# Nintendo Joy-Con (R)
+KERNEL=="hidraw*", ATTRS{idVendor}=="057e", ATTRS{idProduct}=="2007", MODE="0666"
+
+# 8BitDo Controllers
+SUBSYSTEM=="usb", ATTRS{idVendor}=="2dc8", MODE="0666"
+KERNEL=="hidraw*", ATTRS{idVendor}=="2dc8", MODE="0666"
+
+# Logitech Gamepads
+SUBSYSTEM=="usb", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c21d", MODE="0666"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c21e", MODE="0666"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c21f", MODE="0666"
+
+# Steam Controller
+SUBSYSTEM=="usb", ATTRS{idVendor}=="28de", MODE="0666"
+KERNEL=="hidraw*", ATTRS{idVendor}=="28de", MODE="0666"
+KERNEL=="uinput", MODE="0660", GROUP="input", OPTIONS+="static_node=uinput"
+
+# Google Stadia Controller
+SUBSYSTEM=="usb", ATTRS{idVendor}=="18d1", ATTRS{idProduct}=="9400", MODE="0666"
+
+# Generic game controllers - allow user access
+SUBSYSTEM=="input", ATTRS{id/bustype}=="0003", MODE="0666"
+KERNEL=="js[0-9]*", MODE="0666"
+KERNEL=="event[0-9]*", SUBSYSTEM=="input", MODE="0666"

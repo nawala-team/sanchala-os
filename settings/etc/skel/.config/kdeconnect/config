@@ -1,0 +1,164 @@
+# ============================================================================
+# SANCHALA OS - KDE Connect Master Configuration
+# ============================================================================
+# Location: ~/.config/kdeconnect/config
+# Apple Continuity-level device sync and phone integration
+# ============================================================================
+
+[General]
+# Device name (auto-detected from hostname)
+name=Sanchala Desktop
+
+# Unique device ID (generated on first run)
+# deviceId=
+
+# Device type: desktop, laptop, tablet, phone
+deviceType=desktop
+
+# Announce this device on the network
+announceName=true
+
+# Custom port (default: 1716)
+port=1716
+
+# UDP broadcast port (default: 1716)
+udpBroadcastPort=1716
+
+# TCP transfer port range
+tcpPortMin=1739
+tcpPortMax=1764
+
+[Discovery]
+# Enable network discovery
+enabled=true
+
+# Discovery methods: udp, mdns, bluetooth
+methods=udp,mdns,bluetooth
+
+# mDNS service name
+mdnsService=_kdeconnect._udp
+
+# Bluetooth discovery enabled
+bluetoothDiscovery=true
+
+# Trusted networks for auto-connect
+trustedNetworks=
+
+# Allow pairing on untrusted networks
+allowUntrustedPairing=false
+
+# Discovery interval (seconds)
+discoveryInterval=30
+
+# Maximum discovery hops
+maxHops=2
+
+[Security]
+# Require encryption for all transfers
+requireEncryption=true
+
+# Certificate path
+certificatePath=~/.config/kdeconnect/certificate.pem
+
+# Private key path
+privateKeyPath=~/.config/kdeconnect/privateKey.pem
+
+# Auto-accept pairing from previously paired devices
+autoAcceptRepairing=true
+
+# Pairing timeout (seconds)
+pairingTimeout=30
+
+# Maximum unpaired connection attempts before block
+maxUnpairedAttempts=5
+
+# Block duration after failed pairing (seconds)
+blockDuration=300
+
+# Verify certificate on reconnect
+verifyCertificate=true
+
+[Transfer]
+# Default download directory
+downloadDir=~/Downloads/KDE Connect
+
+# Temporary transfer directory
+tempDir=~/.cache/kdeconnect/transfers
+
+# Maximum concurrent transfers
+maxConcurrentTransfers=4
+
+# Resume interrupted transfers
+resumeTransfers=true
+
+# Maximum file size (bytes) - 0 for unlimited
+maxFileSize=0
+
+# Compress transfers when possible
+compressTransfers=true
+
+# Compression threshold (bytes)
+compressionThreshold=102400
+
+# Show transfer notifications
+showTransferNotifications=true
+
+# Auto-open small files after transfer
+autoOpenSmallFiles=false
+
+# Small file threshold (bytes)
+smallFileThreshold=1048576
+
+[Notifications]
+# Show desktop notifications
+showNotifications=true
+
+# Notification timeout (ms)
+notificationTimeout=5000
+
+# Show pairing notifications
+showPairingNotifications=true
+
+# Show connection notifications
+showConnectionNotifications=true
+
+# Show transfer progress notifications
+showTransferNotifications=true
+
+# Play sounds for notifications
+playSounds=true
+
+# Sound file for incoming transfer
+incomingTransferSound=/usr/share/sounds/sanchala/device-connect.ogg
+
+# Sound file for completed transfer
+completedTransferSound=/usr/share/sounds/sanchala/transfer-complete.ogg
+
+[PowerManagement]
+# Keep connection alive when on battery
+keepAliveOnBattery=true
+
+# Reduce discovery frequency on battery
+reducedDiscoveryOnBattery=true
+
+# Battery discovery interval (seconds)
+batteryDiscoveryInterval=60
+
+# Disconnect on critical battery
+disconnectOnCriticalBattery=false
+
+# Critical battery threshold (percent)
+criticalBatteryThreshold=10
+
+[Logging]
+# Enable debug logging
+debugLogging=false
+
+# Log file path
+logFile=~/.local/share/kdeconnect/kdeconnect.log
+
+# Maximum log size (bytes)
+maxLogSize=10485760
+
+# Log rotation count
+logRotationCount=3

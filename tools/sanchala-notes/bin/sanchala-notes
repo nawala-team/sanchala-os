@@ -1,0 +1,130 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0
+# Sanchala Notes - Apple Notes-level note-taking
+"""Beautiful note-taking with folders, tags, and markdown support"""
+
+import os, sys, json, argparse, sqlite3
+from pathlib import Path
+from datetime import datetime
+from typing import Dict, List, Optional
+
+VERSION = "1.0.0"
+DATA_DIR = Path.home() / ".local" / "share" / "sanchala" / "notes"
+
+class NotesDB:
+    def __init__(self):
+        DATA_DIR.mkdir(parents=True, exist_ok=True)
+        self.db = DATA_DIR / "notes.db"
+        self._init_db()
+    
+    def _init_db(self):
+        with sqlite3.connect(self.db) as conn:
+            conn.executescript("""
+                CREATE TABLE IF NOT EXISTS folders (
+                    id INTEGER PRIMARY KEY, name TEXT UNIQUE, icon TEXT DEFAULT '📁'
+                );
+                CREATE TABLE IF NOT EXISTS notes (
+                    id INTEGER PRIMARY KEY, title TEXT, content TEXT, folder_id INTEGER DEFAULT 1,
+                    created TEXT, modified TEXT, pinned INTEGER DEFAULT 0
+                );
+                INSERT OR IGNORE INTO folders (name, icon) VALUES ('Notes', '📝');
+            """)
+    
+    def create(self, title: str, content: str = "", folder_id: int = 1) -> int:
+        now = datetime.now().isoformat()
+        with sqlite3.connect(self.db) as conn:
+            cur = conn.execute("INSERT INTO notes (title,content,folder_id,created,modified) VALUES (?,?,?,?,?)",
+                              (title, content, folder_id, now, now))
+            return cur.lastrowid
+    
+    def update(self, id: int, title: str = None, content: str = None):
+        now = datetime.now().isoformat()
+        with sqlite3.connect(self.db) as conn:
+            if title: conn.execute("UPDATE notes SET title=?,modified=? WHERE id=?", (title, now, id))
+            if content is not None: conn.execute("UPDATE notes SET content=?,modified=? WHERE id=?", (content, now, id))
+    
+    def delete(self, id: int):
+        with sqlite3.connect(self.db) as conn: conn.execute("DELETE FROM notes WHERE id=?", (id,))
+    
+    def get(self, id: int) -> Optional[Dict]:
+        with sqlite3.connect(self.db) as conn:
+            conn.row_factory = sqlite3.Row
+            row = conn.execute("SELECT * FROM notes WHERE id=?", (id,)).fetchone()
+            return dict(row) if row else None
+    
+    def list(self, search: str = None) -> List[Dict]:
+        with sqlite3.connect(self.db) as conn:
+            conn.row_factory = sqlite3.Row
+            q = "SELECT * FROM notes"
+            p = []
+            if search: q += " WHERE title LIKE ? OR content LIKE ?"; p = [f"%{search}%"]*2
+            q += " ORDER BY pinned DESC, modified DESC"
+
+
+def cmd_new(args):
+    db = NotesDB()
+    title = args.title or f"Note {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+    content = ""
+    if args.file and Path(args.file).exists(): content = Path(args.file).read_text()
+    id = db.create(title, content)
+    print(f"✅ Created note #{id}: {title}")
+    return 0
+
+def cmd_edit(args):
+    db = NotesDB()
+    note = db.get(args.id)
+    if not note: print("❌ Note not found"); return 1
+    import tempfile, subprocess
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False) as f:
+        f.write(f"# {note['title']}\n\n{note['content'] or ''}")
+        tmp = f.name
+    subprocess.run([os.environ.get("EDITOR", "nano"), tmp])
+    with open(tmp) as f:
+        lines = f.read().split('\n')
+        title = lines[0].lstrip('# ').strip() if lines else note['title']
+        content = '\n'.join(lines[2:]) if len(lines) > 2 else ""
+    db.update(args.id, title, content)
+    os.unlink(tmp)
+    print(f"✅ Updated note #{args.id}")
+    return 0
+
+def cmd_show(args):
+    db = NotesDB()
+    note = db.get(args.id)
+    if not note: print("❌ Note not found"); return 1
+    print(f"\n📝 {note['title']}\n" + "━"*40)
+    print(note['content'] or "(empty)")
+    print(f"\n📅 Modified: {note['modified'][:16]}\n")
+    return 0
+
+def cmd_list(args):
+    db = NotesDB()
+    notes = db.list(getattr(args, 'search', None))
+    print("\n📝 Notes\n" + "━"*50)
+    for n in notes:
+        pin = "📌" if n['pinned'] else "  "
+        preview = (n['content'] or "")[:35].replace('\n', ' ')
+        print(f"{pin} #{n['id']:3}  {n['title'][:22]:22}  {preview}...")
+    print()
+    return 0
+
+def cmd_delete(args):
+    NotesDB().delete(args.id)
+    print(f"✅ Deleted note #{args.id}")
+    return 0
+
+def main():
+    p = argparse.ArgumentParser(prog="sanchala-notes", description="📝 Sanchala Notes")
+    p.add_argument("--version", action="version", version=f"%(prog)s {VERSION}")
+    sub = p.add_subparsers(dest="cmd")
+    s = sub.add_parser("new", help="Create note"); s.add_argument("title", nargs="?"); s.add_argument("--file")
+    s = sub.add_parser("edit", help="Edit note"); s.add_argument("id", type=int)
+    s = sub.add_parser("show", help="Show note"); s.add_argument("id", type=int)
+    s = sub.add_parser("list", aliases=["ls"], help="List notes"); s.add_argument("-s","--search")
+    s = sub.add_parser("delete", aliases=["rm"], help="Delete"); s.add_argument("id", type=int)
+    args = p.parse_args()
+    cmds = {"new": cmd_new, "edit": cmd_edit, "show": cmd_show, "list": cmd_list, "ls": cmd_list, "delete": cmd_delete, "rm": cmd_delete}
+    if args.cmd in cmds: return cmds[args.cmd](args)
+    return cmd_list(args)
+
+if __name__ == "__main__": sys.exit(main())

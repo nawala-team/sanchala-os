@@ -1,0 +1,28 @@
+#!/bin/bash
+# Sanchala Keyboard Settings - Keyboard Configuration
+set -euo pipefail
+
+get_layout() {
+    setxkbmap -query | grep layout | awk '{print $2}'
+}
+
+set_layout() {
+    setxkbmap "$1" && echo "Layout set to: $1"
+}
+
+set_repeat() {
+    xset r rate "${1:-500}" "${2:-30}" && echo "Repeat: delay=${1:-500}ms rate=${2:-30}/s"
+}
+
+list_layouts() {
+    localectl list-x11-keymap-layouts 2>/dev/null || echo "us gb de fr es it pt ru jp cn kr ar"
+}
+
+case "${1:-status}" in
+    status) echo "Current layout: $(get_layout)" ;;
+    layout|-l) set_layout "$2" ;;
+    repeat|-r) set_repeat "$2" "$3" ;;
+    list) list_layouts ;;
+    gui) exec sanchala-keyboard-settings-gui ;;
+    *) echo "Usage: $0 {status|layout|repeat|list|gui}" ;;
+esac

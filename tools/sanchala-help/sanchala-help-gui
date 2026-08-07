@@ -1,0 +1,90 @@
+#!/usr/bin/env python3
+"""Sanchala Help - Help and Documentation"""
+import sys
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+
+class HelpApp(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Sanchala Help")
+        self.setMinimumSize(800, 550)
+        self.init_ui()
+    
+    def init_ui(self):
+        self.setStyleSheet("QMainWindow{background:#f5f5f5;}QLabel{color:#333;}QPushButton{background:#fff;color:#333;border:1px solid #ddd;padding:10px;border-radius:6px;}QPushButton:hover{background:#f0f0f0;}QTreeWidget{background:#fff;border:1px solid #ddd;border-radius:6px;}QTextEdit{background:#fff;border:1px solid #ddd;border-radius:6px;}")
+        c = QWidget(); self.setCentralWidget(c); m = QVBoxLayout(c)
+        
+        # Search
+        s = QHBoxLayout()
+        search = QLineEdit(); search.setPlaceholderText("🔍 Search help topics...")
+        search.setStyleSheet("background:#fff;border:1px solid #ddd;border-radius:20px;padding:10px 20px;")
+        s.addWidget(search)
+        m.addLayout(s)
+        
+        # Main content
+        main = QHBoxLayout()
+        
+        # Topics tree
+        self.tree = QTreeWidget(); self.tree.setHeaderLabel("📚 Help Topics")
+        self.tree.setFixedWidth(250)
+        topics = {
+            "🚀 Getting Started": ["Welcome", "First Steps", "Desktop Tour"],
+            "🖥️ Desktop": ["Panels", "Workspaces", "Shortcuts"],
+            "⚙️ Settings": ["Appearance", "Network", "Privacy"],
+            "📦 Applications": ["Installing Apps", "Default Apps", "App Settings"],
+            "🔒 Security": ["Passwords", "Firewall", "Updates"],
+            "❓ Troubleshooting": ["Common Issues", "Recovery", "Support"],
+        }
+        for cat, items in topics.items():
+            parent = QTreeWidgetItem([cat])
+            for item in items:
+                parent.addChild(QTreeWidgetItem([item]))
+            self.tree.addTopLevelItem(parent)
+        self.tree.expandAll()
+        self.tree.itemClicked.connect(self.show_topic)
+        main.addWidget(self.tree)
+        
+        # Content
+        self.content = QTextEdit()
+        self.content.setReadOnly(True)
+        self.content.setHtml("""
+            <h1>Welcome to SanchalaOS Help</h1>
+            <p>Find answers to common questions and learn how to get the most out of your system.</p>
+            <h2>Quick Links</h2>
+            <ul>
+                <li>🚀 <a href="#">Getting Started Guide</a></li>
+                <li>⌨️ <a href="#">Keyboard Shortcuts</a></li>
+                <li>🔧 <a href="#">System Settings</a></li>
+                <li>🆘 <a href="#">Contact Support</a></li>
+            </ul>
+            <h2>Popular Topics</h2>
+            <ul>
+                <li>How to customize the desktop</li>
+                <li>Setting up network connections</li>
+                <li>Installing and removing applications</li>
+                <li>Backup and restore</li>
+            </ul>
+        """)
+        main.addWidget(self.content, 1)
+        m.addLayout(main)
+        
+        # Bottom
+        bot = QHBoxLayout()
+        bot.addWidget(QLabel("📖 SanchalaOS Documentation")); bot.addStretch()
+        for txt in ["🌐 Online Help", "💬 Community", "📧 Contact Support"]:
+            b = QPushButton(txt); bot.addWidget(b)
+        m.addLayout(bot)
+    
+    def show_topic(self, item):
+        topic = item.text(0)
+        content = {
+            "Welcome": "<h1>Welcome to SanchalaOS</h1><p>SanchalaOS is a modern, secure, and beautiful operating system.</p>",
+            "First Steps": "<h1>First Steps</h1><p>Learn how to navigate your new system.</p><ul><li>Open the app menu</li><li>Connect to WiFi</li><li>Set up accounts</li></ul>",
+            "Shortcuts": "<h1>Keyboard Shortcuts</h1><p><b>Super</b> - Open app menu<br><b>Super+E</b> - File manager<br><b>Super+T</b> - Terminal<br><b>Alt+Tab</b> - Switch windows</p>",
+        }
+        self.content.setHtml(content.get(topic, f"<h1>{topic}</h1><p>Help content for {topic}.</p>"))
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv); w = HelpApp(); w.show(); sys.exit(app.exec())

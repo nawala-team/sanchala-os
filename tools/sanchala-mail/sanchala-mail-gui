@@ -1,0 +1,95 @@
+#!/usr/bin/env python3
+"""Sanchala Mail - Email Client"""
+import sys, json
+from datetime import datetime
+from pathlib import Path
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+
+class MailApp(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Sanchala Mail")
+        self.setMinimumSize(900, 600)
+        self.data_dir = Path.home() / ".local/share/sanchala/mail"
+        self.data_dir.mkdir(parents=True, exist_ok=True)
+        self.emails = self.load()
+        self.init_ui()
+    
+    def init_ui(self):
+        self.setStyleSheet("QMainWindow{background:#1e1e2e;}QLabel{color:#cdd6f4;}QPushButton{background:#313244;color:#cdd6f4;border:none;padding:10px 16px;border-radius:6px;}QPushButton:hover{background:#45475a;}QListWidget,QTextEdit,QLineEdit{background:#313244;color:#cdd6f4;border:none;border-radius:6px;padding:8px;}")
+        c = QWidget(); self.setCentralWidget(c); m = QHBoxLayout(c)
+        
+        # Sidebar
+        side = QVBoxLayout()
+        compose = QPushButton("✏️ Compose"); compose.setStyleSheet("background:#89b4fa;color:#1e1e2e;font-weight:bold;")
+        compose.clicked.connect(self.compose); side.addWidget(compose)
+        for folder in ["📥 Inbox", "📤 Sent", "⭐ Starred", "📝 Drafts", "🗑️ Trash"]:
+            b = QPushButton(folder); b.clicked.connect(lambda _, f=folder: self.load_folder(f)); side.addWidget(b)
+        side.addStretch()
+        m.addLayout(side)
+        
+        # Email list
+        mid = QVBoxLayout()
+        self.search = QLineEdit(); self.search.setPlaceholderText("🔍 Search mail...")
+        mid.addWidget(self.search)
+        self.mail_list = QListWidget(); self.mail_list.currentRowChanged.connect(self.show_email)
+        mid.addWidget(self.mail_list)
+        m.addLayout(mid, 1)
+        
+        # Email view
+        right = QVBoxLayout()
+        self.subj = QLabel("Select an email"); self.subj.setStyleSheet("font-size:18px;font-weight:bold;")
+        self.meta = QLabel(""); self.meta.setStyleSheet("color:#888;")
+        self.body = QTextEdit(); self.body.setReadOnly(True)
+        right.addWidget(self.subj); right.addWidget(self.meta); right.addWidget(self.body)
+        
+        acts = QHBoxLayout()
+        for txt in ["↩️ Reply", "↪️ Forward", "🗑️ Delete", "⭐ Star"]:
+            b = QPushButton(txt); acts.addWidget(b)
+        right.addLayout(acts)
+        m.addLayout(right, 2)
+        self.load_folder("📥 Inbox")
+    
+    def load(self):
+        f = self.data_dir / "emails.json"
+        if f.exists(): return json.loads(f.read_text())
+        return {"inbox":[{"from":"welcome@sanchala.os","subj":"Welcome to Sanchala Mail!","body":"Thank you for using Sanchala Mail.\n\nFeatures:\n• Fast and secure\n• Beautiful interface\n• Full IMAP/SMTP support","date":"2024-01-01 10:00","read":False}],"sent":[],"starred":[],"drafts":[],"trash":[]}
+    
+    def save(self):
+        (self.data_dir / "emails.json").write_text(json.dumps(self.emails, indent=2))
+    
+    def load_folder(self, folder):
+        self.mail_list.clear()
+        key = folder.split()[-1].lower()
+        for e in self.emails.get(key, []):
+            prefix = "●" if not e.get("read") else "○"
+            self.mail_list.addItem(f"{prefix} {e['from'][:20]} - {e['subj'][:30]}")
+    
+    def show_email(self, row):
+        if row >= 0:
+            emails = self.emails.get("inbox", [])
+            if row < len(emails):
+                e = emails[row]; e["read"] = True
+                self.subj.setText(e["subj"]); self.meta.setText(f"From: {e['from']} | {e['date']}")
+                self.body.setText(e["body"]); self.save()
+    
+    def compose(self):
+        dlg = QDialog(self); dlg.setWindowTitle("Compose Email"); dlg.setMinimumSize(500, 400)
+        l = QVBoxLayout(dlg)
+        to = QLineEdit(); to.setPlaceholderText("To:"); l.addWidget(to)
+        subj = QLineEdit(); subj.setPlaceholderText("Subject:"); l.addWidget(subj)
+        body = QTextEdit(); l.addWidget(body)
+        btns = QHBoxLayout()
+        send = QPushButton("📤 Send"); send.setStyleSheet("background:#89b4fa;color:#1e1e2e;")
+        draft = QPushButton("Save Draft"); cancel = QPushButton("Cancel")
+        send.clicked.connect(dlg.accept); cancel.clicked.connect(dlg.reject)
+        btns.addWidget(send); btns.addWidget(draft); btns.addWidget(cancel)
+        l.addLayout(btns)
+        if dlg.exec() == QDialog.DialogCode.Accepted and to.text():
+            self.emails["sent"].append({"from":"me@sanchala.os","to":to.text(),"subj":subj.text(),"body":body.toPlainText(),"date":datetime.now().strftime("%Y-%m-%d %H:%M"),"read":True})
+            self.save(); self.statusBar().showMessage("Email sent!", 2000)
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv); w = MailApp(); w.show(); sys.exit(app.exec())

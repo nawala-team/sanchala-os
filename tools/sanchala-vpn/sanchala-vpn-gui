@@ -1,0 +1,85 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0
+# Sanchala VPN GUI
+
+import sys, subprocess
+from PyQt6.QtWidgets import *
+from PyQt6.QtGui import QIcon
+from PyQt6.QtCore import QTimer
+
+class VPNManager(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Sanchala VPN")
+        self.setWindowIcon(QIcon.fromTheme("network-vpn"))
+        self.setMinimumSize(500, 400)
+        self.setup_ui()
+        self.refresh()
+        self.timer = QTimer(); self.timer.timeout.connect(self.update_status); self.timer.start(5000)
+        
+    def setup_ui(self):
+        central = QWidget()
+        self.setCentralWidget(central)
+        layout = QVBoxLayout(central)
+        
+        # Status
+        status_box = QGroupBox("Status")
+        sl = QHBoxLayout(status_box)
+        self.status_label = QLabel("Checking...")
+        self.ip_label = QLabel("")
+        sl.addWidget(self.status_label); sl.addWidget(self.ip_label); sl.addStretch()
+        layout.addWidget(status_box)
+        
+        # Connections
+        self.conn_list = QListWidget()
+        layout.addWidget(QLabel("VPN Connections:"))
+        layout.addWidget(self.conn_list)
+        
+        # Buttons
+        btns = QHBoxLayout()
+        self.connect_btn = QPushButton("Connect"); self.connect_btn.clicked.connect(self.connect)
+        self.disconnect_btn = QPushButton("Disconnect"); self.disconnect_btn.clicked.connect(self.disconnect)
+        import_btn = QPushButton("Import"); import_btn.clicked.connect(self.import_vpn)
+        btns.addWidget(self.connect_btn); btns.addWidget(self.disconnect_btn)
+        btns.addWidget(import_btn); btns.addStretch()
+        layout.addLayout(btns)
+        
+    def refresh(self):
+        self.conn_list.clear()
+        try:
+            out = subprocess.getoutput("nmcli connection show 2>/dev/null | grep -E 'vpn|wireguard'")
+            for line in out.strip().split('\n'):
+                if line: self.conn_list.addItem(line.split()[0])
+        except: pass
+        self.update_status()
+        
+    def update_status(self):
+        active = subprocess.getoutput("nmcli connection show --active 2>/dev/null | grep -E 'vpn|wireguard'")
+        if active:
+            self.status_label.setText("🟢 Connected")
+            ip = subprocess.getoutput("curl -s --max-time 2 ifconfig.me 2>/dev/null")
+            self.ip_label.setText(f"IP: {ip}")
+        else:
+            self.status_label.setText("🔴 Disconnected")
+            self.ip_label.setText("")
+            
+    def connect(self):
+        item = self.conn_list.currentItem()
+        if item:
+            subprocess.run(["sanchala-vpn", "connect", item.text()])
+            self.update_status()
+            
+    def disconnect(self):
+        subprocess.run(["sanchala-vpn", "disconnect"])
+        self.update_status()
+        
+    def import_vpn(self):
+        f, _ = QFileDialog.getOpenFileName(self, "Import VPN", "", "OpenVPN (*.ovpn);;All (*)")
+        if f:
+            subprocess.run(["sanchala-vpn", "import", f])
+            self.refresh()
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    win = VPNManager(); win.show()
+    sys.exit(app.exec())

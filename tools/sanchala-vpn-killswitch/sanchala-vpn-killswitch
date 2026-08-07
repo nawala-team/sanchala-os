@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: GPL-3.0
+# Sanchala VPN Killswitch - Network Killswitch for VPN Protection
+set -euo pipefail
+
+VERSION="1.0.0"
+STATE_DIR="/var/lib/sanchala/vpn-killswitch"
+
+RED='\033[0;31m' GREEN='\033[0;32m' BLUE='\033[0;34m' NC='\033[0m'
+
+check_root() { [[ $EUID -eq 0 ]] || { echo -e "${RED}Root required${NC}"; exit 1; }; }
+
+get_vpn() { ip link show 2>/dev/null | grep -oP '(tun|wg|vpn)\d+' | head -1 || true; }
+
+cmd_status() {
+    echo -e "${BLUE}VPN Killswitch Status${NC}"
+    local vpn; vpn=$(get_vpn)
+    [[ -n "$vpn" ]] && echo -e "VPN: ${GREEN}$vpn${NC}" || echo -e "VPN: ${RED}Not connected${NC}"
+    [[ -f "$STATE_DIR/active" ]] && echo -e "Killswitch: ${GREEN}Active${NC}" || echo "Killswitch: Inactive"
+}
+
+cmd_enable() {
+    check_root; mkdir -p "$STATE_DIR"
+    iptables-save > "$STATE_DIR/iptables.bak" 2>/dev/null || true
+    iptables -F OUTPUT; iptables -A OUTPUT -o lo -j ACCEPT
+    local vpn; vpn=$(get_vpn); [[ -n "$vpn" ]] && iptables -A OUTPUT -o "$vpn" -j ACCEPT
+    iptables -A OUTPUT -p udp --dport 1194 -j ACCEPT
+    iptables -A OUTPUT -p udp --dport 51820 -j ACCEPT
+    iptables -A OUTPUT -d 192.168.0.0/16 -j ACCEPT
+    iptables -A OUTPUT -j DROP
+    date -Iseconds > "$STATE_DIR/active"
+    echo -e "${GREEN}VPN killswitch enabled${NC}"
+}
+
+cmd_disable() {
+    check_root
+    [[ -f "$STATE_DIR/iptables.bak" ]] && iptables-restore < "$STATE_DIR/iptables.bak" || iptables -F OUTPUT
+    iptables -P OUTPUT ACCEPT; rm -f "$STATE_DIR/active"
+    echo -e "${GREEN}VPN killswitch disabled${NC}"
+}
+
+case "${1:-status}" in
+    status) cmd_status ;; enable|on) cmd_enable ;; disable|off) cmd_disable ;;
+    *) echo "Usage: sanchala-vpn-killswitch {status|enable|disable}" ;;
+esac

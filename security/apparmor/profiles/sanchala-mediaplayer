@@ -1,0 +1,77 @@
+# ============================================
+# SANCHALA OS - Media Player AppArmor Profile
+# ============================================
+# For VLC, mpv, GNOME Videos, etc.
+# ============================================
+
+#include <tunables/global>
+
+profile sanchala-mediaplayer flags=(attach_disconnected,mediate_deleted) {
+  #include <abstractions/base>
+  #include <abstractions/audio>
+  #include <abstractions/dbus-session-strict>
+  #include <abstractions/gnome>
+  #include <abstractions/nameservice>
+  #include <abstractions/video>
+
+  # Deny sensitive paths
+  deny @{HOME}/.ssh/** rw,
+  deny @{HOME}/.gnupg/** rw,
+  deny @{HOME}/.pki/** rw,
+  deny /etc/shadow r,
+  deny /boot/** rwklx,
+
+  # Media directories (read-only except cache)
+  owner @{HOME}/Videos/** r,
+  owner @{HOME}/Music/** r,
+  owner @{HOME}/Downloads/** r,
+  owner @{HOME}/Documents/** r,
+  owner @{HOME}/Pictures/** r,
+
+  # External media
+  /media/** r,
+  /mnt/** r,
+  /run/media/*/** r,
+
+  # Player configuration
+  owner @{HOME}/.config/vlc/** rw,
+  owner @{HOME}/.config/mpv/** rw,
+  owner @{HOME}/.local/share/vlc/** rw,
+  owner @{HOME}/.cache/vlc/** rw,
+
+  # System libraries
+  /usr/lib/** rm,
+  /usr/share/** r,
+
+  # GPU access
+  /dev/dri/** rw,
+  /dev/nvidia* rw,
+
+  # Audio
+  /dev/snd/** rw,
+  owner /run/user/*/pulse/** rw,
+  owner /run/user/*/pipewire-* rw,
+
+  # Video devices (for DVD, etc.)
+  /dev/sr* r,
+  /dev/dvd r,
+  /dev/cdrom r,
+
+  # Proc filesystem
+  owner @{PROC}/@{pid}/** r,
+  @{PROC}/sys/kernel/random/uuid r,
+
+  # Network (for streaming)
+  network inet stream,
+  network inet6 stream,
+  network inet dgram,
+  network inet6 dgram,
+
+  # DBus
+  dbus send bus=session,
+  dbus receive bus=session,
+
+  # Wayland/X11
+  owner /run/user/*/wayland-* rw,
+  /tmp/.X11-unix/* rw,
+}

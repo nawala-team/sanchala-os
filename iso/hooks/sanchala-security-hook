@@ -1,0 +1,22 @@
+#!/bin/bash
+# ============================================================================
+# SANCHALA OS - Security Initramfs Hook (Runtime)
+# ============================================================================
+# Install: /etc/initcpio/hooks/sanchala-security
+# Purpose: Runtime security initialization during boot
+# ============================================================================
+
+run_hook() {
+    # Log boot security initialization
+    msg ":: Sanchala Security: Initializing..."
+    
+    # Verify TPM is available (optional)
+    if [ -e /sys/class/tpm/tpm0 ]; then
+        msg ":: Sanchala Security: TPM detected"
+    fi
+    
+    # Apply early module restrictions
+    if [ -f /etc/modprobe.d/sanchala-blacklist.conf ]; then
+        msg ":: Sanchala Security: Module blacklist loaded"
+    fi
+}

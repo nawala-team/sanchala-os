@@ -1,0 +1,26 @@
+#!/bin/bash
+# Sanchala Region & Language Settings
+set -euo pipefail
+
+show_locale() {
+    echo "=== Region & Language ==="
+    echo "Language: $LANG"
+    echo "Formats: $(locale | grep LC_TIME | cut -d= -f2)"
+    localectl status 2>/dev/null || true
+}
+
+set_locale() {
+    localectl set-locale "LANG=$1" && echo "Locale set to $1"
+}
+
+list_locales() {
+    localectl list-locales 2>/dev/null || locale -a
+}
+
+case "${1:-show}" in
+    show) show_locale ;;
+    set) set_locale "$2" ;;
+    list) list_locales ;;
+    gui) exec sanchala-region-settings-gui ;;
+    *) echo "Usage: $0 {show|set|list|gui}" ;;
+esac

@@ -1,0 +1,122 @@
+# ============================================
+# SANCHALA OS - Extension Manager Configuration
+# ============================================
+# Central configuration for extension framework
+# ============================================
+
+[general]
+# Enable extension framework
+enabled = true
+
+# Extension data directory
+data_dir = "~/.local/share/sanchala/extensions"
+
+# Cache directory for downloads
+cache_dir = "~/.cache/sanchala/extensions"
+
+# Log level: debug, info, warn, error
+log_level = "info"
+
+[sources]
+# Sanchala Store (primary, trusted)
+[sources.sanchala]
+enabled = true
+url = "https://extensions.sanchala.id/api/v1"
+priority = 1
+trusted = true
+
+# KDE Store (secondary, community)
+[sources.kde]
+enabled = true
+url = "https://api.kde-look.org/ocs/v1"
+priority = 2
+trusted = false
+warn_on_install = true
+
+# Local packages
+[sources.local]
+enabled = true
+path = "~/.local/share/sanchala/extensions/local"
+priority = 3
+
+[security]
+# Require GPG signature for installation
+require_signature = true
+
+# Allow unsigned from Sanchala Store only (for development)
+allow_unsigned_sanchala = false
+
+# Auto-verify signatures on update
+verify_on_update = true
+
+# Block extensions requesting dangerous permissions
+block_dangerous = false
+
+# Warn before granting dangerous permissions
+warn_dangerous = true
+
+# Dangerous permission list
+dangerous_permissions = [
+    "exec",
+    "dbus:system",
+    "filesystem:write"
+]
+
+[sandbox]
+# Enable runtime sandboxing
+enabled = true
+
+# Strict mode (deny by default)
+strict_mode = true
+
+# Log sandbox violations
+log_violations = true
+
+# Auto-disable after repeated violations
+auto_disable_threshold = 5
+
+# Default resource limits
+[sandbox.limits]
+cpu_percent = 10
+memory_mb = 100
+io_read_mbps = 10
+io_write_mbps = 5
+net_bandwidth_kbps = 1024
+max_processes = 5
+max_files = 100
+
+[updates]
+# Check for updates automatically
+auto_check = true
+
+# Check interval
+check_interval = "daily"  # daily, weekly, manual
+
+# Auto-install updates
+auto_install = false
+
+# Notify about available updates
+notify_updates = true
+
+[ui]
+# Show security badges in store
+show_security_badges = true
+
+# Show permission details before install
+show_permissions = true
+
+# Show reviews and ratings
+show_reviews = true
+
+# Default sort order: popular, recent, rating
+default_sort = "popular"
+
+[developer]
+# Enable developer mode (for extension development)
+developer_mode = false
+
+# Allow loading unpacked extensions
+allow_unpacked = false
+
+# Show debug info in extension manager
+show_debug = false

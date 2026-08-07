@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: GPL-3.0
+# Sanchala Disk Repair - Filesystem Repair Tool
+set -euo pipefail
+VERSION="1.0.0"
+PROGRAM_NAME="sanchala-disk-repair"
+RED="\033[0;31m" GREEN="\033[0;32m" YELLOW="\033[1;33m" BLUE="\033[0;34m" NC="\033[0m" BOLD="\033[1m"
+print_info() { echo -e "${BLUE}i $1${NC}"; }
+print_success() { echo -e "${GREEN}ok $1${NC}"; }
+print_warning() { echo -e "${YELLOW}! $1${NC}"; }
+print_error() { echo -e "${RED}x $1${NC}"; }
+check_root() { [[ $EUID -eq 0 ]] || { print_error "Root required"; exit 1; }; }
+show_help() {
+cat << HELP
+SANCHALA DISK REPAIR - Filesystem Repair
+USAGE: sanchala-disk-repair <COMMAND>
+COMMANDS:
+  check <DEVICE>    Check filesystem
+  repair <DEVICE>   Repair filesystem
+  smart <DEVICE>    Show SMART status
+  scan              Scan for disk errors
+  badblocks <DEV>   Check for bad blocks
+  status            Show all disk status
+  trim              Run TRIM on SSDs
+OPTIONS:
+  -f, --force       Force check even if clean
+  -a, --auto        Auto-fix errors
+  -h, --help        Show this help
+HELP
+}
+get_fstype() { blkid -o value -s TYPE "$1" 2>/dev/null || echo "unknown"; }
+cmd_check() {
+    local dev="$1" force=false; shift||true
+    while [[ $# -gt 0 ]]; do case "$1" in -f|--force) force=true;; esac; shift; done
+    [[ -b "$dev" ]] || { print_error "Not block device"; exit 1; }
+    local fs=$(get_fstype "$dev")
+    print_info "Checking $dev ($fs)..."
+    case "$fs" in
+        ext2|ext3|ext4) e2fsck ${force:+-f} -n "$dev" ;;
+        xfs) xfs_repair -n "$dev" ;;
+        btrfs) btrfs check --readonly "$dev" ;;
+        *) fsck -n "$dev" ;;
+    esac
+    print_success "Check complete"
+}
+cmd_repair() {
+    local dev="$1"
+    [[ -b "$dev" ]] || { print_error "Not block device"; exit 1; }
+    findmnt "$dev" &>/dev/null && { print_error "Unmount first!"; exit 1; }
+    local fs=$(get_fstype "$dev")
+    print_info "Repairing $dev ($fs)..."
+    case "$fs" in
+        ext2|ext3|ext4) e2fsck -f -y "$dev" ;;
+        xfs) xfs_repair "$dev" ;;
+        btrfs) btrfs check --repair "$dev" ;;
+        *) fsck -y "$dev" ;;
+    esac
+    print_success "Repair complete"
+}
+cmd_smart() {
+    local dev="$1"
+    [[ -b "$dev" ]] || { print_error "Not block device"; exit 1; }
+    if command -v smartctl &>/dev/null; then
+        smartctl -H "$dev"
+        smartctl -A "$dev" | head -20
+    else
+        print_warning "smartmontools not installed"
+    fi
+}
+cmd_scan() {
+    print_info "Scanning disks..."
+    lsblk -o NAME,SIZE,TYPE,FSTYPE,MOUNTPOINT
+    echo ""
+    print_info "Recent disk errors:"
+    dmesg | grep -iE "error|fail" | grep -iE "sd|nvme|disk" | tail -10 || echo "None found"
+}
+cmd_badblocks() {
+    local dev="$1"
+    [[ -b "$dev" ]] || { print_error "Not block device"; exit 1; }
+    findmnt "$dev" &>/dev/null && { print_error "Unmount first!"; exit 1; }
+    print_info "Checking bad blocks (read-only)..."
+    badblocks -sv "$dev"
+}
+cmd_status() {
+    echo -e "${BOLD}Disk Status:${NC}"
+    lsblk -o NAME,SIZE,TYPE,FSTYPE,MOUNTPOINT
+    echo ""
+    df -hT 2>/dev/null | grep -vE "tmpfs|devtmpfs"
+}
+cmd_trim() {
+    print_info "Running TRIM..."
+    fstrim -av 2>/dev/null || print_warning "TRIM not supported"
+    print_success "TRIM complete"
+}
+main() {
+    case "${1:-help}" in
+        check) check_root; shift; cmd_check "$@";; repair) check_root; shift; cmd_repair "$@";;
+        smart) shift; cmd_smart "$@";; scan) cmd_scan;; badblocks) check_root; shift; cmd_badblocks "$@";;
+        status) cmd_status;; trim) check_root; cmd_trim;;
+        -h|--help|help) show_help;; --version) echo "$PROGRAM_NAME $VERSION";; *) print_error "Unknown: $1"; exit 1;;
+    esac
+}
+main "$@"

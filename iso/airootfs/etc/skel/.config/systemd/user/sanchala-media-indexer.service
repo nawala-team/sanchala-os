@@ -1,0 +1,20 @@
+[Unit]
+Description=SANCHALA Media Library Indexer
+Documentation=man:sanchala-media-indexer(1)
+After=graphical-session.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/sanchala-media-indexer scan
+StandardOutput=journal
+StandardError=journal
+
+# Security hardening
+PrivateTmp=true
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=%h/.local/share/sanchala %h/.cache/sanchala %h/.local/state/sanchala
+
+[Install]
+WantedBy=default.target

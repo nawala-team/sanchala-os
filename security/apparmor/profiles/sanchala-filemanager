@@ -1,0 +1,76 @@
+# ============================================
+# SANCHALA OS - File Manager AppArmor Profile
+# ============================================
+# For Nautilus, Dolphin, Thunar, etc.
+# ============================================
+
+#include <tunables/global>
+
+profile sanchala-filemanager flags=(attach_disconnected,mediate_deleted) {
+  #include <abstractions/base>
+  #include <abstractions/dbus-session-strict>
+  #include <abstractions/gnome>
+  #include <abstractions/nameservice>
+  #include <abstractions/trash>
+
+  # Deny sensitive system paths
+  deny /boot/** rwklx,
+  deny /etc/shadow r,
+  deny /etc/gshadow r,
+  deny /etc/sudoers r,
+  deny /etc/sudoers.d/** r,
+  deny /proc/*/mem r,
+  deny /sys/firmware/** rwklx,
+
+  # Deny access to sensitive user data by default
+  deny @{HOME}/.ssh/** rw,
+  deny @{HOME}/.gnupg/** rw,
+  deny @{HOME}/.pki/** rw,
+  deny @{HOME}/.password-store/** rw,
+  deny @{HOME}/.local/share/keyrings/** rw,
+
+  # User directories (full access for file management)
+  owner @{HOME}/ r,
+  owner @{HOME}/** rwkl,
+
+  # Mount points
+  /media/** rwkl,
+  /mnt/** rwkl,
+  /run/media/*/** rwkl,
+
+  # System binaries (read/execute)
+  /usr/bin/* rix,
+  /usr/lib/** rm,
+  /usr/share/** r,
+
+  # Thumbnails and cache
+  owner @{HOME}/.cache/thumbnails/** rw,
+  owner @{HOME}/.thumbnails/** rw,
+
+  # Trash
+  owner @{HOME}/.local/share/Trash/** rw,
+
+  # GVFS for remote mounts
+  owner /run/user/*/gvfs/** rwkl,
+  owner /run/user/*/gvfsd-* rw,
+
+  # Proc/sys read for system info
+  @{PROC}/@{pid}/fd/ r,
+  @{PROC}/@{pid}/mountinfo r,
+  /sys/devices/**/block/**/size r,
+
+  # Devices
+  /dev/fuse rw,
+
+  # DBus
+  dbus send bus=session,
+  dbus receive bus=session,
+
+  # Wayland/X11
+  owner /run/user/*/wayland-* rw,
+  /tmp/.X11-unix/* rw,
+
+  # Network for remote filesystems
+  network inet stream,
+  network inet6 stream,
+}

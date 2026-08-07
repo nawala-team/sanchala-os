@@ -1,0 +1,67 @@
+# ============================================
+# SANCHALA OS - Font Packages
+# ============================================
+# Comprehensive font support for 50+ languages
+# ============================================
+
+# ===========================================
+# Core System Fonts
+# ===========================================
+noto-fonts
+noto-fonts-cjk
+noto-fonts-emoji
+noto-fonts-extra
+ttf-dejavu
+ttf-liberation
+fontconfig
+
+# ===========================================
+# UI & Coding Fonts
+# ===========================================
+inter-font
+ttf-jetbrains-mono
+ttf-fira-code
+ttf-roboto
+ttf-ubuntu-font-family
+
+# ===========================================
+# Arabic Script
+# ===========================================
+noto-fonts-extra
+# Provides: Noto Naskh Arabic, Noto Sans Arabic
+
+# ===========================================
+# Hebrew Script
+# ===========================================
+# Included in noto-fonts-extra
+
+# ===========================================
+# Indic Scripts
+# ===========================================
+# Devanagari (Hindi, Sanskrit, Marathi)
+# Bengali, Tamil, Telugu, Kannada, Malayalam
+# Gujarati, Gurmukhi (Punjabi), Odia
+# All included in noto-fonts-extra
+
+# ===========================================
+# Southeast Asian Scripts
+# ===========================================
+# Thai, Lao, Khmer, Myanmar, Tibetan
+# All included in noto-fonts-extra
+
+# ===========================================
+# Other Scripts
+# ===========================================
+# Armenian, Georgian, Ethiopic, Sinhala
+# All included in noto-fonts-extra
+
+# ===========================================
+# Console Fonts
+# ===========================================
+terminus-font
+
+# ===========================================
+# Math & Technical Fonts
+# ===========================================
+ttf-linux-libertine
+texlive-fontsrecommended

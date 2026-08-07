@@ -1,0 +1,53 @@
+# Sanchala Browser - KDE Breeze Dark Theme
+# For native Qt/KDE integration
+
+[Theme]
+Name=Sanchala Breeze
+Version=1.0
+Author=Sanchala OS
+
+[Colors]
+WindowBackground=#1e1e2e
+WindowForeground=#cdd6f4
+ButtonBackground=#313244
+ButtonForeground=#cdd6f4
+SelectionBackground=#6366f1
+SelectionForeground=#ffffff
+LinkColor=#89b4fa
+VisitedLink=#cba6f7
+TooltipBackground=#313244
+TooltipForeground=#cdd6f4
+TabBarBackground=#181825
+TabBarForeground=#cdd6f4
+TabBarActive=#6366f1
+ToolbarBackground=#1e1e2e
+ToolbarForeground=#cdd6f4
+BorderColor=#45475a
+
+[VerticalTabs]
+Background=#181825
+ItemBackground=#1e1e2e
+ItemHover=#313244
+ItemSelected=#6366f1
+ItemSelectedText=#ffffff
+GroupHeader=#45475a
+
+[Sidebar]
+Background=#181825
+ItemHover=#313244
+IconColor=#cdd6f4
+BadgeBackground=#f38ba8
+BadgeText=#1e1e2e
+
+[Shield]
+EnabledColor=#a6e3a1
+DisabledColor=#f38ba8
+WarningColor=#fab387
+StatsBackground=#313244
+
+[URLBar]
+Background=#313244
+Foreground=#cdd6f4
+SecureColor=#a6e3a1
+InsecureColor=#f38ba8
+PlaceholderColor=#6c7086

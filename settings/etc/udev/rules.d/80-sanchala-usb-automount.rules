@@ -1,0 +1,78 @@
+# ============================================================================
+# SANCHALA OS - USB Automount Rules
+# ============================================================================
+# Location: /etc/udev/rules.d/80-sanchala-usb-automount.rules
+# Purpose: Plug-and-play automounting for USB storage devices
+# ============================================================================
+
+# ===========================================
+# USB STORAGE AUTOMOUNT
+# ===========================================
+# Trigger udisks2 for automatic mounting of USB storage
+# udisks2 handles mount point creation and permissions
+
+# USB Mass Storage devices - let udisks2 handle them
+ACTION=="add", SUBSYSTEM=="block", ENV{ID_USB_DRIVER}=="usb-storage", ENV{UDISKS_AUTO}="1", ENV{UDISKS_IGNORE}="0"
+ACTION=="add", SUBSYSTEM=="block", ENV{ID_USB_DRIVER}=="uas", ENV{UDISKS_AUTO}="1", ENV{UDISKS_IGNORE}="0"
+
+# USB drives - enable automount
+ACTION=="add", SUBSYSTEM=="block", ENV{ID_BUS}=="usb", ENV{ID_FS_USAGE}=="filesystem", ENV{UDISKS_AUTO}="1"
+
+# ===========================================
+# MOUNT OPTIONS BY FILESYSTEM
+# ===========================================
+# NTFS - mount with proper permissions
+ACTION=="add", SUBSYSTEM=="block", ENV{ID_FS_TYPE}=="ntfs", ENV{UDISKS_MOUNT_OPTIONS_DEFAULTS}="uid=$UDISKS_MOUNT_UID,gid=$UDISKS_MOUNT_GID,dmask=022,fmask=133"
+
+# exFAT - mount with proper permissions  
+ACTION=="add", SUBSYSTEM=="block", ENV{ID_FS_TYPE}=="exfat", ENV{UDISKS_MOUNT_OPTIONS_DEFAULTS}="uid=$UDISKS_MOUNT_UID,gid=$UDISKS_MOUNT_GID,dmask=022,fmask=133"
+
+# FAT32/VFAT - mount with proper permissions
+ACTION=="add", SUBSYSTEM=="block", ENV{ID_FS_TYPE}=="vfat", ENV{UDISKS_MOUNT_OPTIONS_DEFAULTS}="uid=$UDISKS_MOUNT_UID,gid=$UDISKS_MOUNT_GID,dmask=022,fmask=133,utf8=1"
+
+# ===========================================
+# SPECIAL DEVICE HANDLING
+# ===========================================
+# Ignore system disks (prevent accidental automount of internal drives)
+KERNEL=="sd[a-z]", ENV{ID_PATH}=="*-ata-*", ENV{UDISKS_AUTO}="0"
+KERNEL=="nvme*", ENV{UDISKS_AUTO}="0"
+
+# Allow removable USB even if connected via SATA/eSATA
+ACTION=="add", SUBSYSTEM=="block", ATTR{removable}=="1", ENV{UDISKS_AUTO}="1"
+
+# ===========================================
+# EJECT/SAFE REMOVAL SUPPORT
+# ===========================================
+# Enable safe removal for USB devices
+ACTION=="add", SUBSYSTEM=="block", ENV{ID_BUS}=="usb", ENV{UDISKS_CAN_POWER_OFF}="1"
+
+# ===========================================
+# SD/MMC CARD AUTOMOUNT
+# ===========================================
+# SD cards via USB reader
+ACTION=="add", SUBSYSTEM=="block", ENV{ID_DRIVE_FLASH_SD}=="1", ENV{UDISKS_AUTO}="1"
+
+# Internal SD card reader
+ACTION=="add", SUBSYSTEM=="block", KERNEL=="mmcblk[0-9]*p[0-9]*", ENV{UDISKS_AUTO}="1"
+ACTION=="add", SUBSYSTEM=="block", KERNEL=="mmcblk[0-9]*", ENV{ID_FS_USAGE}=="filesystem", ENV{UDISKS_AUTO}="1"
+
+# ===========================================
+# OPTICAL DRIVES
+# ===========================================
+# CD/DVD automount
+ACTION=="change", SUBSYSTEM=="block", KERNEL=="sr[0-9]*", ENV{ID_CDROM_MEDIA}=="1", ENV{UDISKS_AUTO}="1"
+
+# ===========================================
+# MTP/PTP DEVICES (Phones/Cameras)
+# ===========================================
+# Android phones (MTP)
+ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="*", ATTR{bInterfaceClass}=="06", ATTR{bInterfaceSubClass}=="01", MODE="0666", ENV{ID_MTP_DEVICE}="1"
+
+# PTP cameras
+ACTION=="add", SUBSYSTEM=="usb", ATTR{bInterfaceClass}=="06", ATTR{bInterfaceSubClass}=="01", ATTR{bInterfaceProtocol}=="01", MODE="0666"
+
+# ===========================================
+# FUSE FILESYSTEMS
+# ===========================================
+# Allow users to mount FUSE filesystems
+ACTION=="add", SUBSYSTEM=="fuse", MODE="0666"

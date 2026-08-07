@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: GPL-3.0
+# Sanchala App Permissions - Application Permission Manager
+set -euo pipefail
+
+VERSION="1.0.0"
+CONFIG_DIR="/etc/sanchala/app-permissions"
+AUDIT_LOG="/var/log/sanchala/app-permissions-audit.log"
+
+RED='\033[0;31m' GREEN='\033[0;32m' YELLOW='\033[1;33m' BLUE='\033[0;34m' NC='\033[0m'
+PERMISSIONS=(camera microphone location files network bluetooth usb)
+
+log_audit() { echo "[$(date -Iseconds)] $1: ${2:-}" >> "$AUDIT_LOG" 2>/dev/null || true; }
+check_root() { [[ $EUID -eq 0 ]] || { echo -e "${RED}✗ Root required${NC}"; exit 1; }; }
+
+cmd_list() {
+    echo -e "${BLUE}Installed Applications:${NC}"
+    for d in /usr/share/applications/*.desktop; do
+        [[ -f "$d" ]] && grep -m1 "^Name=" "$d" | cut -d= -f2
+    done 2>/dev/null | head -20
+}
+
+cmd_show() {
+    local app="$1" conf="$CONFIG_DIR/${app}.conf"
+    echo -e "${BLUE}Permissions for: $app${NC}"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    local perm status
+    for perm in "${PERMISSIONS[@]}"; do
+        status="${YELLOW}not set${NC}"
+        if [[ -f "$conf" ]]; then
+            grep -q "^${perm}=allow" "$conf" && status="${GREEN}allowed${NC}"
+            grep -q "^${perm}=deny" "$conf" && status="${RED}denied${NC}"
+        fi
+        printf "  %-12s %b\n" "$perm:" "$status"
+    done
+}
+
+cmd_set() {
+    check_root
+    local app="$1" perm="$2" value="$3" conf="$CONFIG_DIR/${app}.conf"
+    mkdir -p "$CONFIG_DIR"; touch "$conf"
+    sed -i "/^${perm}=/d" "$conf"
+    echo "${perm}=${value}" >> "$conf"
+    log_audit "SET" "$app: $perm=$value"
+    echo -e "${GREEN}✓ Set $perm=$value for $app${NC}"
+}
+
+cmd_revoke() {
+    check_root
+    local app="$1" conf="$CONFIG_DIR/${app}.conf" perm
+    for perm in "${PERMISSIONS[@]}"; do echo "${perm}=deny"; done > "$conf"
+    log_audit "REVOKE_ALL" "$app"
+    echo -e "${GREEN}✓ Revoked all permissions for $app${NC}"
+}
+
+case "${1:-help}" in
+    list) cmd_list ;; show) cmd_show "$2" ;;
+    set) cmd_set "$2" "$3" "$4" ;; allow) cmd_set "$2" "$3" "allow" ;;
+    deny) cmd_set "$2" "$3" "deny" ;; revoke-all) cmd_revoke "$2" ;;
+    *) echo "Usage: sanchala-app-permissions {list|show APP|set APP PERM VALUE|revoke-all APP}" ;;
+esac

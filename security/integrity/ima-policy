@@ -1,0 +1,93 @@
+# ============================================================================
+# SANCHALA OS - IMA (Integrity Measurement Architecture) Policy
+# ============================================================================
+# Version: 2.0
+# Install to: /etc/ima/ima-policy
+# ============================================================================
+# This policy measures and optionally appraises file integrity using the
+# kernel's IMA subsystem, providing tamper detection for critical files.
+# ============================================================================
+
+# Don't measure pseudo-filesystems
+dont_measure fsmagic=0x9fa0       # procfs
+dont_measure fsmagic=0x62656572   # sysfs
+dont_measure fsmagic=0x64626720   # debugfs
+dont_measure fsmagic=0x01021994   # tmpfs
+dont_measure fsmagic=0x858458f6   # ramfs
+dont_measure fsmagic=0x73636673   # securityfs
+dont_measure fsmagic=0x27e0eb    # cgroup
+dont_measure fsmagic=0x63677270   # cgroup2
+dont_measure fsmagic=0x6e736673   # nsfs
+
+# ============================================================================
+# BOOT-TIME MEASUREMENTS (Always measure)
+# ============================================================================
+# Measure kernel modules
+measure func=MODULE_CHECK
+
+# Measure firmware
+measure func=FIRMWARE_CHECK
+
+# Measure kernel command line parameters
+measure func=KEXEC_CMDLINE
+
+# ============================================================================
+# EXECUTABLE MEASUREMENTS
+# ============================================================================
+# Measure all executed files
+measure func=BPRM_CHECK mask=MAY_EXEC
+
+# Measure memory-mapped executables
+measure func=MMAP_CHECK mask=MAY_EXEC
+
+# ============================================================================
+# LIBRARY MEASUREMENTS
+# ============================================================================
+# Measure shared libraries when loaded
+measure func=FILE_MMAP mask=MAY_EXEC
+
+# ============================================================================
+# CRITICAL FILE MEASUREMENTS
+# ============================================================================
+# Measure files opened by root
+measure func=FILE_CHECK mask=MAY_READ uid=0
+
+# Measure /etc files
+measure func=FILE_CHECK mask=MAY_READ fspath=/etc
+
+# Measure boot files
+measure func=FILE_CHECK mask=MAY_READ fspath=/boot
+
+# ============================================================================
+# APPRAISAL RULES (Enforcement - Enable after signing files)
+# ============================================================================
+# Uncomment these after setting up file signatures:
+
+# Appraise kernel modules (require signatures)
+# appraise func=MODULE_CHECK appraise_type=imasig
+
+# Appraise firmware
+# appraise func=FIRMWARE_CHECK appraise_type=imasig
+
+# Appraise executables in /usr
+# appraise func=BPRM_CHECK mask=MAY_EXEC fspath=/usr appraise_type=imasig
+
+# Appraise libraries
+# appraise func=FILE_MMAP mask=MAY_EXEC fspath=/usr/lib appraise_type=imasig
+
+# ============================================================================
+# AUDIT RULES
+# ============================================================================
+# Log IMA violations to audit log
+audit func=BPRM_CHECK mask=MAY_EXEC
+audit func=FILE_MMAP mask=MAY_EXEC
+
+# ============================================================================
+# KERNEL COMMAND LINE OPTIONS
+# ============================================================================
+# Add to GRUB_CMDLINE_LINUX:
+#   ima_policy=tcb ima_appraise=fix ima_hash=sha256
+#
+# Production (after signing):
+#   ima_policy=tcb ima_appraise=enforce ima_hash=sha256
+# ============================================================================

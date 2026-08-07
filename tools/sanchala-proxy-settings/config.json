@@ -1,0 +1,44 @@
+{
+  "name": "sanchala-proxy-settings",
+  "version": "1.0.0",
+  "description": "System-wide proxy configuration manager",
+  "author": "Sanchala OS Team",
+  "license": "GPL-3.0",
+  "category": "Network",
+  "settings": {
+    "mode": "none",
+    "applySystemWide": true,
+    "bypassLocal": true
+  },
+  "http": {
+    "enabled": false,
+    "host": "",
+    "port": 8080,
+    "authentication": false,
+    "username": "",
+    "password": ""
+  },
+  "https": {
+    "enabled": false,
+    "host": "",
+    "port": 8080,
+    "useSameAsHttp": true
+  },
+  "socks": {
+    "enabled": false,
+    "host": "",
+    "port": 1080,
+    "version": 5,
+    "authentication": false
+  },
+  "bypass": {
+    "hosts": ["localhost", "127.0.0.1", "::1"],
+    "domains": [".local"],
+    "networks": ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
+  },
+  "pac": {
+    "enabled": false,
+    "url": ""
+  },
+  "profiles": []
+}

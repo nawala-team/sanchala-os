@@ -1,0 +1,41 @@
+[Desktop Entry]
+Type=Service
+ServiceTypes=KonqPopupMenu/Plugin
+MimeType=all/allfiles;
+Actions=checksumMd5;checksumSha256;checksumSha512;verifyChecksum
+X-KDE-Priority=TopLevel
+X-KDE-StartupNotify=false
+X-KDE-Submenu=Checksum
+X-KDE-Submenu-Icon=document-encrypted
+
+[Desktop Action checksumMd5]
+Name=Calculate MD5
+Name[es]=Calcular MD5
+Name[fr]=Calculer MD5
+Name[de]=MD5 berechnen
+Icon=document-encrypted
+Exec=sh -c 'HASH=$(md5sum "%f" | cut -d" " -f1) && kdialog --msgbox "MD5: $HASH" --title "Checksum"'
+
+[Desktop Action checksumSha256]
+Name=Calculate SHA-256
+Name[es]=Calcular SHA-256
+Name[fr]=Calculer SHA-256
+Name[de]=SHA-256 berechnen
+Icon=document-encrypted
+Exec=sh -c 'HASH=$(sha256sum "%f" | cut -d" " -f1) && kdialog --msgbox "SHA-256: $HASH" --title "Checksum"'
+
+[Desktop Action checksumSha512]
+Name=Calculate SHA-512
+Name[es]=Calcular SHA-512
+Name[fr]=Calculer SHA-512
+Name[de]=SHA-512 berechnen
+Icon=document-encrypted
+Exec=sh -c 'HASH=$(sha512sum "%f" | cut -d" " -f1) && kdialog --msgbox "SHA-512: $HASH" --title "Checksum"'
+
+[Desktop Action verifyChecksum]
+Name=Verify Checksum...
+Name[es]=Verificar checksum...
+Name[fr]=Vérifier le checksum...
+Name[de]=Checksum überprüfen...
+Icon=checkbox
+Exec=sh -c 'EXPECTED=$(kdialog --inputbox "Enter expected checksum:") && ACTUAL=$(sha256sum "%f" | cut -d" " -f1) && if [ "$EXPECTED" = "$ACTUAL" ]; then kdialog --msgbox "✓ Checksum verified!" --title "Success"; else kdialog --error "✗ Checksum mismatch!" --title "Error"; fi'

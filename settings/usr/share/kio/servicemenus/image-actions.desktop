@@ -1,0 +1,65 @@
+[Desktop Entry]
+Type=Service
+ServiceTypes=KonqPopupMenu/Plugin
+MimeType=image/jpeg;image/png;image/gif;image/webp;image/bmp;image/tiff;image/svg+xml;
+Actions=rotateLeft;rotateRight;resizeImage;convertPng;convertJpg;convertWebp;optimizeImage
+X-KDE-Priority=TopLevel
+X-KDE-StartupNotify=false
+X-KDE-Submenu=Image Actions
+X-KDE-Submenu-Icon=image-x-generic
+
+[Desktop Action rotateLeft]
+Name=Rotate Left 90°
+Name[es]=Rotar 90° a la izquierda
+Name[fr]=Rotation 90° gauche
+Name[de]=90° nach links drehen
+Icon=object-rotate-left
+Exec=sh -c 'for f in %F; do convert "$f" -rotate -90 "$f"; done'
+
+[Desktop Action rotateRight]
+Name=Rotate Right 90°
+Name[es]=Rotar 90° a la derecha
+Name[fr]=Rotation 90° droite
+Name[de]=90° nach rechts drehen
+Icon=object-rotate-right
+Exec=sh -c 'for f in %F; do convert "$f" -rotate 90 "$f"; done'
+
+[Desktop Action resizeImage]
+Name=Resize Image...
+Name[es]=Redimensionar imagen...
+Name[fr]=Redimensionner l'image...
+Name[de]=Bildgröße ändern...
+Icon=transform-scale
+Exec=sh -c 'SIZE=$(kdialog --inputbox "Enter new size (e.g., 800x600 or 50%%):" "50%%") && for f in %F; do convert "$f" -resize "$SIZE" "${f%%.*}_resized.${f##*.}"; done'
+
+[Desktop Action convertPng]
+Name=Convert to PNG
+Name[es]=Convertir a PNG
+Name[fr]=Convertir en PNG
+Name[de]=In PNG konvertieren
+Icon=image-png
+Exec=sh -c 'for f in %F; do convert "$f" "${f%%.*}.png"; done'
+
+[Desktop Action convertJpg]
+Name=Convert to JPEG
+Name[es]=Convertir a JPEG
+Name[fr]=Convertir en JPEG
+Name[de]=In JPEG konvertieren
+Icon=image-jpeg
+Exec=sh -c 'for f in %F; do convert "$f" -quality 90 "${f%%.*}.jpg"; done'
+
+[Desktop Action convertWebp]
+Name=Convert to WebP
+Name[es]=Convertir a WebP
+Name[fr]=Convertir en WebP
+Name[de]=In WebP konvertieren
+Icon=image-webp
+Exec=sh -c 'for f in %F; do convert "$f" -quality 85 "${f%%.*}.webp"; done'
+
+[Desktop Action optimizeImage]
+Name=Optimize for Web
+Name[es]=Optimizar para web
+Name[fr]=Optimiser pour le web
+Name[de]=Für Web optimieren
+Icon=internet-web-browser
+Exec=sh -c 'for f in %F; do convert "$f" -strip -quality 80 -resize "1920x1920>" "${f%%.*}_optimized.${f##*.}"; done'

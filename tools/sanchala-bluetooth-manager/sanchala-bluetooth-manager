@@ -1,0 +1,46 @@
+#!/bin/bash
+# Sanchala Bluetooth Manager
+set -euo pipefail
+
+bt_power() {
+    bluetoothctl power "${1:-on}" && echo "Bluetooth: $1"
+}
+
+bt_scan() {
+    echo "Scanning for devices..."
+    timeout 10 bluetoothctl scan on &
+    sleep 10
+    bluetoothctl devices
+}
+
+bt_pair() {
+    bluetoothctl pair "$1" && echo "Paired: $1"
+}
+
+bt_connect() {
+    bluetoothctl connect "$1" && echo "Connected: $1"
+}
+
+bt_disconnect() {
+    bluetoothctl disconnect "$1" && echo "Disconnected: $1"
+}
+
+bt_status() {
+    echo "=== Bluetooth Status ==="
+    bluetoothctl show | grep -E "(Name|Powered|Discoverable)"
+    echo
+    echo "Paired Devices:"
+    bluetoothctl paired-devices
+}
+
+case "${1:-status}" in
+    status) bt_status ;;
+    on) bt_power on ;;
+    off) bt_power off ;;
+    scan) bt_scan ;;
+    pair) bt_pair "$2" ;;
+    connect|-c) bt_connect "$2" ;;
+    disconnect|-d) bt_disconnect "$2" ;;
+    gui) exec sanchala-bluetooth-manager-gui ;;
+    *) echo "Usage: $0 {status|on|off|scan|pair|connect|disconnect|gui}" ;;
+esac

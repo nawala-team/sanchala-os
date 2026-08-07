@@ -1,0 +1,33 @@
+.TH SANCHALA-WINDOW-RULES 1 "2024" "Sanchala OS" "User Commands"
+.SH NAME
+sanchala-window-rules \- Per-application window behavior rules
+.SH SYNOPSIS
+.B sanchala-window-rules
+[\fIcommand\fR] [\fIoptions\fR]
+.SH DESCRIPTION
+Create rules for window placement, size, and behavior per application.
+.SH COMMANDS
+.TP
+.B list
+List all rules
+.TP
+.B add \fIapp\fR
+Create new rule for application
+.TP
+.B remove \fIrule-id\fR
+Remove a rule
+.TP
+.B edit \fIrule-id\fR
+Edit existing rule
+.TP
+.B detect
+Detect window class of clicked window
+.SH RULE OPTIONS
+\-\-workspace, \-\-position, \-\-size, \-\-maximized, \-\-minimized, \-\-fullscreen, \-\-opacity, \-\-above, \-\-below
+.SH EXAMPLES
+.TP
+sanchala-window-rules add firefox --workspace 2 --maximized
+.TP
+sanchala-window-rules detect
+.SH AUTHOR
+Sanchala OS Team

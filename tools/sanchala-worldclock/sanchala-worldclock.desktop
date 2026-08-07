@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Sanchala World Clock
+Comment=Multi-timezone world clock
+Exec=sanchala-worldclock
+Icon=clock
+Terminal=false
+Type=Application
+Categories=Utility;Clock;
+Keywords=clock;time;timezone;world;

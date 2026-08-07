@@ -1,0 +1,28 @@
+[Desktop Entry]
+Version=1.1
+Type=Application
+Name=Sanchala Download Manager
+GenericName=Download Manager
+Comment=High-speed download manager with aria2 backend
+Exec=sanchala-download-manager-gui
+Icon=sanchala-downloads
+Terminal=false
+Categories=Network;FileTransfer;
+Keywords=download;aria2;torrent;magnet;
+MimeType=application/x-bittorrent;x-scheme-handler/magnet;
+StartupNotify=true
+StartupWMClass=sanchala-download-manager
+
+Actions=AddURL;ShowQueue;Settings;
+
+[Desktop Action AddURL]
+Name=Add Download URL
+Exec=sanchala-download-manager-gui --add-url
+
+[Desktop Action ShowQueue]
+Name=Show Download Queue
+Exec=sanchala-download-manager-gui --show-queue
+
+[Desktop Action Settings]
+Name=Settings
+Exec=sanchala-download-manager-gui --settings

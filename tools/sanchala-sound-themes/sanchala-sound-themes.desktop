@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Sound Themes
+Comment=Configure system sounds
+Exec=sanchala-sound-themes status
+Icon=preferences-desktop-sound
+Terminal=false
+Type=Application
+Categories=Settings;HardwareSettings;
+Keywords=sound;audio;theme;notification;

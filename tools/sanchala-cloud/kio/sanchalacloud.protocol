@@ -1,0 +1,25 @@
+[Protocol]
+exec=kio_sanchalacloud
+protocol=cloud
+input=none
+output=filesystem
+listing=Name,Type,Size,Date,AccessDate,MimeType
+reading=true
+writing=true
+makedir=true
+deleting=true
+moving=true
+copying=true
+linking=false
+Icon=folder-cloud
+maxInstances=10
+maxInstancesPerHost=5
+defaultMimetype=inode/directory
+Class=:internet
+ProxiedBy=sanchalacloud
+X-Plasma-Protocol=true
+Description=Sanchala Cloud Storage
+Description[id]=Penyimpanan Cloud Sanchala
+
+# Supported sub-protocols
+X-KDE-Protocols=gdrive,dropbox,onedrive,nextcloud,webdav,sftp

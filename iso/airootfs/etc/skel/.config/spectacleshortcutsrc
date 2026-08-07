@@ -1,0 +1,25 @@
+# ============================================
+# SANCHALA OS - Spectacle Screenshot Shortcuts
+# ============================================
+
+[Shortcuts]
+# Full captures
+FullScreenScreenShot=Print
+CurrentMonitorScreenShot=Super+Print
+AllScreensScreenShot=Ctrl+Print
+
+# Selective captures
+RectangularRegionScreenShot=Shift+Print
+ActiveWindowScreenShot=Alt+Print
+WindowUnderCursorScreenShot=Ctrl+Alt+Print
+
+# Recording
+RecordScreen=Super+Shift+R
+RecordWindow=Super+Ctrl+R
+RecordRegion=Super+Alt+R
+
+# Actions after capture
+SaveScreenshot=Return
+CopyToClipboard=Ctrl+C
+Annotate=A
+OpenWith=O

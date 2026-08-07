@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Focus Mode
+Comment=Distraction-free productivity
+Exec=sanchala-focus-mode toggle
+Icon=preferences-desktop-notification-bell
+Terminal=false
+Type=Application
+Categories=Utility;
+Keywords=focus;pomodoro;dnd;productivity;

@@ -1,0 +1,15 @@
+[Unit]
+Description=Sanchala OS KDE Connect Service
+Documentation=https://kdeconnect.kde.org/
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=/usr/lib/kdeconnect/kdeconnectd
+Restart=on-failure
+RestartSec=5
+Environment=QT_QPA_PLATFORM=wayland
+
+[Install]
+WantedBy=graphical-session.target

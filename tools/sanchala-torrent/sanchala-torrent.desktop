@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Torrent Client
+Comment=Download and share files via BitTorrent
+Exec=sanchala-torrent %U
+Icon=transmission
+Terminal=false
+Type=Application
+Categories=Network;FileTransfer;P2P;
+Keywords=torrent;bittorrent;magnet;download;p2p;
+StartupNotify=true
+MimeType=application/x-bittorrent;x-scheme-handler/magnet;

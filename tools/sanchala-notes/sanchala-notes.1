@@ -1,0 +1,44 @@
+.TH SANCHALA-NOTES 1 "2024" "Sanchala OS" "User Commands"
+.SH NAME
+sanchala-notes \- Apple Notes-level note-taking application
+.SH SYNOPSIS
+.B sanchala-notes
+[\fIcommand\fR] [\fIoptions\fR]
+.SH DESCRIPTION
+Sanchala Notes provides beautiful note-taking with folders, tags, and markdown support.
+.SH COMMANDS
+.TP
+.B new \fI[title]\fR
+Create a new note
+.TP
+.B edit \fIid\fR
+Edit an existing note in your default editor
+.TP
+.B show \fIid\fR
+Display note contents
+.TP
+.B list, ls
+List all notes
+.TP
+.B delete, rm \fIid\fR
+Delete a note
+.SH OPTIONS
+.TP
+.B \-s, \-\-search \fIquery\fR
+Search notes by title or content
+.TP
+.B \-\-file \fIpath\fR
+Import content from file when creating note
+.SH EXAMPLES
+.TP
+Create a new note:
+.B sanchala-notes new "Meeting Notes"
+.TP
+Search notes:
+.B sanchala-notes list -s "project"
+.SH FILES
+.TP
+.I ~/.local/share/sanchala/notes/notes.db
+SQLite database storing notes
+.SH AUTHOR
+Sanchala OS Team

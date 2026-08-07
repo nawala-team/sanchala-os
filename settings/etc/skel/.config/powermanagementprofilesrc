@@ -1,0 +1,54 @@
+# ============================================
+# SANCHALA OS - Power Management Settings
+# ============================================
+# Balanced power profile by default
+# ============================================
+
+[AC][Display]
+DimDisplayIdleTimeoutSec=300
+DimDisplayWhenIdle=true
+DisplayBrightness=100
+TurnOffDisplayIdleTimeoutSec=600
+TurnOffDisplayWhenIdle=true
+UseProfileSpecificDisplayBrightness=false
+
+[AC][SuspendAndShutdown]
+AutoSuspendAction=1
+AutoSuspendIdleTimeoutSec=900
+LidAction=1
+PowerButtonAction=16
+PowerDownAction=16
+
+[Battery][Display]
+DimDisplayIdleTimeoutSec=120
+DimDisplayWhenIdle=true
+DisplayBrightness=60
+TurnOffDisplayIdleTimeoutSec=300
+TurnOffDisplayWhenIdle=true
+UseProfileSpecificDisplayBrightness=true
+
+[Battery][SuspendAndShutdown]
+AutoSuspendAction=1
+AutoSuspendIdleTimeoutSec=600
+LidAction=1
+PowerButtonAction=16
+PowerDownAction=16
+
+[BatteryManagement]
+BatteryCriticalAction=8
+BatteryCriticalLevel=5
+BatteryLowLevel=20
+
+[LowBattery][Display]
+DimDisplayIdleTimeoutSec=60
+DimDisplayWhenIdle=true
+DisplayBrightness=30
+TurnOffDisplayIdleTimeoutSec=120
+TurnOffDisplayWhenIdle=true
+UseProfileSpecificDisplayBrightness=true
+
+[LowBattery][SuspendAndShutdown]
+AutoSuspendAction=1
+AutoSuspendIdleTimeoutSec=300
+LidAction=1
+PowerButtonAction=16

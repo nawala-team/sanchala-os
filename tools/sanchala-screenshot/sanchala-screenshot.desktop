@@ -1,0 +1,23 @@
+[Desktop Entry]
+Name=Sanchala Screenshot
+Comment=Take screenshots of your desktop
+GenericName=Screenshot Tool
+Exec=sanchala-screenshot --gui
+Icon=camera-photo
+Terminal=false
+Type=Application
+Categories=Utility;Graphics;
+Keywords=screenshot;capture;screen;snip;print;
+Actions=Fullscreen;Region;Window;
+
+[Desktop Action Fullscreen]
+Name=Capture Fullscreen
+Exec=sanchala-screenshot fullscreen
+
+[Desktop Action Region]
+Name=Capture Region
+Exec=sanchala-screenshot region
+
+[Desktop Action Window]
+Name=Capture Window
+Exec=sanchala-screenshot window

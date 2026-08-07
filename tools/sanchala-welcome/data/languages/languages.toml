@@ -1,0 +1,367 @@
+# SANCHALA OS - Supported Languages (50+)
+# Used by installer and welcome app
+
+[[languages]]
+code = "en_US"
+name = "English"
+native_name = "English"
+flag = "us"
+rtl = false
+
+[[languages]]
+code = "en_GB"
+name = "English (UK)"
+native_name = "English (UK)"
+flag = "gb"
+rtl = false
+
+[[languages]]
+code = "id_ID"
+name = "Indonesian"
+native_name = "Bahasa Indonesia"
+flag = "id"
+rtl = false
+
+[[languages]]
+code = "de_DE"
+name = "German"
+native_name = "Deutsch"
+flag = "de"
+rtl = false
+
+[[languages]]
+code = "fr_FR"
+name = "French"
+native_name = "Français"
+flag = "fr"
+rtl = false
+
+[[languages]]
+code = "es_ES"
+name = "Spanish"
+native_name = "Español"
+flag = "es"
+rtl = false
+
+[[languages]]
+code = "it_IT"
+name = "Italian"
+native_name = "Italiano"
+flag = "it"
+rtl = false
+
+[[languages]]
+code = "pt_BR"
+name = "Portuguese (Brazil)"
+native_name = "Português (Brasil)"
+flag = "br"
+rtl = false
+
+[[languages]]
+code = "pt_PT"
+name = "Portuguese (Portugal)"
+native_name = "Português (Portugal)"
+flag = "pt"
+rtl = false
+
+[[languages]]
+code = "ru_RU"
+name = "Russian"
+native_name = "Русский"
+flag = "ru"
+rtl = false
+
+[[languages]]
+code = "ja_JP"
+name = "Japanese"
+native_name = "日本語"
+flag = "jp"
+rtl = false
+
+[[languages]]
+code = "ko_KR"
+name = "Korean"
+native_name = "한국어"
+flag = "kr"
+rtl = false
+
+[[languages]]
+code = "zh_CN"
+name = "Chinese (Simplified)"
+native_name = "简体中文"
+flag = "cn"
+rtl = false
+
+[[languages]]
+code = "zh_TW"
+name = "Chinese (Traditional)"
+native_name = "繁體中文"
+flag = "tw"
+rtl = false
+
+[[languages]]
+code = "ar_SA"
+name = "Arabic"
+native_name = "العربية"
+flag = "sa"
+rtl = true
+
+[[languages]]
+code = "he_IL"
+name = "Hebrew"
+native_name = "עברית"
+flag = "il"
+rtl = true
+
+[[languages]]
+code = "fa_IR"
+name = "Persian"
+native_name = "فارسی"
+flag = "ir"
+rtl = true
+
+[[languages]]
+code = "hi_IN"
+name = "Hindi"
+native_name = "हिन्दी"
+flag = "in"
+rtl = false
+
+[[languages]]
+code = "th_TH"
+name = "Thai"
+native_name = "ไทย"
+flag = "th"
+rtl = false
+
+[[languages]]
+code = "vi_VN"
+name = "Vietnamese"
+native_name = "Tiếng Việt"
+flag = "vn"
+rtl = false
+
+[[languages]]
+code = "nl_NL"
+name = "Dutch"
+native_name = "Nederlands"
+flag = "nl"
+rtl = false
+
+[[languages]]
+code = "pl_PL"
+name = "Polish"
+native_name = "Polski"
+flag = "pl"
+rtl = false
+
+[[languages]]
+code = "tr_TR"
+name = "Turkish"
+native_name = "Türkçe"
+flag = "tr"
+rtl = false
+
+[[languages]]
+code = "uk_UA"
+name = "Ukrainian"
+native_name = "Українська"
+flag = "ua"
+rtl = false
+
+[[languages]]
+code = "cs_CZ"
+name = "Czech"
+native_name = "Čeština"
+flag = "cz"
+rtl = false
+
+[[languages]]
+code = "el_GR"
+name = "Greek"
+native_name = "Ελληνικά"
+flag = "gr"
+rtl = false
+
+[[languages]]
+code = "hu_HU"
+name = "Hungarian"
+native_name = "Magyar"
+flag = "hu"
+rtl = false
+
+[[languages]]
+code = "sv_SE"
+name = "Swedish"
+native_name = "Svenska"
+flag = "se"
+rtl = false
+
+[[languages]]
+code = "da_DK"
+name = "Danish"
+native_name = "Dansk"
+flag = "dk"
+rtl = false
+
+[[languages]]
+code = "fi_FI"
+name = "Finnish"
+native_name = "Suomi"
+flag = "fi"
+rtl = false
+
+[[languages]]
+code = "nb_NO"
+name = "Norwegian"
+native_name = "Norsk"
+flag = "no"
+rtl = false
+
+[[languages]]
+code = "ro_RO"
+name = "Romanian"
+native_name = "Română"
+flag = "ro"
+rtl = false
+
+[[languages]]
+code = "sk_SK"
+name = "Slovak"
+native_name = "Slovenčina"
+flag = "sk"
+rtl = false
+
+[[languages]]
+code = "bg_BG"
+name = "Bulgarian"
+native_name = "Български"
+flag = "bg"
+rtl = false
+
+[[languages]]
+code = "hr_HR"
+name = "Croatian"
+native_name = "Hrvatski"
+flag = "hr"
+rtl = false
+
+[[languages]]
+code = "sr_RS"
+name = "Serbian"
+native_name = "Српски"
+flag = "rs"
+rtl = false
+
+[[languages]]
+code = "sl_SI"
+name = "Slovenian"
+native_name = "Slovenščina"
+flag = "si"
+rtl = false
+
+[[languages]]
+code = "ca_ES"
+name = "Catalan"
+native_name = "Català"
+flag = "es-ct"
+rtl = false
+
+[[languages]]
+code = "ms_MY"
+name = "Malay"
+native_name = "Bahasa Melayu"
+flag = "my"
+rtl = false
+
+[[languages]]
+code = "tl_PH"
+name = "Filipino"
+native_name = "Filipino"
+flag = "ph"
+rtl = false
+
+[[languages]]
+code = "bn_BD"
+name = "Bengali"
+native_name = "বাংলা"
+flag = "bd"
+rtl = false
+
+[[languages]]
+code = "ta_IN"
+name = "Tamil"
+native_name = "தமிழ்"
+flag = "in"
+rtl = false
+
+[[languages]]
+code = "te_IN"
+name = "Telugu"
+native_name = "తెలుగు"
+flag = "in"
+rtl = false
+
+[[languages]]
+code = "ml_IN"
+name = "Malayalam"
+native_name = "മലയാളം"
+flag = "in"
+rtl = false
+
+[[languages]]
+code = "kn_IN"
+name = "Kannada"
+native_name = "ಕನ್ನಡ"
+flag = "in"
+rtl = false
+
+[[languages]]
+code = "gu_IN"
+name = "Gujarati"
+native_name = "ગુજરાતી"
+flag = "in"
+rtl = false
+
+[[languages]]
+code = "mr_IN"
+name = "Marathi"
+native_name = "मराठी"
+flag = "in"
+rtl = false
+
+[[languages]]
+code = "pa_IN"
+name = "Punjabi"
+native_name = "ਪੰਜਾਬੀ"
+flag = "in"
+rtl = false
+
+[[languages]]
+code = "ur_PK"
+name = "Urdu"
+native_name = "اردو"
+flag = "pk"
+rtl = true
+
+[[languages]]
+code = "et_EE"
+name = "Estonian"
+native_name = "Eesti"
+flag = "ee"
+rtl = false
+
+[[languages]]
+code = "lt_LT"
+name = "Lithuanian"
+native_name = "Lietuvių"
+flag = "lt"
+rtl = false
+
+[[languages]]
+code = "lv_LV"
+name = "Latvian"
+native_name = "Latviešu"
+flag = "lv"
+rtl = false
+

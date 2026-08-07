@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  SANCHALA OS - Icon Only
+  Version: 1.0
+  Description: Standalone icon for app icons, favicons, small displays
+  Size: 80x80 base (scalable)
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" width="80" height="80">
+  <defs>
+    <linearGradient id="iconGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#536DFE;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#3949AB;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1A237E;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="innerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3949AB;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1A237E;stop-opacity:1" />
+    </linearGradient>
+    
+    <filter id="iconGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background circle (optional, for app icon contexts) -->
+  <!-- <circle cx="40" cy="40" r="38" fill="#FFFFFF"/> -->
+  
+  <!-- Outer motion ring -->
+  <circle cx="40" cy="40" r="35" fill="none" stroke="url(#iconGradient)" stroke-width="3"/>
+  
+  <!-- Motion arcs - dynamic rotation effect -->
+  <g filter="url(#iconGlow)">
+    <path d="M 40 7 A 33 33 0 0 1 71 32" fill="none" stroke="#536DFE" stroke-width="5" stroke-linecap="round"/>
+    <path d="M 73 40 A 33 33 0 0 1 55 68" fill="none" stroke="#3949AB" stroke-width="5" stroke-linecap="round"/>
+    <path d="M 40 73 A 33 33 0 0 1 9 50" fill="none" stroke="#1A237E" stroke-width="5" stroke-linecap="round"/>
+  </g>
+  
+  <!-- Inner gear structure -->
+  <g>
+    <!-- Central hub -->
+    <circle cx="40" cy="40" r="14" fill="url(#innerGradient)"/>
+    
+    <!-- Gear spokes - 4 main -->
+    <rect x="38" y="16" width="4" height="14" rx="2" fill="#3949AB"/>
+    <rect x="38" y="50" width="4" height="14" rx="2" fill="#3949AB"/>
+    <rect x="16" y="38" width="14" height="4" rx="2" fill="#3949AB"/>
+    <rect x="50" y="38" width="14" height="4" rx="2" fill="#3949AB"/>
+    
+    <!-- Gear spokes - 4 diagonal (smaller) -->
+    <rect x="38" y="22" width="4" height="10" rx="2" transform="rotate(45 40 40)" fill="#536DFE"/>
+    <rect x="38" y="22" width="4" height="10" rx="2" transform="rotate(135 40 40)" fill="#536DFE"/>
+    <rect x="38" y="22" width="4" height="10" rx="2" transform="rotate(225 40 40)" fill="#536DFE"/>
+    <rect x="38" y="22" width="4" height="10" rx="2" transform="rotate(315 40 40)" fill="#536DFE"/>
+  </g>
+  
+  <!-- Center focal point -->
+  <circle cx="40" cy="40" r="6" fill="#FFFFFF"/>
+  <circle cx="40" cy="40" r="3.5" fill="#3949AB"/>
+  
+  <!-- Motion accent line -->
+  <path d="M 12 62 Q 4 45, 14 30" fill="none" stroke="#536DFE" stroke-width="2.5" stroke-linecap="round" opacity="0.6"/>
+</svg>

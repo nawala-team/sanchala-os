@@ -1,0 +1,56 @@
+#!/usr/bin/env python3
+"""Sanchala Account - Secure Cloud Account Management"""
+import os,sys,json,hashlib,secrets,base64
+from datetime import datetime,timedelta
+from pathlib import Path
+
+class SanchalaAccount:
+    def __init__(self):
+        self.base=Path(__file__).parent
+        self.data=self.base/"data";self.data.mkdir(parents=True,exist_ok=True)
+        self.accounts=self._load("accounts.json",{})
+        self.sessions=self._load("sessions.json",{})
+        self.devices=self._load("devices.json",{})
+    def _load(self,f,d):
+        p=self.data/f
+        return json.load(open(p)) if p.exists() else d
+    def _save(self,f,d):json.dump(d,open(self.data/f,'w'),indent=2)
+    def hash_pw(self,pw,salt=None):
+        salt=salt or secrets.token_hex(32)
+        return base64.b64encode(hashlib.pbkdf2_hmac('sha512',pw.encode(),salt.encode(),100000,64)).decode(),salt
+    def verify_pw(self,pw,h,s):return secrets.compare_digest(self.hash_pw(pw,s)[0],h)
+    def create(self,email,pw,name):
+        if len(pw)<12:return{"success":False,"error":"Password too short"}
+        if any(a["email"]==email.lower()for a in self.accounts.values()):return{"success":False,"error":"Exists"}
+        aid=f"SA-{secrets.token_hex(8).upper()}";h,s=self.hash_pw(pw)
+        self.accounts[aid]={"id":aid,"email":email.lower(),"name":name,"hash":h,"salt":s,"created":datetime.now().isoformat(),"plan":"free"}
+        self._save("accounts.json",self.accounts);return{"success":True,"account_id":aid}
+    def login(self,email,pw):
+        a=next((x for x in self.accounts.values()if x["email"]==email.lower()),None)
+        if not a or not self.verify_pw(pw,a["hash"],a["salt"]):return{"success":False,"error":"Invalid"}
+        t=secrets.token_urlsafe(48)
+        self.sessions[t]={"aid":a["id"],"exp":(datetime.now()+timedelta(days=30)).isoformat(),"active":True}
+        self._save("sessions.json",self.sessions);return{"success":True,"token":t,"name":a["name"]}
+    def logout(self,t):
+        if t in self.sessions:self.sessions[t]["active"]=False;self._save("sessions.json",self.sessions)
+        return{"success":True}
+    def verify(self,t):
+        s=self.sessions.get(t)
+        if not s or not s["active"]or datetime.now()>datetime.fromisoformat(s["exp"]):return{"valid":False}
+        return{"valid":True,"account_id":s["aid"]}
+    def link_device(self,aid,info):
+        if aid not in self.devices:self.devices[aid]=[]
+        if len(self.devices[aid])>=10:return{"success":False,"error":"Limit"}
+        did=info.get("id")or secrets.token_hex(16)
+        self.devices[aid].append({"id":did,"name":info.get("name","Device"),"linked":datetime.now().isoformat()})
+        self._save("devices.json",self.devices);return{"success":True,"device_id":did}
+
+if __name__=="__main__":
+    import argparse;p=argparse.ArgumentParser();s=p.add_subparsers(dest="c")
+    c=s.add_parser("create");c.add_argument("--email",required=True);c.add_argument("--password",required=True);c.add_argument("--name",required=True)
+    l=s.add_parser("login");l.add_argument("--email",required=True);l.add_argument("--password",required=True)
+    s.add_parser("status");a=p.parse_args();m=SanchalaAccount()
+    if a.c=="create":print(json.dumps(m.create(a.email,a.password,a.name),indent=2))
+    elif a.c=="login":print(json.dumps(m.login(a.email,a.password),indent=2))
+    elif a.c=="status":print(f"Sanchala Account\nAccounts: {len(m.accounts)}\nSessions: {len([x for x in m.sessions.values()if x.get('active')])}")
+    else:p.print_help()

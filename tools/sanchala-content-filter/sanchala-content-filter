@@ -1,0 +1,43 @@
+#!/usr/bin/env python3
+import os, sys, json, re
+from pathlib import Path
+
+class ContentFilter:
+    def __init__(self):
+        self.cfg = Path(os.path.expanduser("~/.config/sanchala/content-filter"))
+        self.cfg.mkdir(parents=True, exist_ok=True)
+        self.rules = self.cfg / "rules.json"
+        if not self.rules.exists():
+            with open(self.rules, "w") as f:
+                json.dump({"enabled": True, "blocked": ["adult", "malware"]}, f)
+
+    def load(self):
+        with open(self.rules) as f:
+            return json.load(f)
+
+    def check(self, url):
+        r = self.load()
+        if not r["enabled"]: return True, "disabled"
+        patterns = {"adult": r"porn|xxx", "malware": r"malware|crack"}
+        for cat in r.get("blocked", []):
+            if cat in patterns and re.search(patterns[cat], url.lower()):
+                return False, cat
+        return True, "ok"
+
+def main():
+    cf = ContentFilter()
+    if len(sys.argv) < 2:
+        print("Usage: sanchala-content-filter <status|check> [url]")
+        return
+    if sys.argv[1] == "status":
+        r = cf.load()
+        st = "ON" if r["enabled"] else "OFF"
+        print(f"Content Filter: {st}")
+        print(f"Blocked: {r.get('blocked', [])}")
+    elif sys.argv[1] == "check" and len(sys.argv) > 2:
+        ok, reason = cf.check(sys.argv[2])
+        res = "ALLOWED" if ok else "BLOCKED"
+        print(f"{res}: {reason}")
+
+if __name__ == "__main__":
+    main()

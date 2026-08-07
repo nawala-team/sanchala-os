@@ -1,0 +1,30 @@
+# Crowdin Configuration for Sanchala OS
+# Alternative translation platform configuration
+
+"project_id": "sanchala-os"
+"api_token_env": "CROWDIN_TOKEN"
+"base_path": "."
+"preserve_hierarchy": true
+
+files:
+  # Core translations
+  - source: /po/sanchala.pot
+    translation: /po/%locale%/LC_MESSAGES/sanchala.po
+    languages_mapping:
+      locale:
+        zh-CN: zh_CN
+        zh-TW: zh_TW
+        pt-BR: pt_BR
+    
+  # Welcome app
+  - source: /tools/sanchala-welcome/po/sanchala-welcome.pot
+    translation: /tools/sanchala-welcome/po/%locale%.po
+    
+  # Settings app (Qt)
+  - source: /tools/sanchala-settings/translations/sanchala-settings_en.ts
+    translation: /tools/sanchala-settings/translations/sanchala-settings_%locale%.ts
+    
+  # Desktop entries
+  - source: /branding/applications/en/*.desktop
+    translation: /branding/applications/%locale%/*.desktop
+    update_option: update_as_unapproved

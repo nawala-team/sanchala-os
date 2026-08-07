@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Sanchala Sensors
+Comment=Monitor hardware sensors
+Exec=sanchala-sensors-gui
+Icon=sensors
+Type=Application
+Categories=System;Monitor;
+Keywords=sensors;temperature;fan;hardware;

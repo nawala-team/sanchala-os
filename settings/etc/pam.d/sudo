@@ -1,0 +1,25 @@
+# ============================================================================
+# SANCHALA OS - Sudo Authentication Configuration
+# ============================================================================
+# Biometric-first sudo like macOS Touch ID for sudo
+# ============================================================================
+
+# Fingerprint authentication (Touch ID experience)
+auth        sufficient    pam_fprintd.so max_tries=1 timeout=8
+
+# FIDO2 hardware key authentication
+auth        sufficient    pam_u2f.so cue authfile=/etc/sanchala/identity/u2f_keys
+
+# Standard password fallback with brute-force protection
+auth        required      pam_faillock.so preauth silent deny=3 unlock_time=600
+auth        required      pam_unix.so try_first_pass
+auth        required      pam_faillock.so authfail deny=3 unlock_time=600
+
+# Account verification
+account     required      pam_faillock.so
+account     include       system-auth
+
+# Session handling
+session     required      pam_limits.so
+session     required      pam_unix.so
+session     optional      pam_env.so readenv=1

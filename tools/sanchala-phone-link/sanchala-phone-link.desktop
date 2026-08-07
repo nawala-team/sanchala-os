@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Phone Link
+Comment=Connect your phone to sync messages, calls, and notifications
+Exec=sanchala-phone-link
+Icon=phone
+Terminal=false
+Type=Application
+Categories=Network;Utility;
+Keywords=phone;mobile;android;ios;sync;messages;calls;
+StartupNotify=true

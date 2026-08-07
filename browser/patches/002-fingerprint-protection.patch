@@ -1,0 +1,54 @@
+diff --git a/third_party/blink/renderer/modules/canvas/canvas2d/canvas_rendering_context_2d.cc b/third_party/blink/renderer/modules/canvas/canvas2d/canvas_rendering_context_2d.cc
+--- a/third_party/blink/renderer/modules/canvas/canvas2d/canvas_rendering_context_2d.cc
++++ b/third_party/blink/renderer/modules/canvas/canvas2d/canvas_rendering_context_2d.cc
+@@ -1,5 +1,7 @@
+ // Copyright 2024 Sanchala OS Project - Fingerprint Protection Patch
+ 
++#include "browser/src/security/fingerprint_protection.h"
++
+ // SANCHALA: Canvas Fingerprint Protection
+ // Add noise to canvas data to prevent fingerprinting
+ 
+@@ -500,6 +502,18 @@ ImageData* CanvasRenderingContext2D::getImageData(
+     ExceptionState& exception_state) {
+   ImageData* image_data = GetImageDataInternal(sx, sy, sw, sh, exception_state);
+   
++#ifdef SANCHALA_BROWSER
++  // Apply canvas fingerprint protection
++  if (sanchala::CanvasProtection::IsEnabled() && image_data) {
++    auto* data = image_data->data()->Data();
++    size_t length = image_data->data()->length();
++    std::string origin = GetExecutionContext()->GetSecurityOrigin()->ToString().Utf8();
++    
++    // Add deterministic noise based on origin
++    sanchala::CanvasProtection::AddNoise(data, length, origin);
++  }
++#endif
++  
+   return image_data;
+ }
+
+diff --git a/third_party/blink/renderer/modules/webgl/webgl_rendering_context_base.cc b/third_party/blink/renderer/modules/webgl/webgl_rendering_context_base.cc
+--- a/third_party/blink/renderer/modules/webgl/webgl_rendering_context_base.cc
++++ b/third_party/blink/renderer/modules/webgl/webgl_rendering_context_base.cc
+@@ -1,5 +1,7 @@
+ // SANCHALA: WebGL Fingerprint Protection
+ 
++#include "browser/src/security/fingerprint_protection.h"
++
+ // Mask WebGL vendor and renderer strings
+ 
+@@ -800,6 +802,14 @@ ScriptValue WebGLRenderingContextBase::getParameter(GLenum pname) {
+   switch (pname) {
+     case GL_VENDOR:
++#ifdef SANCHALA_BROWSER
++      if (sanchala::WebGLProtection::IsEnabled())
++        return ScriptValue::From(script_state, sanchala::WebGLProtection::GetMaskedVendor());
++#endif
+       return ScriptValue::From(script_state, GetVendorString());
+     case GL_RENDERER:
++#ifdef SANCHALA_BROWSER
++      if (sanchala::WebGLProtection::IsEnabled())
++        return ScriptValue::From(script_state, sanchala::WebGLProtection::GetMaskedRenderer());
++#endif
+       return ScriptValue::From(script_state, GetRendererString());

@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: GPL-3.0
+# Sanchala Hardware Test - Hardware Diagnostics
+set -euo pipefail
+VERSION="1.0.0"
+RESULT_DIR="/var/lib/sanchala/hardware-test"
+RED='\033[0;31m' GREEN='\033[0;32m' YELLOW='\033[1;33m' BLUE='\033[0;34m' NC='\033[0m' BOLD='\033[1m'
+info() { echo -e "${BLUE}i${NC} $1"; }
+ok() { echo -e "${GREEN}+${NC} $1"; }
+warn() { echo -e "${YELLOW}!${NC} $1"; }
+err() { echo -e "${RED}x${NC} $1" >&2; }
+header() { echo -e "\n${BOLD}=== $1 ===${NC}\n"; }
+show_help() { cat << 'EOF'
+SANCHALA HARDWARE TEST
+USAGE: sanchala-hardware-test <COMMAND>
+COMMANDS:
+  all       Run all tests
+  cpu       CPU test
+  memory    Memory test
+  disk      Disk test
+  gpu       GPU info
+  network   Network test
+  usb       USB devices
+  pci       PCI devices
+  sensors   Temperatures
+  battery   Battery health
+  status    Hardware summary
+  report    Full report
+EOF
+}
+cmd_cpu() { header "CPU"; info "$(grep -m1 'model name' /proc/cpuinfo | cut -d: -f2 | xargs)"; info "Cores: $(nproc)"; command -v stress-ng &>/dev/null && { stress-ng --cpu $(nproc) -t 10s 2>&1 | tail -3; ok "Done"; }; }
+cmd_memory() { header "Memory"; free -h; command -v memtester &>/dev/null && memtester 64M 1 | tail -5 && ok "OK"; }
+cmd_disk() { header "Disk"; lsblk -o NAME,SIZE,TYPE,FSTYPE,MOUNTPOINT; for d in /dev/sd? /dev/nvme?n?; do [[ -b "$d" ]] && smartctl -H "$d" 2>/dev/null | grep -E "result|Status"; done; }
+cmd_gpu() { header "GPU"; lspci 2>/dev/null | grep -i vga || echo "Unknown"; }
+cmd_network() { header "Network"; ip -br link; ping -c 2 8.8.8.8 &>/dev/null && ok "Internet OK" || warn "No internet"; }
+cmd_usb() { header "USB"; lsusb 2>/dev/null || ls /sys/bus/usb/devices/*/product 2>/dev/null; }
+cmd_pci() { header "PCI"; lspci 2>/dev/null | head -15; }
+cmd_sensors() { header "Sensors"; sensors 2>/dev/null || for z in /sys/class/thermal/thermal_zone*/temp; do [[ -f "$z" ]] && echo "$(basename $(dirname $z)): $(($(cat $z)/1000))C"; done; }
+cmd_battery() { header "Battery"; local b=/sys/class/power_supply/BAT0; [[ -d "$b" ]] && { echo "Status: $(cat $b/status)"; echo "Capacity: $(cat $b/capacity)%"; } || info "No battery"; }
+cmd_status() { header "Summary"; echo "CPU: $(grep -m1 'model name' /proc/cpuinfo | cut -d: -f2 | xargs)"; echo "RAM: $(free -h | awk '/Mem:/{print $2}')"; echo "Kernel: $(uname -r)"; }
+cmd_all() { for t in cpu memory disk sensors network; do cmd_$t 2>/dev/null || true; done; ok "All done"; }
+cmd_report() { mkdir -p "$RESULT_DIR"; local r="$RESULT_DIR/report-$(date +%s).txt"; { cmd_status; cmd_cpu; cmd_disk; } > "$r" 2>&1; ok "Report: $r"; }
+main() { case "${1:-status}" in all) cmd_all;; cpu) cmd_cpu;; memory) cmd_memory;; disk) cmd_disk;; gpu) cmd_gpu;; network) cmd_network;; usb) cmd_usb;; pci) cmd_pci;; sensors) cmd_sensors;; battery) cmd_battery;; status) cmd_status;; report) cmd_report;; -h|--help|help) show_help;; --version) echo "$VERSION";; *) err "Unknown: $1";; esac; }
+main "$@"

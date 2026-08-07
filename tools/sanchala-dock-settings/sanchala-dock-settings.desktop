@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Dock Settings
+Comment=Configure the dock
+Exec=sanchala-dock-settings gui
+Icon=preferences-desktop-icons
+Terminal=false
+Type=Application
+Categories=Settings;DesktopSettings;
+Keywords=dock;panel;taskbar;

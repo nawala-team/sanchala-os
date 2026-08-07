@@ -1,0 +1,23 @@
+[Desktop Entry]
+Type=Service
+ServiceTypes=KonqPopupMenu/Plugin
+MimeType=application/zip;application/x-tar;application/x-compressed-tar;application/x-bzip-compressed-tar;application/x-xz-compressed-tar;application/x-7z-compressed;application/x-rar;application/gzip;application/x-bzip2;
+Actions=extractHere;extractTo
+X-KDE-Priority=TopLevel
+X-KDE-StartupNotify=false
+
+[Desktop Action extractHere]
+Name=Extract Here
+Name[es]=Extraer aquí
+Name[fr]=Extraire ici
+Name[de]=Hier entpacken
+Icon=archive-extract
+Exec=ark --batch --autodestination %F
+
+[Desktop Action extractTo]
+Name=Extract To...
+Name[es]=Extraer en...
+Name[fr]=Extraire vers...
+Name[de]=Entpacken nach...
+Icon=archive-extract
+Exec=ark --batch --autodestination --dialog %F

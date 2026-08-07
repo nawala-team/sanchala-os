@@ -1,0 +1,151 @@
+#!/bin/bash
+# SANCHALA-BRAILLE - Braille Display Support for Sanchala OS
+# WCAG 2.1 AAA Compliant | Copyright (c) 2025 Sanchala OS Project
+set -euo pipefail
+
+VERSION="1.0.0"
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/sanchala/accessibility"
+CONFIG_FILE="$CONFIG_DIR/braille.conf"
+PID_FILE="/tmp/sanchala-braille.pid"
+
+declare -A BRAILLE=([enabled]=false [device]=auto [cells]=40 [grade]=2 [table]=en-us-g2.ctb [cursor]=true [word_wrap]=true)
+
+mkdir -p "$CONFIG_DIR"
+
+load_config() { [[ -f "$CONFIG_FILE" ]] && source "$CONFIG_FILE"; }
+save_config() { declare -p BRAILLE > "$CONFIG_FILE"; }
+
+check_brltty() {
+    if ! command -v brltty &>/dev/null; then
+        echo "BRLTTY not found. Install with: sudo apt install brltty"
+        return 1
+    fi
+    return 0
+}
+
+list_devices() {
+    echo "Braille Display Devices:"
+    
+    # USB devices
+    echo "  USB:"
+    lsusb 2>/dev/null | grep -i "braille\|freedom\|baum\|hims\|humanware\|eurobraille\|papenmeier" | \
+        sed 's/^/    /' || echo "    None detected"
+    
+    # Bluetooth devices
+    echo "  Bluetooth:"
+    bluetoothctl devices 2>/dev/null | while read -r _ mac name; do
+        if echo "$name" | grep -qi "braille\|focus\|brailliant\|orbit"; then
+            echo "    $name ($mac)"
+        fi
+    done || echo "    None detected"
+    
+    # Serial devices
+    echo "  Serial:"
+    ls /dev/ttyUSB* /dev/ttyACM* 2>/dev/null | sed 's/^/    /' || echo "    None detected"
+}
+
+configure_brltty() {
+    local conf="/etc/brltty.conf"
+    local user_conf="$CONFIG_DIR/brltty.conf"
+    
+    cat > "$user_conf" << EOF
+# Sanchala OS BRLTTY Configuration
+braille-driver auto
+braille-device usb:,bluetooth:
+text-table ${BRAILLE[table]}
+contraction-table ${BRAILLE[table]}
+screen-driver a2
+speech-driver es
+EOF
+
+    echo "BRLTTY config: $user_conf"
+}
+
+start_brltty() {
+    check_brltty || return 1
+    
+    load_config
+    configure_brltty
+    
+    # Stop existing instance
+    sudo systemctl stop brltty 2>/dev/null ||:
+    pkill brltty 2>/dev/null ||:
+    
+    # Start BRLTTY
+    echo "Starting BRLTTY..."
+    sudo brltty -b auto -d usb:,bluetooth: -t "${BRAILLE[table]}" &
+    echo $! > "$PID_FILE"
+    
+    BRAILLE[enabled]="true"; save_config
+    
+    echo "Braille display service started"
+    echo "  Table: ${BRAILLE[table]} | Grade: ${BRAILLE[grade]}"
+}
+
+stop_brltty() {
+    sudo systemctl stop brltty 2>/dev/null ||:
+    [[ -f "$PID_FILE" ]] && sudo kill "$(cat "$PID_FILE")" 2>/dev/null ||:
+    pkill brltty 2>/dev/null ||:
+    rm -f "$PID_FILE"
+    
+    BRAILLE[enabled]="false"; save_config
+    echo "Braille display service stopped"
+}
+
+set_table() {
+    local table="$1"
+    local tables_dir="/usr/share/liblouis/tables"
+    
+    if [[ -f "$tables_dir/$table" ]] || [[ -f "$tables_dir/${table}.ctb" ]]; then
+        BRAILLE[table]="$table"
+        save_config
+        echo "Braille table set to: $table"
+        [[ "${BRAILLE[enabled]}" == "true" ]] && start_brltty
+    else
+        echo "Available tables:"
+        ls "$tables_dir"/*.ctb 2>/dev/null | xargs -n1 basename | head -20
+        return 1
+    fi
+}
+
+set_grade() {
+    case "$1" in
+        1) BRAILLE[grade]=1; BRAILLE[table]="en-us-g1.ctb" ;;
+        2) BRAILLE[grade]=2; BRAILLE[table]="en-us-g2.ctb" ;;
+        *) echo "Grades: 1 (uncontracted), 2 (contracted)"; return 1 ;;
+    esac
+    save_config
+    echo "Braille grade: ${BRAILLE[grade]}"
+}
+
+translate_text() {
+    local text="$1"
+    if command -v lou_translate &>/dev/null; then
+        echo "$text" | lou_translate "${BRAILLE[table]}" 2>/dev/null
+    else
+        echo "liblouis not found. Install: sudo apt install liblouis-bin"
+    fi
+}
+
+status() {
+    load_config
+    local running=$(pgrep brltty &>/dev/null && echo "running" || echo "stopped")
+    
+    echo "Braille Display: ${BRAILLE[enabled]} ($running)"
+    echo "  Table: ${BRAILLE[table]} | Grade: ${BRAILLE[grade]} | Cells: ${BRAILLE[cells]}"
+    echo ""
+    list_devices
+}
+
+case "${1:-status}" in
+    start|on) start_brltty ;; stop|off) stop_brltty ;; status) status ;;
+    toggle) pgrep brltty &>/dev/null && stop_brltty || start_brltty ;;
+    restart) stop_brltty; sleep 1; start_brltty ;;
+    list) list_devices ;;
+    --table) set_table "$2" ;;
+    --grade) set_grade "$2" ;;
+    --cells) BRAILLE[cells]="$2"; save_config ;;
+    translate) shift; translate_text "$*" ;;
+    --help|-h) echo "Usage: sanchala-braille {start|stop|status|list|translate TEXT|--table NAME|--grade 1|2}" ;;
+    --version|-v) echo "v$VERSION" ;; *) echo "Unknown: $1"; exit 1 ;;
+esac

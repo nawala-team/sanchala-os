@@ -1,0 +1,41 @@
+[Desktop Entry]
+Type=Service
+ServiceTypes=KonqPopupMenu/Plugin
+MimeType=application/octet-stream;inode/directory;
+Actions=compressZip;compressTarGz;compressTarXz;compress7z
+X-KDE-Priority=TopLevel
+X-KDE-StartupNotify=false
+X-KDE-Submenu=Compress
+X-KDE-Submenu-Icon=archive-insert
+
+[Desktop Action compressZip]
+Name=Create ZIP Archive
+Name[es]=Crear archivo ZIP
+Name[fr]=Créer une archive ZIP
+Name[de]=ZIP-Archiv erstellen
+Icon=application-zip
+Exec=ark -c -a -f "%f.zip" %F
+
+[Desktop Action compressTarGz]
+Name=Create TAR.GZ Archive
+Name[es]=Crear archivo TAR.GZ
+Name[fr]=Créer une archive TAR.GZ
+Name[de]=TAR.GZ-Archiv erstellen
+Icon=application-x-compressed-tar
+Exec=ark -c -a -f "%f.tar.gz" %F
+
+[Desktop Action compressTarXz]
+Name=Create TAR.XZ Archive (Best Compression)
+Name[es]=Crear archivo TAR.XZ (mejor compresión)
+Name[fr]=Créer une archive TAR.XZ (meilleure compression)
+Name[de]=TAR.XZ-Archiv erstellen (beste Kompression)
+Icon=application-x-xz-compressed-tar
+Exec=ark -c -a -f "%f.tar.xz" %F
+
+[Desktop Action compress7z]
+Name=Create 7Z Archive
+Name[es]=Crear archivo 7Z
+Name[fr]=Créer une archive 7Z
+Name[de]=7Z-Archiv erstellen
+Icon=application-x-7z-compressed
+Exec=ark -c -a -f "%f.7z" %F

@@ -1,0 +1,10 @@
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Operation = Remove
+Type = Package
+
+[Action]
+Description = Creating pre-transaction snapshot...
+When = PreTransaction
+Exec = /usr/bin/snapper -c root create --type pre --cleanup-algorithm number --description "pacman pre"

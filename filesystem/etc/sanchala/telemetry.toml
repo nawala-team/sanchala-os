@@ -1,0 +1,64 @@
+# Sanchala OS Telemetry Configuration
+# Default: ALL telemetry BLOCKED for maximum privacy
+
+[global]
+# Master switch - when false, all telemetry is blocked
+enabled = false
+
+# User has explicitly reviewed and accepted telemetry policy
+user_consent_given = false
+consent_timestamp = ""
+
+[categories]
+# Individual telemetry categories (all false by default)
+# Users must explicitly opt-in to each category
+
+[categories.crash_reports]
+enabled = false
+description = "Send crash reports to help improve stability"
+privacy_impact = "medium"
+data_collected = ["stack_trace", "app_version", "os_version"]
+
+[categories.usage_statistics]
+enabled = false
+description = "Anonymous usage patterns to improve UX"
+privacy_impact = "high"
+data_collected = ["feature_usage", "session_duration", "ui_interactions"]
+
+[categories.hardware_info]
+enabled = false
+description = "Hardware info for compatibility improvements"
+privacy_impact = "medium"
+data_collected = ["cpu_model", "gpu_model", "ram_size", "disk_type"]
+
+[categories.location_services]
+enabled = false
+description = "Location-based features and services"
+privacy_impact = "critical"
+data_collected = ["gps_coordinates", "wifi_networks", "ip_geolocation"]
+
+[categories.search_suggestions]
+enabled = false
+description = "Cloud-based search suggestions"
+privacy_impact = "high"
+data_collected = ["search_queries", "selected_results"]
+
+[blocking]
+# Network-level telemetry blocking
+block_known_domains = true
+block_tracking_pixels = true
+strip_tracking_params = true
+
+[blocking.domains]
+# Domains blocked by default (can be overridden per-app)
+microsoft = ["telemetry.microsoft.com", "vortex.data.microsoft.com"]
+google = ["clientservices.googleapis.com", "update.googleapis.com"]
+mozilla = ["incoming.telemetry.mozilla.org"]
+canonical = ["metrics.ubuntu.com", "popcon.ubuntu.com"]
+kde = ["telemetry.kde.org"]
+flatpak = ["stats.flathub.org"]
+
+[exceptions]
+# Apps allowed to bypass telemetry blocking (empty by default)
+# Users can add apps here after explicit consent
+allowed_apps = []

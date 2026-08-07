@@ -1,0 +1,136 @@
+#!/usr/bin/env python3
+"""Sanchala Sensors GUI - Hardware Sensor Monitor"""
+import sys, subprocess, re
+from pathlib import Path
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+
+class SensorsGUI(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Sanchala Sensors")
+        self.setMinimumSize(500, 450)
+        self.init_ui()
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.update_sensors)
+        self.timer.start(2000)
+        self.update_sensors()
+    
+    def init_ui(self):
+        w = QWidget()
+        self.setCentralWidget(w)
+        layout = QVBoxLayout(w)
+        
+        # CPU section
+        cpu_grp = QGroupBox("CPU")
+        cpu_l = QFormLayout(cpu_grp)
+        self.cpu_temp = QLabel("--")
+        self.cpu_temp.setStyleSheet("font-size: 18px; font-weight: bold;")
+        cpu_l.addRow("Temperature:", self.cpu_temp)
+        self.cpu_freq = QLabel("--")
+        cpu_l.addRow("Frequency:", self.cpu_freq)
+        self.cpu_usage = QProgressBar()
+        self.cpu_usage.setRange(0, 100)
+        cpu_l.addRow("Usage:", self.cpu_usage)
+        layout.addWidget(cpu_grp)
+        
+        # GPU section
+        gpu_grp = QGroupBox("GPU")
+        gpu_l = QFormLayout(gpu_grp)
+        self.gpu_temp = QLabel("--")
+        self.gpu_temp.setStyleSheet("font-size: 18px; font-weight: bold;")
+        gpu_l.addRow("Temperature:", self.gpu_temp)
+        self.gpu_usage = QLabel("--")
+        gpu_l.addRow("Usage:", self.gpu_usage)
+        layout.addWidget(gpu_grp)
+        
+        # Fans section
+        fan_grp = QGroupBox("Fans")
+        fan_l = QVBoxLayout(fan_grp)
+        self.fan_list = QTreeWidget()
+        self.fan_list.setHeaderLabels(["Fan", "Speed (RPM)"])
+        self.fan_list.setMaximumHeight(120)
+        fan_l.addWidget(self.fan_list)
+        layout.addWidget(fan_grp)
+        
+        # Other temps
+        other_grp = QGroupBox("Other Sensors")
+        other_l = QVBoxLayout(other_grp)
+        self.other_list = QTreeWidget()
+        self.other_list.setHeaderLabels(["Sensor", "Value"])
+        other_l.addWidget(self.other_list)
+        layout.addWidget(other_grp)
+    
+    def update_sensors(self):
+        # CPU temp from thermal zones
+        for tz in Path("/sys/class/thermal").glob("thermal_zone*"):
+            try:
+                temp = int((tz / "temp").read_text()) // 1000
+                tz_type = (tz / "type").read_text().strip()
+                if "cpu" in tz_type.lower() or "x86" in tz_type.lower():
+                    self.cpu_temp.setText(f"{temp}°C")
+                    if temp > 80:
+                        self.cpu_temp.setStyleSheet("font-size: 18px; font-weight: bold; color: #e74c3c;")
+                    elif temp > 60:
+                        self.cpu_temp.setStyleSheet("font-size: 18px; font-weight: bold; color: #f39c12;")
+                    else:
+                        self.cpu_temp.setStyleSheet("font-size: 18px; font-weight: bold; color: #27ae60;")
+                    break
+            except: pass
+        
+        # CPU frequency
+        try:
+            freq = int(Path("/sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq").read_text()) // 1000
+            self.cpu_freq.setText(f"{freq} MHz")
+        except: pass
+        
+        # CPU usage
+        try:
+            with open("/proc/stat") as f:
+                line = f.readline()
+                parts = line.split()
+                idle = int(parts[4])
+                total = sum(int(p) for p in parts[1:])
+                if hasattr(self, '_last_idle'):
+                    usage = 100 - (idle - self._last_idle) * 100 // max(1, total - self._last_total)
+                    self.cpu_usage.setValue(max(0, min(100, usage)))
+                self._last_idle, self._last_total = idle, total
+        except: pass
+        
+        # GPU temp (NVIDIA)
+        try:
+            out = subprocess.check_output(["nvidia-smi", "--query-gpu=temperature.gpu", "--format=csv,noheader"], text=True)
+            self.gpu_temp.setText(f"{out.strip()}°C")
+        except:
+            # AMD
+            for f in Path("/sys/class/drm").glob("card*/device/hwmon/hwmon*/temp1_input"):
+                try:
+                    temp = int(f.read_text()) // 1000
+                    self.gpu_temp.setText(f"{temp}°C")
+                    break
+                except: pass
+        
+        # Fans and other from lm-sensors
+        try:
+            out = subprocess.check_output(["sensors"], text=True, stderr=subprocess.DEVNULL)
+            self.fan_list.clear()
+            self.other_list.clear()
+            for line in out.split("\n"):
+                if "fan" in line.lower() and "RPM" in line:
+                    name = line.split(":")[0].strip()
+                    rpm = re.search(r"(\d+)\s*RPM", line)
+                    if rpm:
+                        self.fan_list.addTopLevelItem(QTreeWidgetItem([name, rpm.group(1)]))
+                elif "°C" in line and ":" in line:
+                    name = line.split(":")[0].strip()
+                    temp = re.search(r"([\d.]+)°C", line)
+                    if temp:
+                        self.other_list.addTopLevelItem(QTreeWidgetItem([name, f"{temp.group(1)}°C"]))
+        except: pass
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    w = SensorsGUI()
+    w.show()
+    sys.exit(app.exec())

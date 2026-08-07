@@ -1,0 +1,49 @@
+[Desktop Entry]
+Type=Service
+ServiceTypes=KonqPopupMenu/Plugin
+MimeType=inode/directory;
+Actions=gitInit;gitStatus;gitPull;gitCommit;gitLog
+X-KDE-Priority=TopLevel
+X-KDE-StartupNotify=false
+X-KDE-Submenu=Git
+X-KDE-Submenu-Icon=git
+
+[Desktop Action gitInit]
+Name=Initialize Repository
+Name[es]=Inicializar repositorio
+Name[fr]=Initialiser le dépôt
+Name[de]=Repository initialisieren
+Icon=git
+Exec=konsole --hold --workdir %f -e git init
+
+[Desktop Action gitStatus]
+Name=Show Status
+Name[es]=Mostrar estado
+Name[fr]=Afficher le statut
+Name[de]=Status anzeigen
+Icon=dialog-information
+Exec=konsole --hold --workdir %f -e git status
+
+[Desktop Action gitPull]
+Name=Pull Changes
+Name[es]=Obtener cambios
+Name[fr]=Récupérer les modifications
+Name[de]=Änderungen abrufen
+Icon=go-down
+Exec=konsole --hold --workdir %f -e git pull
+
+[Desktop Action gitCommit]
+Name=Commit Changes...
+Name[es]=Confirmar cambios...
+Name[fr]=Valider les modifications...
+Name[de]=Änderungen committen...
+Icon=vcs-commit
+Exec=sh -c 'MSG=$(kdialog --inputbox "Commit message:") && cd "%f" && git add -A && git commit -m "$MSG"'
+
+[Desktop Action gitLog]
+Name=View Log
+Name[es]=Ver historial
+Name[fr]=Voir l'historique
+Name[de]=Log anzeigen
+Icon=view-history
+Exec=konsole --hold --workdir %f -e git log --oneline --graph -20

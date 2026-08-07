@@ -1,0 +1,18 @@
+[Unit]
+Description=Sanchala User Switch Service
+Documentation=https://docs.sanchala.id/users
+After=graphical.target
+PartOf=graphical.target
+
+[Service]
+Type=dbus
+BusName=id.sanchala.UserSwitch
+ExecStart=/usr/bin/sanchala-user-switch --daemon
+Restart=on-failure
+
+# Security
+NoNewPrivileges=true
+ProtectSystem=strict
+
+[Install]
+WantedBy=graphical.target

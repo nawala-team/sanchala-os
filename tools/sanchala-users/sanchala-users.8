@@ -1,0 +1,52 @@
+.TH SANCHALA-USERS 8 "August 2026" "Sanchala OS" "System Administration"
+.SH NAME
+sanchala-users \- User account management for Sanchala OS
+.SH SYNOPSIS
+.B sanchala-users
+[\fIOPTIONS\fR] [\fICOMMAND\fR]
+.SH DESCRIPTION
+.B sanchala-users
+provides user-friendly account management including user creation,
+parental controls, and multi-user administration.
+.SH COMMANDS
+.TP
+.B list
+List user accounts
+.TP
+.B add \fIUSERNAME\fR
+Create new user
+.TP
+.B remove \fIUSERNAME\fR
+Remove user account
+.TP
+.B modify \fIUSERNAME\fR
+Modify user settings
+.TP
+.B password \fIUSERNAME\fR
+Change user password
+.TP
+.B groups \fIUSERNAME\fR
+Manage user groups
+.SH OPTIONS
+.TP
+.B \-\-admin
+Create administrator account
+.TP
+.B \-\-parental
+Enable parental controls
+.TP
+.B \-\-json
+Output in JSON format
+.TP
+.B \-h, \-\-help
+Show help message
+.SH FILES
+.TP
+.I /etc/sanchala/users/
+User configuration
+.SH SEE ALSO
+.BR useradd (8),
+.BR usermod (8),
+.BR sanchala-parental (1)
+.SH AUTHOR
+Sanchala OS Team <dev@sanchala.id>

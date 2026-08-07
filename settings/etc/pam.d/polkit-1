@@ -1,0 +1,23 @@
+# ============================================================================
+# SANCHALA OS - Polkit Authentication Configuration
+# ============================================================================
+# System policy prompts with biometric support
+# ============================================================================
+
+# Fingerprint first for seamless privilege elevation
+auth        sufficient    pam_fprintd.so max_tries=2 timeout=10
+
+# FIDO2 key support
+auth        sufficient    pam_u2f.so cue authfile=/etc/sanchala/identity/u2f_keys
+
+# Password fallback
+auth        required      pam_unix.so try_first_pass
+
+# Account management
+account     include       system-auth
+
+# Password changes redirect to main config
+password    include       system-auth
+
+# Session
+session     include       system-auth

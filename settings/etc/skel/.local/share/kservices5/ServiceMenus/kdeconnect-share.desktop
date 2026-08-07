@@ -1,0 +1,17 @@
+# ============================================================================
+# SANCHALA OS - Dolphin Context Menu: Send via KDE Connect
+# ============================================================================
+# Location: ~/.local/share/kservices5/ServiceMenus/kdeconnect-share.desktop
+# Right-click file → Send to Phone
+# ============================================================================
+
+[Desktop Entry]
+Type=Service
+X-KDE-ServiceTypes=KonqPopupMenu/Plugin
+MimeType=all/allfiles;
+Actions=sendToPhone;
+
+[Desktop Action sendToPhone]
+Name=Send to Phone via Sanchala Drop
+Icon=kdeconnect
+Exec=sanchala-drop %F

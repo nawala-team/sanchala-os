@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Night Light
+Comment=Reduce blue light for eye comfort
+Exec=sanchala-nightlight toggle
+Icon=redshift
+Terminal=false
+Type=Application
+Categories=Settings;
+Keywords=night;light;blue;filter;eye;

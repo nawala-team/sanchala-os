@@ -1,0 +1,24 @@
+# ============================================================================
+# SANCHALA OS - Systemd Readahead Configuration
+# ============================================================================
+# Version: 1.0 | Boot-time file prefetching
+#
+# Modern alternative: systemd-boot collects boot files automatically
+# This config provides additional readahead hints for critical paths
+# ============================================================================
+
+[Unit]
+Description=Sanchala OS Readahead Prefetch
+DefaultDependencies=no
+Conflicts=shutdown.target
+Before=sysinit.target shutdown.target
+ConditionPathExists=/var/lib/sanchala/readahead.pack
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/lib/sanchala/readahead-replay /var/lib/sanchala/readahead.pack
+TimeoutSec=30
+
+[Install]
+WantedBy=sysinit.target

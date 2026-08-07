@@ -1,0 +1,24 @@
+[Desktop Entry]
+Version=1.0
+Name=Brave Web Browser
+Comment=Access the Internet - Privacy focused browser with built-in ad blocker
+GenericName=Web Browser
+Keywords=Internet;WWW;Browser;Web;Explorer;Privacy;Crypto;
+Exec=/opt/brave-bin/brave %U
+Terminal=false
+X-MultipleArgs=false
+Type=Application
+Icon=brave
+Categories=Network;WebBrowser;
+MimeType=application/pdf;application/rdf+xml;application/rss+xml;application/xhtml+xml;application/xhtml_xml;application/xml;image/gif;image/jpeg;image/png;image/webp;text/html;text/xml;x-scheme-handler/http;x-scheme-handler/https;x-scheme-handler/ipfs;x-scheme-handler/ipns;
+StartupNotify=true
+StartupWMClass=brave-browser
+Actions=new-window;new-private-window;
+
+[Desktop Action new-window]
+Name=New Window
+Exec=/opt/brave-bin/brave
+
+[Desktop Action new-private-window]
+Name=New Private Window
+Exec=/opt/brave-bin/brave --incognito

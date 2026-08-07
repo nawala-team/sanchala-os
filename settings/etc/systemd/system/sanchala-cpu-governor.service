@@ -1,0 +1,40 @@
+# ============================================================================
+# SANCHALA OS - CPU Governor & Power Management
+# ============================================================================
+# Version: 1.0 | Balanced performance with power efficiency
+# Integration: Works with power-profiles-daemon for dynamic switching
+#
+# Governors Available:
+#   performance   - Maximum frequency always (desktop plugged in)
+#   powersave     - Minimum frequency always (maximum battery)
+#   schedutil     - Kernel scheduler-driven (recommended default)
+#   ondemand      - Legacy, frequency based on CPU load
+#   conservative  - Like ondemand but slower ramp-up
+# ============================================================================
+
+[Unit]
+Description=Sanchala OS CPU Governor Configuration
+After=systemd-modules-load.service
+ConditionPathExists=/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+
+# Set schedutil as default governor (best for modern kernels)
+# schedutil integrates with the scheduler for intelligent frequency scaling
+ExecStart=/bin/sh -c 'for cpu in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do echo schedutil > "$cpu" 2>/dev/null || true; done'
+
+# Configure schedutil rate limits for responsiveness
+# rate_limit_us: Minimum time between frequency changes (microseconds)
+# Lower = more responsive, higher = more stable/efficient
+ExecStart=/bin/sh -c 'for rl in /sys/devices/system/cpu/cpufreq/policy*/schedutil/rate_limit_us; do echo 1000 > "$rl" 2>/dev/null || true; done'
+
+# Enable turbo boost by default (can be disabled for thermals)
+ExecStart=/bin/sh -c 'echo 0 > /sys/devices/system/cpu/intel_pstate/no_turbo 2>/dev/null || true'
+
+# AMD: Ensure performance bias is balanced
+ExecStart=/bin/sh -c 'echo 128 > /sys/devices/system/cpu/cpu*/cpufreq/energy_performance_preference 2>/dev/null || true'
+
+[Install]
+WantedBy=multi-user.target

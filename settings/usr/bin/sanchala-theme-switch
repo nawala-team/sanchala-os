@@ -1,0 +1,87 @@
+#!/bin/bash
+# Sanchala OS Theme Switcher
+# Seamlessly switches between light and dark themes across all toolkits
+set -e
+
+SCRIPT_NAME="sanchala-theme-switch"
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/sanchala"
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/sanchala/theming"
+
+log() { logger -t "$SCRIPT_NAME" "$1"; echo "[$(date '+%H:%M:%S')] $1"; }
+
+get_current_mode() {
+    if command -v kreadconfig5 &>/dev/null; then
+        local scheme=$(kreadconfig5 --file kdeglobals --group General --key ColorScheme)
+        [[ "$scheme" == *"Dark"* ]] && echo "dark" || echo "light"
+    else
+        echo "light"
+    fi
+}
+
+apply_plasma_theme() {
+    local mode=$1
+    log "Applying Plasma theme: $mode"
+    if [[ "$mode" == "dark" ]]; then
+        plasma-apply-colorscheme SanchalaDark 2>/dev/null || true
+        plasma-apply-desktoptheme sanchala-dark 2>/dev/null || true
+    else
+        plasma-apply-colorscheme SanchalaLight 2>/dev/null || true
+        plasma-apply-desktoptheme sanchala 2>/dev/null || true
+    fi
+}
+
+apply_gtk_theme() {
+    local mode=$1
+    local gtk_theme="Sanchala"
+    [[ "$mode" == "dark" ]] && gtk_theme="Sanchala-Dark"
+    local prefer_dark=$([[ "$mode" == "dark" ]] && echo "1" || echo "0")
+    
+    mkdir -p "$HOME/.config/gtk-3.0" "$HOME/.config/gtk-4.0"
+    for ver in 3.0 4.0; do
+        cat > "$HOME/.config/gtk-$ver/settings.ini" << EOF
+[Settings]
+gtk-theme-name=$gtk_theme
+gtk-icon-theme-name=sanchala-icons
+gtk-font-name=Inter 10
+gtk-application-prefer-dark-theme=$prefer_dark
+EOF
+    done
+    
+    command -v gsettings &>/dev/null && {
+        gsettings set org.gnome.desktop.interface gtk-theme "$gtk_theme" 2>/dev/null || true
+        gsettings set org.gnome.desktop.interface color-scheme "prefer-$mode" 2>/dev/null || true
+    }
+}
+
+apply_kvantum_theme() {
+    local mode=$1
+    local kvantum_theme="Sanchala"
+    [[ "$mode" == "dark" ]] && kvantum_theme="SanchalaDark"
+    mkdir -p "$HOME/.config/Kvantum"
+    echo -e "[General]\ntheme=$kvantum_theme" > "$HOME/.config/Kvantum/kvantum.kvconfig"
+}
+
+emit_dbus_signal() {
+    command -v dbus-send &>/dev/null && dbus-send --session --type=signal \
+        /org/sanchala/ThemeEngine org.sanchala.ThemeEngine.ThemeChanged string:"$1" 2>/dev/null || true
+}
+
+switch_theme() {
+    local mode=$1
+    [[ "$mode" != "light" && "$mode" != "dark" ]] && { echo "Usage: $0 [light|dark|toggle]"; exit 1; }
+    log "Switching to $mode mode..."
+    apply_plasma_theme "$mode"
+    apply_gtk_theme "$mode"
+    apply_kvantum_theme "$mode"
+    emit_dbus_signal "$mode"
+    mkdir -p "$CACHE_DIR" && echo "$mode" > "$CACHE_DIR/current_mode"
+    command -v notify-send &>/dev/null && notify-send -i "weather-clear$([[ $mode == dark ]] && echo '-night')" "Theme" "Switched to ${mode^} mode" -t 2000
+    log "Theme switch complete: $mode"
+}
+
+case "${1:-}" in
+    light|dark) switch_theme "$1" ;;
+    toggle) [[ $(get_current_mode) == "dark" ]] && switch_theme "light" || switch_theme "dark" ;;
+    status) echo "Current mode: $(get_current_mode)" ;;
+    *) echo "Usage: $0 [light|dark|toggle|status]" ;;
+esac

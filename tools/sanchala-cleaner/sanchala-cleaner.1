@@ -1,0 +1,65 @@
+.TH SANCHALA-CLEANER 1 "August 2026" "Sanchala OS" "User Commands"
+.SH NAME
+sanchala-cleaner \- System maintenance and cleanup tool for Sanchala OS
+.SH SYNOPSIS
+.B sanchala-cleaner
+[\fIOPTIONS\fR] [\fICOMMAND\fR]
+.SH DESCRIPTION
+.B sanchala-cleaner
+performs system maintenance tasks including package cache cleanup,
+temporary file removal, log rotation, and orphan package removal.
+.SH COMMANDS
+.TP
+.B analyze
+Analyze disk usage and cleanup opportunities
+.TP
+.B clean \fR[\fICATEGORY\fR]
+Perform cleanup (all, cache, logs, tmp, orphans)
+.TP
+.B schedule \fR[\fBenable\fR|\fBdisable\fR|\fBstatus\fR]
+Manage automatic cleanup schedule
+.TP
+.B rules
+List active cleanup rules
+.TP
+.B dry-run
+Show what would be cleaned without removing
+.SH OPTIONS
+.TP
+.B \-\-aggressive
+More thorough cleanup (may remove useful caches)
+.TP
+.B \-\-keep-days \fIN\fR
+Keep files newer than N days (default: 7)
+.TP
+.B \-\-json
+Output in JSON format
+.TP
+.B \-y, \-\-yes
+Skip confirmation prompts
+.TP
+.B \-h, \-\-help
+Show help message
+.SH EXAMPLES
+.TP
+Analyze cleanup opportunities:
+.B sanchala-cleaner analyze
+.TP
+Clean package cache:
+.B sanchala-cleaner clean cache
+.TP
+Full cleanup with confirmation:
+.B sanchala-cleaner clean all
+.SH FILES
+.TP
+.I /etc/sanchala/cleaner/cleaner.toml
+Configuration file
+.TP
+.I /etc/sanchala/cleaner/rules.d/
+Cleanup rule definitions
+.SH SEE ALSO
+.BR paccache (8),
+.BR journalctl (1),
+.BR tmpfiles.d (5)
+.SH AUTHOR
+Sanchala OS Team <dev@sanchala.id>

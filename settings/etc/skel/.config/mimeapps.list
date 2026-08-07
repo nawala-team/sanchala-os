@@ -1,0 +1,164 @@
+# ============================================
+# SANCHALA OS - Default Applications
+# ============================================
+# Sensible defaults with privacy-focused choices
+# Location: ~/.config/mimeapps.list
+# ============================================
+
+[Default Applications]
+
+# ====================
+# Web Browser (Brave - Privacy First)
+# ====================
+x-scheme-handler/http=brave-browser.desktop
+x-scheme-handler/https=brave-browser.desktop
+x-scheme-handler/about=brave-browser.desktop
+x-scheme-handler/unknown=brave-browser.desktop
+x-scheme-handler/webcal=brave-browser.desktop
+x-scheme-handler/ipfs=brave-browser.desktop
+x-scheme-handler/ipns=brave-browser.desktop
+text/html=brave-browser.desktop
+application/xhtml+xml=brave-browser.desktop
+application/xml=brave-browser.desktop
+application/rss+xml=brave-browser.desktop
+
+# ====================
+# Images (Gwenview)
+# ====================
+image/jpeg=org.kde.gwenview.desktop
+image/png=org.kde.gwenview.desktop
+image/gif=org.kde.gwenview.desktop
+image/webp=org.kde.gwenview.desktop
+image/tiff=org.kde.gwenview.desktop
+image/bmp=org.kde.gwenview.desktop
+image/heic=org.kde.gwenview.desktop
+image/heif=org.kde.gwenview.desktop
+image/avif=org.kde.gwenview.desktop
+image/svg+xml=org.inkscape.Inkscape.desktop
+image/x-canon-cr2=org.kde.gwenview.desktop
+image/x-nikon-nef=org.kde.gwenview.desktop
+image/x-sony-arw=org.kde.gwenview.desktop
+image/x-adobe-dng=org.kde.gwenview.desktop
+
+# ====================
+# Documents (Okular)
+# ====================
+application/pdf=org.kde.okular.desktop
+application/epub+zip=org.kde.okular.desktop
+application/x-mobipocket-ebook=org.kde.okular.desktop
+application/x-cbz=org.kde.okular.desktop
+application/x-cbr=org.kde.okular.desktop
+image/vnd.djvu=org.kde.okular.desktop
+
+# ====================
+# Office (LibreOffice)
+# ====================
+application/vnd.oasis.opendocument.text=libreoffice-writer.desktop
+application/msword=libreoffice-writer.desktop
+application/vnd.openxmlformats-officedocument.wordprocessingml.document=libreoffice-writer.desktop
+application/vnd.oasis.opendocument.spreadsheet=libreoffice-calc.desktop
+application/vnd.ms-excel=libreoffice-calc.desktop
+application/vnd.openxmlformats-officedocument.spreadsheetml.sheet=libreoffice-calc.desktop
+text/csv=libreoffice-calc.desktop
+application/vnd.oasis.opendocument.presentation=libreoffice-impress.desktop
+application/vnd.ms-powerpoint=libreoffice-impress.desktop
+application/vnd.openxmlformats-officedocument.presentationml.presentation=libreoffice-impress.desktop
+
+# ====================
+# Video (Haruna - Primary, VLC fallback)
+# ====================
+video/mp4=org.kde.haruna.desktop
+video/x-matroska=org.kde.haruna.desktop
+video/webm=org.kde.haruna.desktop
+video/x-msvideo=org.kde.haruna.desktop
+video/mpeg=org.kde.haruna.desktop
+video/quicktime=org.kde.haruna.desktop
+video/x-flv=org.kde.haruna.desktop
+video/3gpp=org.kde.haruna.desktop
+video/x-ms-wmv=org.kde.haruna.desktop
+video/ogg=org.kde.haruna.desktop
+
+# ====================
+# Audio (Elisa - Music Library)
+# ====================
+audio/mpeg=org.kde.elisa.desktop
+audio/flac=org.kde.elisa.desktop
+audio/ogg=org.kde.elisa.desktop
+audio/opus=org.kde.elisa.desktop
+audio/mp4=org.kde.elisa.desktop
+audio/x-m4a=org.kde.elisa.desktop
+audio/wav=org.kde.elisa.desktop
+audio/x-wav=org.kde.elisa.desktop
+audio/aac=org.kde.elisa.desktop
+audio/x-aiff=org.kde.elisa.desktop
+audio/x-ape=org.kde.elisa.desktop
+audio/x-wavpack=org.kde.elisa.desktop
+audio/webm=org.kde.elisa.desktop
+
+# ====================
+# Playlists
+# ====================
+audio/x-mpegurl=org.kde.elisa.desktop
+audio/mpegurl=org.kde.elisa.desktop
+application/x-mpegurl=org.kde.elisa.desktop
+audio/x-scpls=org.kde.elisa.desktop
+application/xspf+xml=org.kde.elisa.desktop
+
+# ====================
+# Text Editor (Kate)
+# ====================
+text/plain=org.kde.kate.desktop
+text/markdown=org.kde.kate.desktop
+application/json=org.kde.kate.desktop
+application/x-yaml=org.kde.kate.desktop
+text/x-python=org.kde.kate.desktop
+text/x-csrc=org.kde.kate.desktop
+text/x-c++src=org.kde.kate.desktop
+text/javascript=org.kde.kate.desktop
+text/x-rust=org.kde.kate.desktop
+text/css=org.kde.kate.desktop
+application/x-shellscript=org.kde.kate.desktop
+
+# ====================
+# Archives (Ark)
+# ====================
+application/zip=org.kde.ark.desktop
+application/x-tar=org.kde.ark.desktop
+application/x-compressed-tar=org.kde.ark.desktop
+application/x-7z-compressed=org.kde.ark.desktop
+application/x-rar=org.kde.ark.desktop
+application/gzip=org.kde.ark.desktop
+application/x-xz=org.kde.ark.desktop
+application/zstd=org.kde.ark.desktop
+
+# ====================
+# System
+# ====================
+inode/directory=org.kde.dolphin.desktop
+x-scheme-handler/file=org.kde.dolphin.desktop
+x-scheme-handler/trash=org.kde.dolphin.desktop
+application/x-desktop=org.kde.kate.desktop
+
+# ====================
+# Sanchala Custom Types
+# ====================
+application/x-sanchala-config=org.kde.kate.desktop
+application/x-sanchala-theme=sanchala-theme-installer.desktop
+application/x-sanchala-backup=sanchala-backup.desktop
+application/x-sanchala-policy=sanchala-guardian.desktop
+application/x-sanchala-extension=sanchala-extension-installer.desktop
+
+[Added Associations]
+image/jpeg=gimp.desktop;org.kde.gwenview.desktop;org.kde.digikam.desktop
+image/png=gimp.desktop;org.kde.gwenview.desktop;org.kde.digikam.desktop
+application/pdf=brave-browser.desktop;org.kde.okular.desktop
+video/mp4=vlc.desktop;org.kde.haruna.desktop
+video/x-matroska=vlc.desktop;org.kde.haruna.desktop
+audio/mpeg=vlc.desktop;org.kde.elisa.desktop
+audio/flac=vlc.desktop;org.kde.elisa.desktop
+text/html=firefox.desktop;brave-browser.desktop
+
+[Removed Associations]
+x-scheme-handler/http=firefox.desktop
+x-scheme-handler/https=firefox.desktop
+

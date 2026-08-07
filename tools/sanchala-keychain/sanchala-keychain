@@ -1,0 +1,96 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: GPL-3.0
+# Sanchala Keychain - Secure Credential & Secret Manager
+set -euo pipefail
+
+VERSION="1.0.0"
+KEYCHAIN_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/sanchala/keychain"
+AUDIT_LOG="/var/log/sanchala/keychain-audit.log"
+
+umask 077
+RED='\033[0;31m' GREEN='\033[0;32m' YELLOW='\033[1;33m' BLUE='\033[0;34m' NC='\033[0m'
+
+log_audit() { echo "[$(date -Iseconds)] $1: ${2:-}" >> "$AUDIT_LOG" 2>/dev/null || true; }
+
+init_keychain() {
+    mkdir -p "$KEYCHAIN_DIR"
+    chmod 700 "$KEYCHAIN_DIR"
+    if [[ ! -f "$KEYCHAIN_DIR/.master" ]]; then
+        echo -e "${BLUE}ℹ First run - creating encrypted keychain${NC}"
+        read -rsp "Set master password: " pass; echo
+        read -rsp "Confirm password: " pass2; echo
+        [[ "$pass" == "$pass2" ]] || { echo -e "${RED}✗ Passwords don't match${NC}"; exit 1; }
+        echo -n "$pass" | openssl dgst -sha512 | cut -d' ' -f2 > "$KEYCHAIN_DIR/.master"
+        chmod 600 "$KEYCHAIN_DIR/.master"
+        log_audit "INIT" "Keychain initialized"
+    fi
+}
+
+verify_master() {
+    read -rsp "Master password: " pass; echo
+    local hash
+    hash=$(echo -n "$pass" | openssl dgst -sha512 | cut -d' ' -f2)
+    [[ "$hash" == "$(cat "$KEYCHAIN_DIR/.master")" ]] || { echo -e "${RED}✗ Invalid password${NC}"; exit 1; }
+    echo "$pass"
+}
+
+encrypt_secret() {
+    local pass="$1" data="$2"
+    echo -n "$data" | openssl enc -aes-256-cbc -pbkdf2 -iter 100000 -salt -pass "pass:$pass" -base64
+}
+
+decrypt_secret() {
+    local pass="$1" data="$2"
+    echo -n "$data" | openssl enc -aes-256-cbc -pbkdf2 -iter 100000 -d -salt -pass "pass:$pass" -base64 2>/dev/null
+}
+
+cmd_add() {
+    local name="$1" user="${2:-}"
+    init_keychain
+    local pass
+    pass=$(verify_master)
+    read -rsp "Enter secret value: " secret; echo
+    local entry="user=$user|secret=$secret|created=$(date -Iseconds)"
+    encrypt_secret "$pass" "$entry" > "$KEYCHAIN_DIR/${name}.enc"
+    chmod 600 "$KEYCHAIN_DIR/${name}.enc"
+    log_audit "ADD" "Added: $name"
+    echo -e "${GREEN}✓ Secret '$name' stored${NC}"
+}
+
+cmd_get() {
+    local name="$1"
+    [[ -f "$KEYCHAIN_DIR/${name}.enc" ]] || { echo -e "${RED}✗ Not found: $name${NC}"; exit 1; }
+    local pass
+    pass=$(verify_master)
+    local data
+    data=$(decrypt_secret "$pass" "$(cat "$KEYCHAIN_DIR/${name}.enc")")
+    echo "$data" | tr '|' '\n' | grep "^secret=" | cut -d= -f2-
+    log_audit "GET" "Retrieved: $name"
+}
+
+cmd_list() {
+    init_keychain
+    echo -e "${BLUE}Stored secrets:${NC}"
+    for f in "$KEYCHAIN_DIR"/*.enc; do
+        [[ -f "$f" ]] && basename "$f" .enc
+    done 2>/dev/null || echo "  (none)"
+}
+
+cmd_delete() {
+    local name="$1"
+    [[ -f "$KEYCHAIN_DIR/${name}.enc" ]] || { echo -e "${RED}✗ Not found${NC}"; exit 1; }
+    verify_master >/dev/null
+    rm -f "$KEYCHAIN_DIR/${name}.enc"
+    log_audit "DELETE" "Deleted: $name"
+    echo -e "${GREEN}✓ Deleted: $name${NC}"
+}
+
+case "${1:-help}" in
+    add) shift; cmd_add "$@" ;;
+    get) cmd_get "$2" ;;
+    list|ls) cmd_list ;;
+    delete|rm) cmd_delete "$2" ;;
+    lock) rm -f "/tmp/.sanchala-keychain-$"; echo -e "${GREEN}✓ Keychain locked${NC}" ;;
+    *) echo "Usage: sanchala-keychain {add NAME [USER]|get NAME|list|delete NAME|lock}" ;;
+esac
+

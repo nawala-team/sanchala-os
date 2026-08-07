@@ -1,0 +1,16 @@
+# ============================================
+# SANCHALA OS - KScreen Display Configuration
+# ============================================
+# Multi-monitor and display management defaults
+# ============================================
+
+[Effect-kscreen]
+Duration=150
+
+[Output]
+# Auto-detect and configure displays
+AutoRotation=true
+
+[Daemon]
+# Enable background service
+Autostart=true

@@ -1,0 +1,143 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0
+# Sanchala Window Rules - Per-application window behavior rules
+"""Create rules for window position, size, workspace, and behavior"""
+
+import sys, json, argparse, subprocess, re
+from pathlib import Path
+
+VERSION = "1.0.0"
+CONFIG_DIR = Path.home() / ".config" / "sanchala" / "window-rules"
+
+class WindowRulesConfig:
+    def __init__(self):
+        CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+        self.file = CONFIG_DIR / "rules.json"
+        self.data = self._load()
+    
+    def _load(self):
+        if self.file.exists():
+            try: return json.load(open(self.file))
+            except: pass
+        return {"rules": []}
+    
+    def save(self):
+        with open(self.file, 'w') as f: json.dump(self.data, f, indent=2)
+        self._apply()
+    
+    def _apply(self):
+        # Generate KWin rules
+        for i, rule in enumerate(self.data["rules"]):
+            group = f"Rule{i+1}"
+            subprocess.run(["kwriteconfig5", "--file", "kwinrulesrc", "--group", group,
+                           "--key", "Description", rule.get("name", f"Rule {i+1}")], capture_output=True)
+            subprocess.run(["kwriteconfig5", "--file", "kwinrulesrc", "--group", group,
+                           "--key", "wmclass", rule.get("class", "")], capture_output=True)
+            if rule.get("workspace"):
+                subprocess.run(["kwriteconfig5", "--file", "kwinrulesrc", "--group", group,
+                               "--key", "desktop", str(rule["workspace"])], capture_output=True)
+        subprocess.run(["qdbus", "org.kde.KWin", "/KWin", "reconfigure"], capture_output=True)
+
+def get_active_window():
+    try:
+        r = subprocess.run(["xprop", "-root", "_NET_ACTIVE_WINDOW"], capture_output=True, text=True)
+        wid = r.stdout.split()[-1]
+        r = subprocess.run(["xprop", "-id", wid, "WM_CLASS"], capture_output=True, text=True)
+        match = re.search(r'"([^"]+)"', r.stdout)
+        return match.group(1) if match else None
+    except: return None
+
+def cmd_list(args):
+    config = WindowRulesConfig()
+    rules = config.data.get("rules", [])
+    
+    print(f"\n📋 Window Rules ({len(rules)})\n" + "━"*50)
+    if not rules:
+        print("  No rules defined")
+    for i, r in enumerate(rules, 1):
+        print(f"  {i}. {r.get('name', 'Unnamed')}")
+        print(f"     Class: {r.get('class', '*')}")
+        if r.get("workspace"): print(f"     Workspace: {r['workspace']}")
+        if r.get("geometry"): print(f"     Geometry: {r['geometry']}")
+        if r.get("maximized"): print(f"     Maximized: Yes")
+    print()
+    return 0
+
+def cmd_add(args):
+    config = WindowRulesConfig()
+    rule = {"name": args.name, "class": args.window_class}
+    if args.workspace: rule["workspace"] = args.workspace
+    if args.maximized: rule["maximized"] = True
+    if args.geometry: rule["geometry"] = args.geometry
+    
+    config.data["rules"].append(rule)
+    config.save()
+    print(f"✅ Added rule: {args.name}")
+    return 0
+
+def cmd_remove(args):
+    config = WindowRulesConfig()
+    try:
+        idx = int(args.index) - 1
+        if 0 <= idx < len(config.data["rules"]):
+            removed = config.data["rules"].pop(idx)
+            config.save()
+            print(f"✅ Removed rule: {removed.get('name', 'Unnamed')}")
+            return 0
+    except: pass
+    print("❌ Invalid rule index")
+    return 1
+
+def cmd_detect(args):
+    print("🔍 Click on a window to detect its class...")
+    wclass = get_active_window()
+    if wclass:
+        print(f"   Window class: {wclass}")
+        print(f"\n   Create rule with:")
+        print(f"   sanchala-window-rules add 'My Rule' -c '{wclass}'")
+    else:
+        print("❌ Could not detect window class")
+    return 0
+
+def cmd_quick(args):
+    """Quick rule for current window"""
+    wclass = get_active_window()
+    if not wclass:
+        print("❌ No active window")
+        return 1
+    
+    config = WindowRulesConfig()
+    rule = {"name": f"Rule for {wclass}", "class": wclass}
+    
+    if args.workspace: rule["workspace"] = args.workspace
+    if args.maximize: rule["maximized"] = True
+    
+    config.data["rules"].append(rule)
+    config.save()
+    print(f"✅ Created rule for: {wclass}")
+    return 0
+
+def main():
+    p = argparse.ArgumentParser(prog="sanchala-window-rules", description="📋 Window Rules")
+    p.add_argument("--version", action="version", version=f"%(prog)s {VERSION}")
+    sub = p.add_subparsers(dest="cmd")
+    
+    sub.add_parser("list", help="List rules")
+    s = sub.add_parser("add", help="Add rule")
+    s.add_argument("name"); s.add_argument("-c", "--window-class", required=True)
+    s.add_argument("-w", "--workspace", type=int); s.add_argument("-m", "--maximized", action="store_true")
+    s.add_argument("-g", "--geometry")
+    s = sub.add_parser("remove", aliases=["rm"], help="Remove rule"); s.add_argument("index")
+    sub.add_parser("detect", help="Detect window class")
+    s = sub.add_parser("quick", help="Quick rule for current window")
+    s.add_argument("-w", "--workspace", type=int); s.add_argument("-m", "--maximize", action="store_true")
+    sub.add_parser("gui", help="Open GUI")
+    
+    args = p.parse_args()
+    cmds = {"list": cmd_list, "add": cmd_add, "remove": cmd_remove, "rm": cmd_remove,
+            "detect": cmd_detect, "quick": cmd_quick,
+            "gui": lambda a: subprocess.run(["kcmshell5", "kwinrules"]) or 0}
+    if args.cmd in cmds: return cmds[args.cmd](args)
+    return cmd_list(args)
+
+if __name__ == "__main__": sys.exit(main())

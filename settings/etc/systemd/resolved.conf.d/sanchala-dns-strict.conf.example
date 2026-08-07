@@ -1,0 +1,45 @@
+# ============================================
+# SANCHALA OS - Strict DNS Configuration
+# ============================================
+# OPTIONAL: Maximum security DNS settings
+# Copy to sanchala-dns-strict.conf to enable
+# ============================================
+#
+# WARNING: This may break connectivity on some
+# networks that intercept DNS traffic. Only enable
+# if you understand the implications.
+#
+# ============================================
+
+[Resolve]
+# ----------------------------------------
+# Strict DNS-over-TLS
+# ----------------------------------------
+# REQUIRE TLS for all DNS queries
+# Connections will FAIL if TLS unavailable
+# ----------------------------------------
+DNSOverTLS=yes
+
+# ----------------------------------------
+# Strict DNSSEC
+# ----------------------------------------
+# REQUIRE DNSSEC validation
+# Unsigned domains will FAIL to resolve
+# ----------------------------------------
+DNSSEC=yes
+
+# ----------------------------------------
+# Disable Fallback Protocols
+# ----------------------------------------
+# No LLMNR or mDNS on external interfaces
+# ----------------------------------------
+MulticastDNS=no
+LLMNR=no
+
+# ----------------------------------------
+# Privacy-Focused DNS Servers
+# ----------------------------------------
+# All servers support DoT and don't log queries
+# ----------------------------------------
+DNS=1.1.1.1#cloudflare-dns.com 9.9.9.9#dns.quad9.net 194.242.2.2#dns.mullvad.net
+FallbackDNS=

@@ -1,0 +1,14 @@
+diff --git a/net/dns/dns_client.cc b/net/dns/dns_client.cc
+--- a/net/dns/dns_client.cc
++++ b/net/dns/dns_client.cc
+@@ -100,6 +100,14 @@ DnsConfig DnsClient::GetEffectiveConfig() {
++#ifdef SANCHALA_BROWSER
++  // Sanchala: Enable DoH by default with Cloudflare
++  DnsOverHttpsConfig doh_config;
++  doh_config.AddServer(DnsOverHttpsServerConfig(
++      "https://cloudflare-dns.com/dns-query", true));
++  config.dns_over_https_config = std::move(doh_config);
++  config.secure_dns_mode = SecureDnsMode::kSecure;
++#endif
+   return config;
+ }

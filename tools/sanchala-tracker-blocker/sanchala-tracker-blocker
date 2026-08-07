@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+CONF="/etc/sanchala/tracker-blocker"
+HOSTS="/etc/hosts"
+case "${1:-status}" in
+  status) echo "Blocked: $(grep -c ^0.0.0.0 "$HOSTS" 2>/dev/null || echo 0)" ;;
+  enable) [[ $EUID -eq 0 ]] || exit 1; mkdir -p "$CONF"; cp "$HOSTS" "$CONF/hosts.bak" 2>/dev/null; curl -sL https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts | grep ^0.0.0.0 >> "$HOSTS" ;;
+  disable) [[ $EUID -eq 0 ]] || exit 1; [[ -f "$CONF/hosts.bak" ]] && cp "$CONF/hosts.bak" "$HOSTS" ;;
+  whitelist) [[ $EUID -eq 0 ]] || exit 1; sed -i "/$2/d" "$HOSTS" ;;
+  *) echo "Usage: sanchala-tracker-blocker {status|enable|disable|whitelist DOMAIN}" ;;
+esac

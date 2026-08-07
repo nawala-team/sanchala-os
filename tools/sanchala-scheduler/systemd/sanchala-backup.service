@@ -1,0 +1,9 @@
+[Unit]
+Description=Sanchala Automatic Backup
+After=local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/sanchala-backup create "Scheduled automatic backup"
+Nice=19
+IOSchedulingClass=idle

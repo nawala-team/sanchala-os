@@ -1,0 +1,88 @@
+#!/bin/bash
+# ============================================
+# SANCHALA OS - DNS Leak Prevention
+# ============================================
+# Ensures DNS queries go through VPN when active
+# ============================================
+# Location: /etc/NetworkManager/dispatcher.d/40-sanchala-dns-leak-protect
+# Permissions: chmod 755, owned by root
+# ============================================
+
+INTERFACE="$1"
+STATUS="$2"
+
+LOG_TAG="sanchala-dns"
+
+log_message() {
+    logger -t "$LOG_TAG" "$1"
+}
+
+# Check if this is a VPN interface
+is_vpn_interface() {
+    case "$1" in
+        wg*|tun*|tap*)
+            return 0
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+}
+
+block_non_vpn_dns() {
+    log_message "Blocking non-VPN DNS queries"
+    
+    nft -f - <<'EOF'
+table inet sanchala_dns_protect {
+    chain output {
+        type filter hook output priority filter + 5; policy accept;
+        
+        # Allow DNS to VPN interfaces
+        oifname "wg*" udp dport 53 accept
+        oifname "wg*" tcp dport 53 accept
+        oifname "tun*" udp dport 53 accept
+        oifname "tun*" tcp dport 53 accept
+        oifname "tap*" udp dport 53 accept
+        oifname "tap*" tcp dport 53 accept
+        
+        # Allow DNS to localhost (systemd-resolved)
+        oif "lo" udp dport 53 accept
+        oif "lo" tcp dport 53 accept
+        
+        # Allow DoT (DNS over TLS) on port 853
+        tcp dport 853 accept
+        
+        # Allow DoH endpoints (Cloudflare, Quad9, Mullvad)
+        # These IPs are for the encrypted DNS servers
+        ip daddr { 1.1.1.1, 1.0.0.1, 9.9.9.9, 149.112.112.112, 194.242.2.2 } tcp dport 443 accept
+        
+        # Block plain DNS to non-VPN interfaces
+        udp dport 53 drop
+        tcp dport 53 drop
+    }
+}
+EOF
+    
+    log_message "Non-VPN DNS blocked"
+}
+
+allow_all_dns() {
+    log_message "Removing DNS restrictions"
+    nft delete table inet sanchala_dns_protect 2>/dev/null || true
+    log_message "DNS restrictions removed"
+}
+
+case "$STATUS" in
+    vpn-up|up)
+        if is_vpn_interface "$INTERFACE"; then
+            block_non_vpn_dns
+        fi
+        ;;
+    vpn-down|down)
+        if is_vpn_interface "$INTERFACE"; then
+            allow_all_dns
+        fi
+        ;;
+esac
+
+exit 0

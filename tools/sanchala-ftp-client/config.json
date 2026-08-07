@@ -1,0 +1,35 @@
+{
+  "name": "sanchala-ftp-client",
+  "version": "1.0.0",
+  "description": "FTP/SFTP/FTPS file transfer client",
+  "author": "Sanchala OS Team",
+  "license": "GPL-3.0",
+  "category": "Network",
+  "settings": {
+    "defaultProtocol": "sftp",
+    "connectionTimeout": 30,
+    "transferTimeout": 300,
+    "retryAttempts": 3,
+    "simultaneousTransfers": 2,
+    "preserveTimestamps": true,
+    "followSymlinks": true
+  },
+  "security": {
+    "verifySSL": true,
+    "minTLSVersion": "1.2",
+    "preferredCiphers": "HIGH:!aNULL:!MD5",
+    "hostKeyVerification": true
+  },
+  "transfer": {
+    "resumeSupport": true,
+    "bandwidthLimit": 0,
+    "asciiMode": false,
+    "overwritePolicy": "ask"
+  },
+  "ui": {
+    "showHiddenFiles": false,
+    "confirmDelete": true,
+    "doubleClickAction": "open"
+  },
+  "bookmarks": []
+}

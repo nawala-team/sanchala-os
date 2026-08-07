@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ============================================
+  SANCHALA OS - MIME Type Overrides
+  ============================================
+  Customizations to standard MIME types for
+  better integration with Sanchala applications.
+  ============================================
+-->
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+
+  <!-- ==================== -->
+  <!-- Enhanced Document Types -->
+  <!-- ==================== -->
+
+  <!-- Better detection for markdown variants -->
+  <mime-type type="text/markdown">
+    <comment>Markdown Document</comment>
+    <glob pattern="*.md" weight="60"/>
+    <glob pattern="*.markdown" weight="60"/>
+    <glob pattern="*.mdown" weight="50"/>
+    <glob pattern="*.mkd" weight="50"/>
+    <glob pattern="README" weight="40"/>
+    <glob pattern="CHANGELOG" weight="40"/>
+    <magic priority="50">
+      <match type="string" value="# " offset="0"/>
+    </magic>
+  </mime-type>
+
+  <!-- YAML with additional patterns -->
+  <mime-type type="application/x-yaml">
+    <comment>YAML Document</comment>
+    <glob pattern="*.yml" weight="60"/>
+    <glob pattern="*.yaml" weight="60"/>
+    <glob pattern=".clang-format" weight="50"/>
+    <glob pattern=".prettierrc" weight="50"/>
+    <glob pattern=".eslintrc" weight="50"/>
+  </mime-type>
+
+  <!-- TOML configuration -->
+  <mime-type type="application/toml">
+    <comment>TOML Configuration</comment>
+    <glob pattern="*.toml" weight="60"/>
+    <glob pattern="Cargo.toml" weight="70"/>
+    <glob pattern="pyproject.toml" weight="70"/>
+  </mime-type>
+
+  <!-- ==================== -->
+  <!-- Development Files -->
+  <!-- ==================== -->
+
+  <!-- Rust source -->
+  <mime-type type="text/x-rust">
+    <comment>Rust Source Code</comment>
+    <glob pattern="*.rs" weight="60"/>
+  </mime-type>
+
+  <!-- Go source -->
+  <mime-type type="text/x-go">
+    <comment>Go Source Code</comment>
+    <glob pattern="*.go" weight="60"/>
+  </mime-type>
+
+  <!-- TypeScript -->
+  <mime-type type="application/x-typescript">
+    <comment>TypeScript Source Code</comment>
+    <glob pattern="*.ts" weight="60"/>
+    <glob pattern="*.tsx" weight="60"/>
+    <glob pattern="*.mts" weight="50"/>
+    <glob pattern="*.cts" weight="50"/>
+  </mime-type>
+
+  <!-- Vue.js -->
+  <mime-type type="text/x-vue">
+    <comment>Vue.js Component</comment>
+    <glob pattern="*.vue" weight="60"/>
+  </mime-type>
+
+  <!-- Svelte -->
+  <mime-type type="text/x-svelte">
+    <comment>Svelte Component</comment>
+    <glob pattern="*.svelte" weight="60"/>
+  </mime-type>
+
+  <!-- ==================== -->
+  <!-- Config File Types -->
+  <!-- ==================== -->
+
+  <!-- Systemd units -->
+  <mime-type type="text/x-systemd-unit">
+    <comment>Systemd Unit File</comment>
+    <glob pattern="*.service" weight="60"/>
+    <glob pattern="*.timer" weight="60"/>
+    <glob pattern="*.socket" weight="60"/>
+    <glob pattern="*.mount" weight="60"/>
+    <glob pattern="*.target" weight="60"/>
+    <glob pattern="*.path" weight="60"/>
+  </mime-type>
+
+  <!-- Desktop entries -->
+  <mime-type type="application/x-desktop">
+    <comment>Desktop Entry</comment>
+    <glob pattern="*.desktop" weight="60"/>
+    <magic priority="50">
+      <match type="string" value="[Desktop Entry]" offset="0"/>
+    </magic>
+  </mime-type>
+
+  <!-- AppImage -->
+  <mime-type type="application/x-appimage">
+    <comment>AppImage Application</comment>
+    <glob pattern="*.AppImage" weight="60"/>
+    <glob pattern="*.appimage" weight="60"/>
+    <magic priority="50">
+      <match type="string" value="AI\x02" offset="8"/>
+    </magic>
+  </mime-type>
+
+  <!-- Flatpak bundle -->
+  <mime-type type="application/vnd.flatpak">
+    <comment>Flatpak Application Bundle</comment>
+    <glob pattern="*.flatpak" weight="60"/>
+  </mime-type>
+
+  <!-- Flatpak ref -->
+  <mime-type type="application/vnd.flatpak.ref">
+    <comment>Flatpak Reference</comment>
+    <glob pattern="*.flatpakref" weight="60"/>
+    <magic priority="50">
+      <match type="string" value="[Flatpak Ref]" offset="0"/>
+    </magic>
+  </mime-type>
+
+  <!-- Flatpak repo -->
+  <mime-type type="application/vnd.flatpak.repo">
+    <comment>Flatpak Repository</comment>
+    <glob pattern="*.flatpakrepo" weight="60"/>
+  </mime-type>
+
+</mime-info>

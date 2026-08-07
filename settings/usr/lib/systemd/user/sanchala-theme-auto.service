@@ -1,0 +1,14 @@
+[Unit]
+Description=Sanchala OS Auto Theme Daemon
+Documentation=man:sanchala-theme-auto(1)
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/sanchala-theme-auto start
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=graphical-session.target

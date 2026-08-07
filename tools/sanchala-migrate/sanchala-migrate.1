@@ -1,0 +1,55 @@
+.TH SANCHALA-MIGRATE 1 "August 2026" "Sanchala OS" "User Commands"
+.SH NAME
+sanchala-migrate \- Migration assistant for switching to Sanchala OS
+.SH SYNOPSIS
+.B sanchala-migrate
+[\fIOPTIONS\fR] [\fICOMMAND\fR]
+.SH DESCRIPTION
+.B sanchala-migrate
+helps users migrate from Windows, macOS, or other Linux distributions.
+It imports user data, browser profiles, documents, and suggests
+alternative applications.
+.SH COMMANDS
+.TP
+.B scan
+Scan for data to migrate
+.TP
+.B import \fR[\fICATEGORY\fR]
+Import data (documents, browsers, settings)
+.TP
+.B apps
+Show application alternatives
+.TP
+.B status
+Show migration progress
+.SH OPTIONS
+.TP
+.B \-\-source \fIPATH\fR
+Source partition or directory
+.TP
+.B \-\-dry-run
+Show what would be imported
+.TP
+.B \-\-json
+Output in JSON format
+.TP
+.B \-h, \-\-help
+Show help message
+.SH CATEGORIES
+documents, browsers, email, music, photos, videos, settings
+.SH EXAMPLES
+.TP
+Scan Windows partition:
+.B sanchala-migrate scan --source /mnt/windows
+.TP
+Import browser profiles:
+.B sanchala-migrate import browsers
+.SH FILES
+.TP
+.I /etc/sanchala/migrate/
+Configuration and app mappings
+.SH SEE ALSO
+.BR rsync (1),
+.BR sanchala-welcome (1)
+.SH AUTHOR
+Sanchala OS Team <dev@sanchala.id>

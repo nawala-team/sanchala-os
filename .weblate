@@ -1,0 +1,50 @@
+# Weblate Configuration for Sanchala OS
+# https://docs.weblate.org/en/latest/admin/projects.html
+
+[weblate]
+url = https://translate.sanchala.io
+project = sanchala-os
+
+# Auto-sync settings
+push_on_commit = true
+auto_lock_error = true
+suggestion_voting = true
+suggestion_autoaccept = 2
+
+[component.sanchala-core]
+file_format = po
+filemask = po/*.po
+new_lang = add
+template = po/sanchala.pot
+repo = https://github.com/nicostudios/sanchala-os
+branch = main
+push_branch = weblate-translations
+
+[component.sanchala-welcome]
+file_format = po
+filemask = tools/sanchala-welcome/po/*.po
+template = tools/sanchala-welcome/po/sanchala-welcome.pot
+
+[component.sanchala-settings]
+file_format = ts
+filemask = tools/sanchala-settings/translations/*.ts
+template = tools/sanchala-settings/translations/sanchala-settings_en.ts
+
+[component.sanchala-desktop]
+file_format = desktop
+filemask = branding/applications/*.desktop
+add_message = true
+
+[component.sanchala-installer]
+file_format = po
+filemask = installer/calamares/lang/*.po
+template = installer/calamares/lang/calamares.pot
+
+# Quality checks
+[checks]
+same = true
+inconsistent = true
+placeholder = true
+punctuation = true
+max_length = true
+xml_tags = true

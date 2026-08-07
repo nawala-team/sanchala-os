@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Sanchala Mail
+Comment=Email Client
+Exec=sanchala-mail
+Icon=mail-client
+Terminal=false
+Type=Application
+Categories=Network;Email;

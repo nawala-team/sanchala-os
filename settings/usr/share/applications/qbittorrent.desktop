@@ -1,0 +1,24 @@
+[Desktop Entry]
+Version=1.1
+Type=Application
+Name=qBittorrent
+GenericName=BitTorrent Client
+Comment=A free and reliable P2P BitTorrent client
+Exec=qbittorrent %U
+Icon=qbittorrent
+Terminal=false
+Categories=Network;FileTransfer;P2P;
+Keywords=torrent;bittorrent;download;p2p;
+MimeType=application/x-bittorrent;x-scheme-handler/magnet;
+StartupNotify=true
+StartupWMClass=qbittorrent
+
+Actions=OpenMagnet;Preferences;
+
+[Desktop Action OpenMagnet]
+Name=Open Magnet Link
+Exec=qbittorrent %U
+
+[Desktop Action Preferences]
+Name=Preferences
+Exec=qbittorrent --show-settings

@@ -1,0 +1,103 @@
+#!/usr/bin/env python3
+"""Sanchala Bluetooth Manager GUI"""
+import sys, subprocess
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+
+class BluetoothManager(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Sanchala Bluetooth")
+        self.setMinimumSize(450, 400)
+        self.init_ui()
+        self.refresh_devices()
+    
+    def init_ui(self):
+        w = QWidget()
+        self.setCentralWidget(w)
+        layout = QVBoxLayout(w)
+        
+        # Power toggle
+        power_row = QHBoxLayout()
+        power_row.addWidget(QLabel("Bluetooth"))
+        self.power_btn = QPushButton("On")
+        self.power_btn.setCheckable(True)
+        self.power_btn.clicked.connect(self.toggle_power)
+        power_row.addWidget(self.power_btn)
+        power_row.addStretch()
+        scan_btn = QPushButton("Scan")
+        scan_btn.clicked.connect(self.scan_devices)
+        power_row.addWidget(scan_btn)
+        layout.addLayout(power_row)
+        
+        # Device list
+        self.device_list = QTreeWidget()
+        self.device_list.setHeaderLabels(["Device", "MAC Address", "Status"])
+        self.device_list.setAlternatingRowColors(True)
+        layout.addWidget(self.device_list)
+        
+        # Action buttons
+        btn_row = QHBoxLayout()
+        for name, cb in [("Connect", self.connect_device), ("Disconnect", self.disconnect_device),
+                         ("Pair", self.pair_device), ("Remove", self.remove_device)]:
+            btn = QPushButton(name)
+            btn.clicked.connect(cb)
+            btn_row.addWidget(btn)
+        layout.addLayout(btn_row)
+    
+    def run_bt(self, *args):
+        return subprocess.run(["bluetoothctl"] + list(args), capture_output=True, text=True)
+    
+    def toggle_power(self):
+        state = "on" if self.power_btn.isChecked() else "off"
+        self.run_bt("power", state)
+        self.power_btn.setText("On" if state == "on" else "Off")
+    
+    def refresh_devices(self):
+        self.device_list.clear()
+        result = self.run_bt("paired-devices")
+        for line in result.stdout.strip().split("\n"):
+            if line.startswith("Device "):
+                parts = line.split(" ", 2)
+                mac, name = parts[1], parts[2] if len(parts) > 2 else "Unknown"
+                item = QTreeWidgetItem([name, mac, "Paired"])
+                self.device_list.addTopLevelItem(item)
+    
+    def scan_devices(self):
+        QMessageBox.information(self, "Scanning", "Scanning for devices...")
+        subprocess.Popen(["bluetoothctl", "scan", "on"], stdout=subprocess.DEVNULL)
+        QTimer.singleShot(5000, self.refresh_devices)
+    
+    def get_selected_mac(self):
+        item = self.device_list.currentItem()
+        return item.text(1) if item else None
+    
+    def connect_device(self):
+        mac = self.get_selected_mac()
+        if mac:
+            self.run_bt("connect", mac)
+            self.refresh_devices()
+    
+    def disconnect_device(self):
+        mac = self.get_selected_mac()
+        if mac:
+            self.run_bt("disconnect", mac)
+    
+    def pair_device(self):
+        mac = self.get_selected_mac()
+        if mac:
+            self.run_bt("pair", mac)
+            self.refresh_devices()
+    
+    def remove_device(self):
+        mac = self.get_selected_mac()
+        if mac:
+            self.run_bt("remove", mac)
+            self.refresh_devices()
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    w = BluetoothManager()
+    w.show()
+    sys.exit(app.exec())

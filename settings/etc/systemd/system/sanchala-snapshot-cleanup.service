@@ -1,0 +1,8 @@
+[Unit]
+Description=Sanchala Backup - Snapshot Cleanup
+Documentation=man:snapper(8)
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/snapper -c root cleanup timeline
+ExecStart=/usr/bin/snapper -c home cleanup timeline

@@ -1,0 +1,22 @@
+# Maintainer: Sanchala Team <dev@sanchala.id>
+
+pkgname=sanchala-keyring
+pkgver=1.0.0
+pkgrel=1
+pkgdesc='Sanchala OS PGP keyring for package signing'
+arch=('any')
+url='https://sanchala.id'
+license=('GPL3')
+groups=('sanchala')
+install=sanchala-keyring.install
+
+package() {
+    # Install keyring
+    install -dm755 "$pkgdir/usr/share/pacman/keyrings"
+    install -Dm644 "$srcdir/sanchala.gpg" \
+        "$pkgdir/usr/share/pacman/keyrings/sanchala.gpg"
+    install -Dm644 "$srcdir/sanchala-trusted" \
+        "$pkgdir/usr/share/pacman/keyrings/sanchala-trusted"
+    install -Dm644 "$srcdir/sanchala-revoked" \
+        "$pkgdir/usr/share/pacman/keyrings/sanchala-revoked"
+}

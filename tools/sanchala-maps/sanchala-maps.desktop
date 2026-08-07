@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Sanchala Maps
+Comment=Navigation and Maps
+Exec=sanchala-maps
+Icon=maps
+Terminal=false
+Type=Application
+Categories=Network;Maps;

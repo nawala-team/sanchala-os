@@ -1,0 +1,31 @@
+#!/bin/bash
+# Sanchala Date & Time Settings
+set -euo pipefail
+
+show_status() {
+    echo "=== Date & Time ==="
+    echo "Current: $(date)"
+    echo "Timezone: $(timedatectl show -p Timezone --value 2>/dev/null || cat /etc/timezone 2>/dev/null)"
+    echo "NTP: $(timedatectl show -p NTP --value 2>/dev/null || echo 'unknown')"
+}
+
+set_timezone() {
+    timedatectl set-timezone "$1" && echo "Timezone set to $1"
+}
+
+set_ntp() {
+    timedatectl set-ntp "$1" && echo "NTP: $1"
+}
+
+list_timezones() {
+    timedatectl list-timezones
+}
+
+case "${1:-status}" in
+    status) show_status ;;
+    timezone|-z) set_timezone "$2" ;;
+    ntp) set_ntp "${2:-true}" ;;
+    list) list_timezones ;;
+    gui) exec sanchala-datetime-settings-gui ;;
+    *) echo "Usage: $0 {status|timezone|ntp|list|gui}" ;;
+esac

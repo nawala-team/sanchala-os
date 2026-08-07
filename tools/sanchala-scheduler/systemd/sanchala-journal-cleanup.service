@@ -1,0 +1,7 @@
+[Unit]
+Description=Sanchala Journal Cleanup
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/journalctl --vacuum-time=2weeks
+ExecStart=/usr/bin/journalctl --vacuum-size=500M

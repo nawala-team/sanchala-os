@@ -1,0 +1,111 @@
+# ============================================================================
+# SANCHALA OS - KAddressBook Configuration  
+# ============================================================================
+# Contact Management - Apple Contacts-style experience
+# ============================================================================
+
+[General]
+# View mode: simple, twoColumn, threeColumn
+ViewMode=twoColumn
+
+# Sort field: fullName, familyName, givenName
+SortField=fullName
+
+# Show photos
+ShowPhotos=true
+
+# Photo size
+PhotoSize=96
+
+[MainWindow]
+Height=600
+Width=900
+
+[AddressBook]
+# Default address book for new contacts
+DefaultAddressBook=
+
+# Show empty address books
+ShowEmptyAddressBooks=false
+
+[ContactEditor]
+# Default editor fields shown
+ShowAllFields=false
+
+# Photo handling
+AllowPhotoEditing=true
+PhotoMaxSize=512
+
+# Phone number formatting
+FormatPhoneNumbers=true
+
+[Display]
+# Contact list display format
+DisplayFormat=%{givenName} %{familyName}
+
+# Show organization
+ShowOrganization=true
+
+# Group contacts by: none, organization, category
+GroupBy=none
+
+[Import/Export]
+# Default export format: vcard21, vcard30, vcard40
+DefaultVCardVersion=vcard40
+
+# Include photos in export
+ExportPhotos=true
+
+# Import duplicate handling: ask, merge, skip, add
+DuplicateHandling=ask
+
+[Merge]
+# Enable contact merge suggestions
+EnableMergeDetection=true
+
+# Merge confidence threshold (0-100)
+MergeThreshold=80
+
+[Sync]
+# Auto-sync interval (minutes)
+AutoSyncInterval=15
+
+# Sync on changes
+SyncOnChange=true
+
+# Conflict resolution: ask, local, remote, newest
+ConflictResolution=ask
+
+[Search]
+# Enable instant search
+InstantSearch=true
+
+# Search fields: all, name, email, phone, address
+SearchFields=all
+
+# Search delay (ms)
+SearchDelay=300
+
+[Groups]
+# Enable contact groups
+EnableGroups=true
+
+# Smart groups (auto-populate based on rules)
+EnableSmartGroups=true
+
+[Privacy]
+# Mask phone numbers in list view
+MaskPhoneNumbers=false
+
+# Require unlock for sensitive fields
+ProtectSensitiveFields=false
+
+[Integration]
+# KMail integration
+KMailIntegration=true
+
+# Dialer integration (KDE Connect)
+DialerIntegration=true
+
+# Show in Plasma contacts plasmoid
+PlasmaIntegration=true

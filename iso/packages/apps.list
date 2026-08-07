@@ -1,0 +1,89 @@
+# ============================================
+# SANCHALA OS - Default Applications
+# ============================================
+
+# Browser (Firefox - ships in official repos)
+firefox
+
+# Office
+libreoffice-fresh
+
+# ===========================================
+# Media Players
+# ===========================================
+# Music Player (KDE Elisa - elegant, library-focused)
+elisa
+
+# Video Player (Haruna - modern mpv frontend)
+haruna
+
+# Universal Player (VLC - fallback/compatibility)
+vlc
+
+# ===========================================
+# Image & Photo
+# ===========================================
+# Image Viewer (Gwenview)
+gwenview
+
+# Photo Management (digiKam for advanced users)
+digikam
+
+# Graphics Editor
+gimp
+
+# ===========================================
+# Documents
+# ===========================================
+# PDF Reader
+okular
+
+# Archive Manager
+ark
+
+# ===========================================
+# Utilities
+# ===========================================
+# Screenshot
+spectacle
+
+# Calculator
+kcalc
+
+# Terminal Tools
+neofetch
+btop
+fastfetch
+
+# ===========================================
+# Media Tools
+# ===========================================
+# YouTube downloader
+yt-dlp
+
+# Audio tag editor
+kid3
+
+# ===========================================
+# Download Management
+# ===========================================
+# aria2 - High-performance download accelerator
+aria2
+
+# uGet - GTK download manager (aria2 GUI frontend)
+uget
+
+# qBittorrent - Feature-rich torrent client
+qbittorrent
+
+# curl/wget - Command line downloaders
+curl
+wget
+
+# jq - JSON processor (for browser integration scripts)
+jq
+
+# Note: AUR packages like brave-bin must be added to Sanchala repo
+# or installed post-install. They cannot be installed via pacstrap.
+
+

@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Sanchala Default Applications
+Comment=Choose default applications
+Exec=sanchala-default-apps-gui
+Icon=preferences-desktop-default-applications
+Type=Application
+Categories=Settings;System;
+Keywords=default;applications;browser;email;

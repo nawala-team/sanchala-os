@@ -1,0 +1,11 @@
+{
+  "SA-5C4C0020879DAAA4": {
+    "id": "SA-5C4C0020879DAAA4",
+    "email": "test@sanchala.io",
+    "name": "Test User",
+    "hash": "tur9iWjnYmJOJre/JT/0NSXCPQC1ez6lucdeKJFXDdjY6sdm7Bg+3dcbtB9CJWyHf+uG5SH4poMEVLxllSlDzw==",
+    "salt": "a08c3b5b14e833f9aa9997736594b38ae29af693b8440eae95902ea0ab5026bc",
+    "created": "2026-08-06T23:00:02.221533",
+    "plan": "free"
+  }
+}

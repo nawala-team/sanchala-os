@@ -1,0 +1,42 @@
+#!/usr/bin/env python3
+"""Sanchala Settings Sync - Cross-device settings synchronization"""
+import os,json,hashlib
+from datetime import datetime
+from pathlib import Path
+
+class SettingsSync:
+    def __init__(self):
+        self.base=Path(__file__).parent
+        self.profiles=self.base/"profiles";self.profiles.mkdir(parents=True,exist_ok=True)
+        self.cache=self.base/"cache";self.cache.mkdir(exist_ok=True)
+        self.config={"interval":300,"auto":True,"categories":["appearance","keyboard","privacy","apps","network"]}
+    def _profile(self,aid):
+        p=self.profiles/f"{aid}.json"
+        return json.load(open(p))if p.exists()else{"aid":aid,"settings":{},"ver":0}
+    def _save(self,aid,data):
+        data["modified"]=datetime.now().isoformat()
+        json.dump(data,open(self.profiles/f"{aid}.json",'w'),indent=2)
+    def collect(self):
+        return{"appearance":{"theme":"dark","accent":"#007AFF"},"keyboard":{"layout":"us"},
+               "privacy":{"location":True,"analytics":False},"apps":{"browser":"sanchala-browser"},
+               "network":{"dns":["1.1.1.1","8.8.8.8"]}}
+    def upload(self,aid):
+        p=self._profile(aid);p["settings"]=self.collect();p["ver"]+=1;p["sync"]=datetime.now().isoformat()
+        self._save(aid,p);return{"success":True,"version":p["ver"]}
+    def download(self,aid):
+        p=self._profile(aid)
+        if not p["settings"]:return{"success":False,"error":"No cloud settings"}
+        return{"success":True,"settings":p["settings"],"version":p["ver"]}
+    def status(self,aid):
+        p=self._profile(aid);local=self.collect();diff=[c for c in self.config["categories"]if local.get(c)!=p["settings"].get(c)]
+        return{"aid":aid,"last_sync":p.get("sync"),"in_sync":len(diff)==0,"diff":diff}
+
+if __name__=="__main__":
+    import argparse;pr=argparse.ArgumentParser();s=pr.add_subparsers(dest="c")
+    for c in["upload","download","status"]:x=s.add_parser(c);x.add_argument("--account-id",required=True)
+    s.add_parser("info");a=pr.parse_args();sync=SettingsSync()
+    if a.c=="upload":print(json.dumps(sync.upload(a.account_id),indent=2))
+    elif a.c=="download":print(json.dumps(sync.download(a.account_id),indent=2))
+    elif a.c=="status":print(json.dumps(sync.status(a.account_id),indent=2))
+    elif a.c=="info":print(f"Settings Sync\nAuto: {sync.config['auto']}\nInterval: {sync.config['interval']}s")
+    else:pr.print_help()

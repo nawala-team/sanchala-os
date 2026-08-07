@@ -1,0 +1,38 @@
+.TH SANCHALA-HOT-CORNERS 1 "2024" "Sanchala OS" "User Commands"
+.SH NAME
+sanchala-hot-corners \- Screen corner actions (macOS-style)
+.SH SYNOPSIS
+.B sanchala-hot-corners
+[\fIcommand\fR] [\fIoptions\fR]
+.SH DESCRIPTION
+Trigger actions when moving the mouse to screen corners.
+.SH COMMANDS
+.TP
+.B status
+Show current corner assignments
+.TP
+.B set \fIcorner\fR \fIaction\fR
+Set action for corner
+.TP
+.B enable
+Enable hot corners
+.TP
+.B disable
+Disable hot corners
+.TP
+.B actions
+List available actions
+.TP
+.B delay \fIms\fR
+Set activation delay in milliseconds
+.SH CORNERS
+top-left, top-right, bottom-left, bottom-right
+.SH ACTIONS
+none, overview, desktop, lock, sleep, screensaver, notifications, app_menu
+.SH EXAMPLES
+.TP
+sanchala-hot-corners set top-left overview
+.TP
+sanchala-hot-corners delay 200
+.SH AUTHOR
+Sanchala OS Team

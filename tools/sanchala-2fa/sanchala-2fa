@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: GPL-3.0
+# Sanchala 2FA - Two-Factor Authentication Manager
+set -euo pipefail
+
+VERSION="1.0.0"
+CONFIG_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/sanchala/2fa"
+AUDIT_LOG="/var/log/sanchala/2fa-audit.log"
+
+umask 077
+mkdir -p "$CONFIG_DIR"
+
+RED='\033[0;31m' GREEN='\033[0;32m' YELLOW='\033[1;33m' BLUE='\033[0;34m' NC='\033[0m'
+
+log_audit() { echo "[$(date -Iseconds)] $1: ${2:-}" >> "$AUDIT_LOG" 2>/dev/null || true; }
+
+generate_totp() {
+    local secret="$1" period="${2:-30}"
+    local time key hmac offset code
+    time=$(($(date +%s) / period))
+    key=$(echo -n "$secret" | base32 -d 2>/dev/null | xxd -p | tr -d '\n')
+    hmac=$(printf '%016x' "$time" | xxd -r -p | openssl dgst -sha1 -mac HMAC -macopt "hexkey:$key" 2>/dev/null | cut -d' ' -f2)
+    offset=$((0x${hmac: -1} * 2))
+    code=$((0x${hmac:offset:8} & 0x7fffffff))
+    printf "%06d" $((code % 1000000))
+}
+
+cmd_add() {
+    local name="$1" secret="${2:-}"
+    [[ -z "$secret" ]] && { read -rp "Enter secret key (base32): " secret; }
+    local enc
+    enc=$(echo -n "$secret" | openssl enc -aes-256-cbc -pbkdf2 -salt -pass "pass:$(hostname)-$(id -u)" -base64)
+    echo "$enc" > "$CONFIG_DIR/${name}.key"
+    chmod 600 "$CONFIG_DIR/${name}.key"
+    log_audit "ADD" "Added 2FA: $name"
+    echo -e "${GREEN}✓ Added 2FA account: $name${NC}"
+}
+
+cmd_code() {
+    local name="$1"
+    [[ -f "$CONFIG_DIR/${name}.key" ]] || { echo -e "${RED}✗ Not found: $name${NC}"; exit 1; }
+    local secret code remaining
+    secret=$(openssl enc -aes-256-cbc -pbkdf2 -d -salt -pass "pass:$(hostname)-$(id -u)" -base64 < "$CONFIG_DIR/${name}.key" 2>/dev/null)
+    code=$(generate_totp "$secret")
+    remaining=$((30 - $(date +%s) % 30))
+    echo -e "${BLUE}$name:${NC} ${GREEN}$code${NC} (${remaining}s remaining)"
+    log_audit "CODE" "Generated for: $name"
+}
+
+cmd_list() {
+    echo -e "${BLUE}2FA Accounts:${NC}"
+    local f
+    for f in "$CONFIG_DIR"/*.key; do
+        [[ -f "$f" ]] && echo "  $(basename "$f" .key)"
+    done 2>/dev/null || echo "  (none)"
+}
+
+cmd_delete() {
+    rm -f "$CONFIG_DIR/${1}.key"
+    log_audit "DELETE" "Removed: $1"
+    echo -e "${GREEN}✓ Deleted: $1${NC}"
+}
+
+case "${1:-help}" in
+    add) cmd_add "$2" "${3:-}" ;; code|get) cmd_code "$2" ;;
+    list|ls) cmd_list ;; delete|rm) cmd_delete "$2" ;;
+    *) echo "Usage: sanchala-2fa {add NAME [SECRET]|code NAME|list|delete NAME}" ;;
+esac

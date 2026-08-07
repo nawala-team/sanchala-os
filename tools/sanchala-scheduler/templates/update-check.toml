@@ -1,0 +1,25 @@
+# Sanchala Scheduler - Update Check Template
+# SPDX-License-Identifier: GPL-3.0
+
+[template]
+name = "update-check"
+description = "Check for system updates weekly"
+category = "system"
+icon = "system-software-update"
+
+[task]
+name = "update-check"
+description = "Weekly System Update Check"
+command = "/usr/bin/sanchala-updater check --notify"
+working_directory = "/"
+
+[schedule]
+type = "calendar"
+calendar = "Wed *-*-* 10:00:00"
+persistent = true
+
+[options]
+notify_on_complete = true
+notify_on_failure = false
+log_output = true
+require_network = true

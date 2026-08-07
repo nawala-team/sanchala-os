@@ -1,0 +1,104 @@
+#!/usr/bin/env python3
+"""Sanchala Magnifier - Screen Magnifier"""
+import sys
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+
+class MagnifierApp(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Sanchala Magnifier")
+        self.setMinimumSize(400, 450)
+        self.zoom = 2.0
+        self.frozen = False
+        self.init_ui()
+    
+    def init_ui(self):
+        self.setStyleSheet("QMainWindow{background:#1a1a2e;}QLabel{color:#fff;}QPushButton{background:#16213e;color:#fff;border:none;padding:12px;border-radius:8px;}QPushButton:hover{background:#1f4068;}QSlider::groove:horizontal{background:#16213e;height:8px;border-radius:4px;}QSlider::handle:horizontal{background:#e94560;width:20px;height:20px;margin:-6px 0;border-radius:10px;}")
+        c = QWidget(); self.setCentralWidget(c); m = QVBoxLayout(c)
+        m.setContentsMargins(20,20,20,20)
+        
+        # Magnified view
+        self.view = QLabel("🔍\n\nMagnified area\nMove cursor to magnify")
+        self.view.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.view.setStyleSheet("background:#0f0f1a;border-radius:15px;min-height:250px;")
+        self.view.setScaledContents(True)
+        m.addWidget(self.view)
+        
+        # Zoom control
+        zl = QHBoxLayout()
+        zl.addWidget(QLabel("🔍 Zoom:"))
+        self.zoom_slider = QSlider(Qt.Orientation.Horizontal)
+        self.zoom_slider.setRange(10, 100)
+        self.zoom_slider.setValue(20)
+        self.zoom_slider.valueChanged.connect(self.set_zoom)
+        zl.addWidget(self.zoom_slider)
+        self.zoom_label = QLabel("2.0x")
+        zl.addWidget(self.zoom_label)
+        m.addLayout(zl)
+        
+        # Controls
+        ctrl = QHBoxLayout()
+        self.freeze_btn = QPushButton("❄️ Freeze")
+        self.freeze_btn.setCheckable(True)
+        self.freeze_btn.clicked.connect(self.toggle_freeze)
+        ctrl.addWidget(self.freeze_btn)
+        
+        invert = QPushButton("🔄 Invert")
+        invert.setCheckable(True)
+        ctrl.addWidget(invert)
+        
+        flash = QPushButton("💡 Flashlight")
+        flash.setCheckable(True)
+        ctrl.addWidget(flash)
+        m.addLayout(ctrl)
+        
+        # Presets
+        pre = QHBoxLayout()
+        pre.addWidget(QLabel("Presets:"))
+        for z in ["1x", "2x", "4x", "8x"]:
+            b = QPushButton(z)
+            b.clicked.connect(lambda _, v=float(z[:-1]): self.set_zoom_val(v))
+            pre.addWidget(b)
+        m.addLayout(pre)
+        
+        # Filters
+        m.addWidget(QLabel("Color Filters:"))
+        flt = QHBoxLayout()
+        for f in ["None", "Grayscale", "High Contrast", "Yellow/Black"]:
+            b = QPushButton(f)
+            b.setCheckable(True)
+            if f == "None": b.setChecked(True)
+            flt.addWidget(b)
+        m.addLayout(flt)
+        
+        # Timer for screen capture
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.capture)
+        self.timer.start(50)
+    
+    def set_zoom(self, val):
+        self.zoom = val / 10
+        self.zoom_label.setText(f"{self.zoom:.1f}x")
+    
+    def set_zoom_val(self, val):
+        self.zoom = val
+        self.zoom_slider.setValue(int(val * 10))
+    
+    def toggle_freeze(self):
+        self.frozen = self.freeze_btn.isChecked()
+        self.freeze_btn.setText("🔓 Unfreeze" if self.frozen else "❄️ Freeze")
+    
+    def capture(self):
+        if self.frozen: return
+        try:
+            cursor = QCursor.pos()
+            screen = QApplication.primaryScreen()
+            size = int(100 / self.zoom)
+            pixmap = screen.grabWindow(0, cursor.x() - size//2, cursor.y() - size//2, size, size)
+            self.view.setPixmap(pixmap.scaled(self.view.size(), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+        except: pass
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv); w = MagnifierApp(); w.show(); sys.exit(app.exec())

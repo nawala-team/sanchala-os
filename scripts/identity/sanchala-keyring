@@ -1,0 +1,175 @@
+#!/bin/bash
+# ============================================================================
+# SANCHALA OS - Keyring Management Tool
+# ============================================================================
+set -euo pipefail
+
+RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'
+BLUE='\033[0;34m'; CYAN='\033[0;36m'; NC='\033[0m'; BOLD='\033[1m'
+
+print_header() {
+    echo -e "\n${CYAN}╔════════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${CYAN}║${NC}${BOLD}        🔐  SANCHALA OS - Keyring Manager                ${NC}${CYAN}║${NC}"
+    echo -e "${CYAN}╚════════════════════════════════════════════════════════════╝${NC}\n"
+}
+
+print_success() { echo -e "${GREEN}✓${NC} $1"; }
+print_error() { echo -e "${RED}✗${NC} $1"; }
+print_info() { echo -e "${BLUE}ℹ${NC} $1"; }
+print_warning() { echo -e "${YELLOW}⚠${NC} $1"; }
+
+detect_backend() {
+    if command -v gnome-keyring-daemon &>/dev/null; then
+        echo "gnome-keyring"
+    elif command -v kwalletd5 &>/dev/null; then
+        echo "kwallet"
+    else
+        echo "none"
+    fi
+}
+
+status() {
+    print_header
+    echo -e "${BOLD}Keyring Status${NC}\n"
+    
+    local backend=$(detect_backend)
+    echo -e "Backend: ${CYAN}$backend${NC}\n"
+    
+    case "$backend" in
+        gnome-keyring)
+            if pgrep -x gnome-keyring-d &>/dev/null; then
+                print_success "GNOME Keyring daemon running"
+            else
+                print_warning "GNOME Keyring daemon not running"
+            fi
+            
+            # Check for keyrings
+            local keyring_dir="$HOME/.local/share/keyrings"
+            if [[ -d "$keyring_dir" ]]; then
+                echo -e "\n${BOLD}Keyrings:${NC}"
+                for f in "$keyring_dir"/*.keyring; do
+                    [[ -f "$f" ]] && echo -e "  ${GREEN}•${NC} $(basename "$f" .keyring)"
+                done
+            fi
+            ;;
+        kwallet)
+            if pgrep -x kwalletd5 &>/dev/null; then
+                print_success "KWallet daemon running"
+            else
+                print_warning "KWallet daemon not running"
+            fi
+            ;;
+        *)
+            print_error "No supported keyring backend found"
+            echo "Install: sudo pacman -S gnome-keyring  OR  kwallet"
+            ;;
+    esac
+    
+    # PAM integration
+    echo -e "\n${BOLD}PAM Integration:${NC}"
+    if grep -q pam_gnome_keyring /etc/pam.d/system-auth 2>/dev/null; then
+        print_success "GNOME Keyring auto-unlock configured"
+    elif grep -q pam_kwallet /etc/pam.d/system-auth 2>/dev/null; then
+        print_success "KWallet auto-unlock configured"
+    else
+        print_warning "No keyring auto-unlock in PAM"
+    fi
+}
+
+unlock() {
+    local backend=$(detect_backend)
+    echo -e "${BOLD}Unlocking keyring...${NC}\n"
+    
+    case "$backend" in
+        gnome-keyring)
+            if command -v secret-tool &>/dev/null; then
+                echo -n | secret-tool store --label "unlock" unlock trigger 2>/dev/null && \
+                    secret-tool clear unlock trigger 2>/dev/null
+                print_success "Keyring unlocked"
+            else
+                print_info "Use Seahorse or login to unlock keyring"
+            fi
+            ;;
+        kwallet)
+            if command -v kwallet-query &>/dev/null; then
+                kwallet-query -l kdewallet &>/dev/null && print_success "KWallet accessible"
+            else
+                print_info "Use KWalletManager to unlock"
+            fi
+            ;;
+        *) print_error "No keyring backend" ;;
+    esac
+}
+
+lock() {
+    local backend=$(detect_backend)
+    echo -e "${BOLD}Locking keyring...${NC}\n"
+    
+    case "$backend" in
+        gnome-keyring)
+            # Signal keyring to lock
+            dbus-send --session --type=method_call \
+                --dest=org.gnome.keyring /org/freedesktop/secrets \
+                org.freedesktop.Secret.Service.LockService 2>/dev/null && \
+                print_success "Keyring locked" || print_warning "Could not lock via D-Bus"
+            ;;
+        kwallet)
+            qdbus org.kde.kwalletd5 /modules/kwalletd5 close kdewallet true 2>/dev/null && \
+                print_success "KWallet locked" || print_warning "Could not lock KWallet"
+            ;;
+        *) print_error "No keyring backend" ;;
+    esac
+}
+
+setup_gnome_keyring() {
+    echo -e "${BOLD}Setting up GNOME Keyring...${NC}\n"
+    
+    # Check installation
+    if ! command -v gnome-keyring-daemon &>/dev/null; then
+        print_info "Installing gnome-keyring..."
+        sudo pacman -S --noconfirm gnome-keyring libsecret seahorse
+    fi
+    
+    # Create default keyring if needed
+    local keyring_dir="$HOME/.local/share/keyrings"
+    mkdir -p "$keyring_dir"
+    
+    if [[ ! -f "$keyring_dir/login.keyring" ]]; then
+        print_info "Default keyring will be created on first use"
+    fi
+    
+    print_success "GNOME Keyring configured"
+    echo -e "\nKeyring will auto-unlock on login with PAM integration."
+}
+
+show_help() {
+    cat << EOF
+${BOLD}SANCHALA OS - Keyring Manager${NC}
+
+USAGE: sanchala-keyring [COMMAND]
+
+COMMANDS:
+    status      Show keyring status (default)
+    unlock      Unlock keyring
+    lock        Lock keyring
+    setup       Setup GNOME Keyring
+    help        Show this help
+
+The keyring securely stores passwords and secrets for applications.
+With PAM integration, it auto-unlocks on login.
+EOF
+}
+
+main() {
+    local cmd="${1:-status}"
+    case "$cmd" in
+        status) status ;;
+        unlock) unlock ;;
+        lock) lock ;;
+        setup) setup_gnome_keyring ;;
+        help|--help|-h) show_help ;;
+        *) print_error "Unknown: $cmd"; show_help; exit 1 ;;
+    esac
+}
+
+main "$@"

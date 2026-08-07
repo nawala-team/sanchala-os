@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=File Sharing
+Comment=Share folders over the network via SMB/NFS/WebDAV
+Exec=sanchala-file-sharing
+Icon=folder-publicshare
+Terminal=false
+Type=Application
+Categories=Network;FileTransfer;System;
+Keywords=share;smb;samba;nfs;webdav;network;
+StartupNotify=true

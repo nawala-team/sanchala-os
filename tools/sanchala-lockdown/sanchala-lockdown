@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: GPL-3.0
+# Sanchala Lockdown - Emergency Security Lockdown Mode
+set -euo pipefail
+
+VERSION="1.0.0"
+STATE_DIR="/var/lib/sanchala/lockdown"
+AUDIT_LOG="/var/log/sanchala/lockdown-audit.log"
+
+RED='\033[0;31m' GREEN='\033[0;32m' YELLOW='\033[1;33m' BLUE='\033[0;34m' NC='\033[0m'
+
+log_audit() { echo "[$(date -Iseconds)] $1: ${2:-}" >> "$AUDIT_LOG" 2>/dev/null || true; }
+check_root() { [[ $EUID -eq 0 ]] || { echo -e "${RED}✗ Root required${NC}"; exit 1; }; }
+
+cmd_status() {
+    echo -e "${BLUE}Lockdown Status${NC}"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    if [[ -f "$STATE_DIR/active" ]]; then
+        echo -e "Status: ${RED}LOCKDOWN ACTIVE${NC}"
+        echo "Since: $(cat "$STATE_DIR/active")"
+    else
+        echo -e "Status: ${GREEN}Normal operation${NC}"
+    fi
+}
+
+cmd_enable() {
+    check_root
+    local level="${1:-standard}"
+    mkdir -p "$STATE_DIR"
+    
+    echo -e "${RED}⚠ ENABLING LOCKDOWN MODE${NC}"
+    date -Iseconds > "$STATE_DIR/active"
+    
+    echo 0 > /sys/bus/usb/drivers_autoprobe 2>/dev/null || true
+    loginctl lock-sessions 2>/dev/null || true
+    systemctl stop sshd 2>/dev/null || true
+    
+    if [[ "$level" == "maximum" ]]; then
+        rfkill block bluetooth wifi 2>/dev/null || true
+    fi
+    
+    log_audit "LOCKDOWN_ENABLE" "Level: $level"
+    echo -e "${RED}🔒 LOCKDOWN ACTIVE${NC}"
+}
+
+cmd_disable() {
+    check_root
+    [[ -f "$STATE_DIR/active" ]] || { echo "Lockdown not active"; exit 0; }
+    
+    echo 1 > /sys/bus/usb/drivers_autoprobe 2>/dev/null || true
+    systemctl start sshd 2>/dev/null || true
+    rfkill unblock all 2>/dev/null || true
+    
+    rm -f "$STATE_DIR/active"
+    log_audit "LOCKDOWN_DISABLE" "Ended"
+    echo -e "${GREEN}✓ Lockdown disabled${NC}"
+}
+
+case "${1:-status}" in
+    status) cmd_status ;; enable|on) cmd_enable "${2:-standard}" ;;
+    disable|off) cmd_disable ;; maximum) cmd_enable maximum ;;
+    *) echo "Usage: sanchala-lockdown {status|enable [LEVEL]|disable|maximum}" ;;
+esac

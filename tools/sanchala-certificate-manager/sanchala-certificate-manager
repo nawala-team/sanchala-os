@@ -1,0 +1,51 @@
+#!/usr/bin/env python3
+import os, sys, json, hashlib
+from pathlib import Path
+from datetime import datetime
+
+class CertManager:
+    def __init__(self):
+        self.cfg = Path(os.path.expanduser("~/.config/sanchala/certs"))
+        self.cfg.mkdir(parents=True, exist_ok=True)
+        self.reg = self.cfg / "registry.json"
+        if not self.reg.exists():
+            with open(self.reg, "w") as f:
+                json.dump({"trusted": [], "pinned": {}}, f)
+
+    def load(self):
+        with open(self.reg) as f:
+            return json.load(f)
+
+    def save(self, d):
+        with open(self.reg, "w") as f:
+            json.dump(d, f, indent=2)
+
+    def import_cert(self, path):
+        p = Path(path)
+        if not p.exists(): return None
+        h = hashlib.sha256(p.read_bytes()).hexdigest()[:16]
+        r = self.load()
+        r["trusted"].append({"hash": h, "added": datetime.now().isoformat()})
+        self.save(r)
+        return h
+
+    def list_certs(self):
+        return self.load()["trusted"]
+
+def main():
+    cm = CertManager()
+    if len(sys.argv) < 2:
+        print("Usage: sanchala-certificate-manager <list|import> [path]")
+        return
+    if sys.argv[1] == "list":
+        certs = cm.list_certs()
+        print(f"Certificates ({len(certs)}):")
+        for c in certs:
+            print(f"  {c['hash']}")
+    elif sys.argv[1] == "import" and len(sys.argv) > 2:
+        h = cm.import_cert(sys.argv[2])
+        if h: print(f"Imported: {h}")
+        else: print("Error: File not found")
+
+if __name__ == "__main__":
+    main()

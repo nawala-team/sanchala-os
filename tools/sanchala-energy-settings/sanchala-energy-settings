@@ -1,0 +1,38 @@
+#!/bin/bash
+# Sanchala Energy Settings - Power Management
+set -euo pipefail
+
+get_battery() {
+    local bat="/sys/class/power_supply/BAT0"
+    [[ -d "$bat" ]] || bat="/sys/class/power_supply/BAT1"
+    if [[ -d "$bat" ]]; then
+        local cap=$(cat "$bat/capacity" 2>/dev/null || echo "N/A")
+        local status=$(cat "$bat/status" 2>/dev/null || echo "Unknown")
+        echo "Battery: ${cap}% ($status)"
+    else
+        echo "No battery detected"
+    fi
+}
+
+get_profile() {
+    powerprofilesctl get 2>/dev/null || echo "balanced"
+}
+
+set_profile() {
+    powerprofilesctl set "$1" 2>/dev/null && echo "Profile: $1"
+}
+
+show_status() {
+    echo "=== Energy Status ==="
+    get_battery
+    echo "Power Profile: $(get_profile)"
+    echo "AC Power: $(cat /sys/class/power_supply/AC*/online 2>/dev/null | grep -q 1 && echo 'Connected' || echo 'Disconnected')"
+}
+
+case "${1:-status}" in
+    status) show_status ;;
+    battery|-b) get_battery ;;
+    profile|-p) set_profile "$2" ;;
+    gui) exec sanchala-energy-settings-gui ;;
+    *) echo "Usage: $0 {status|battery|profile|gui}" ;;
+esac

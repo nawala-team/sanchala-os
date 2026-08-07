@@ -1,0 +1,151 @@
+#!/bin/bash
+# SANCHALA-HEARING-AIDS - Hearing Aid Integration for Sanchala OS
+# WCAG 2.1 AAA Compliant | Copyright (c) 2025 Sanchala OS Project
+set -euo pipefail
+
+VERSION="1.0.0"
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/sanchala/accessibility"
+CONFIG_FILE="$CONFIG_DIR/hearing-aids.conf"
+
+declare -A HEARING=([enabled]=false [device]=auto [profile]=hearing-aid [mono]=false [balance]=0 [boost]=0 [compression]=true [feedback_cancel]=true)
+
+mkdir -p "$CONFIG_DIR"
+
+load_config() { [[ -f "$CONFIG_FILE" ]] && source "$CONFIG_FILE"; }
+save_config() { declare -p HEARING > "$CONFIG_FILE"; }
+
+detect_audio_system() {
+    command -v pactl &>/dev/null && echo "pulseaudio" && return
+    command -v wpctl &>/dev/null && echo "pipewire" && return
+    command -v amixer &>/dev/null && echo "alsa" && return
+    echo "none"
+}
+
+list_bluetooth_devices() {
+    echo "Bluetooth Audio Devices:"
+    bluetoothctl devices 2>/dev/null | while read -r _ mac name; do
+        local info=$(bluetoothctl info "$mac" 2>/dev/null)
+        if echo "$info" | grep -q "Audio"; then
+            local connected=$(echo "$info" | grep -q "Connected: yes" && echo "●" || echo "○")
+            echo "  $connected $name ($mac)"
+        fi
+    done
+}
+
+connect_hearing_aid() {
+    local device="${1:-${HEARING[device]}}"
+    
+    if [[ "$device" == "auto" ]]; then
+        # Find first hearing aid device
+        device=$(bluetoothctl devices 2>/dev/null | head -1 | awk '{print $2}')
+    fi
+    
+    [[ -z "$device" ]] && echo "No hearing aid device found" && return 1
+    
+    echo "Connecting to hearing aid: $device"
+    bluetoothctl connect "$device" 2>/dev/null
+    
+    # Set audio profile
+    local audio=$(detect_audio_system)
+    case "$audio" in
+        pulseaudio)
+            pactl set-card-profile "bluez_card.${device//:/_}" a2dp_sink 2>/dev/null ||:
+            ;;
+        pipewire)
+            wpctl set-profile "bluez_card.${device//:/_}" 1 2>/dev/null ||:
+            ;;
+    esac
+    
+    HEARING[device]="$device"
+    save_config
+    echo "Hearing aid connected"
+}
+
+disconnect_hearing_aid() {
+    local device="${HEARING[device]}"
+    [[ "$device" == "auto" || -z "$device" ]] && return
+    bluetoothctl disconnect "$device" 2>/dev/null
+    echo "Hearing aid disconnected"
+}
+
+apply_audio_settings() {
+    local audio=$(detect_audio_system)
+    
+    case "$audio" in
+        pulseaudio)
+            # Mono audio
+            if [[ "${HEARING[mono]}" == "true" ]]; then
+                pactl load-module module-remap-sink sink_name=mono master=@DEFAULT_SINK@ channels=1 2>/dev/null ||:
+            fi
+            
+            # Balance adjustment (-100 to 100)
+            local balance="${HEARING[balance]}"
+            if [[ "$balance" -ne 0 ]]; then
+                local left=$((100 - balance)) right=$((100 + balance))
+                [[ $left -gt 100 ]] && left=100; [[ $left -lt 0 ]] && left=0
+                [[ $right -gt 100 ]] && right=100; [[ $right -lt 0 ]] && right=0
+                pactl set-sink-volume @DEFAULT_SINK@ "${left}%,${right}%" 2>/dev/null ||:
+            fi
+            
+            # Audio boost
+            local boost="${HEARING[boost]}"
+            if [[ "$boost" -gt 0 ]]; then
+                pactl set-sink-volume @DEFAULT_SINK@ "$((100 + boost))%" 2>/dev/null ||:
+            fi
+            ;;
+        pipewire)
+            # Similar settings for PipeWire
+            if [[ "${HEARING[mono]}" == "true" ]]; then
+                wpctl set-profile @DEFAULT_SINK@ mono 2>/dev/null ||:
+            fi
+            ;;
+        alsa)
+            amixer set Master "${HEARING[boost]}%+" 2>/dev/null ||:
+            ;;
+    esac
+    
+    echo "Audio settings applied"
+}
+
+enable_hearing_mode() {
+    load_config
+    HEARING[enabled]="true"; save_config
+    
+    apply_audio_settings
+    [[ "${HEARING[device]}" != "auto" ]] && connect_hearing_aid
+    
+    echo "Hearing aid mode enabled"
+    echo "  Mono: ${HEARING[mono]} | Balance: ${HEARING[balance]} | Boost: ${HEARING[boost]}dB"
+}
+
+disable_hearing_mode() {
+    HEARING[enabled]="false"; save_config
+    
+    # Reset audio settings
+    pactl set-sink-volume @DEFAULT_SINK@ 100% 2>/dev/null ||:
+    pactl unload-module module-remap-sink 2>/dev/null ||:
+    
+    echo "Hearing aid mode disabled"
+}
+
+status() {
+    load_config
+    echo "Hearing Aid Mode: ${HEARING[enabled]}"
+    echo "  Device: ${HEARING[device]} | Mono: ${HEARING[mono]}"
+    echo "  Balance: ${HEARING[balance]} | Boost: ${HEARING[boost]}dB"
+    echo "  Audio System: $(detect_audio_system)"
+    echo ""
+    list_bluetooth_devices
+}
+
+case "${1:-status}" in
+    enable|on) enable_hearing_mode ;; disable|off) disable_hearing_mode ;; status) status ;;
+    toggle) [[ "${HEARING[enabled]}" == "true" ]] && disable_hearing_mode || enable_hearing_mode ;;
+    connect) connect_hearing_aid "${2:-}" ;; disconnect) disconnect_hearing_aid ;;
+    --mono) HEARING[mono]="$2"; save_config; apply_audio_settings ;;
+    --balance) HEARING[balance]="$2"; save_config; apply_audio_settings ;;
+    --boost) HEARING[boost]="$2"; save_config; apply_audio_settings ;;
+    list) list_bluetooth_devices ;;
+    --help|-h) echo "Usage: sanchala-hearing-aids {enable|disable|connect|list|--mono true|false|--balance N|--boost N}" ;;
+    --version|-v) echo "v$VERSION" ;; *) echo "Unknown: $1"; exit 1 ;;
+esac

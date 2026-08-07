@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Sanchala
+Description=Elegant boot splash for Sanchala OS - Set Your System in Motion
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/sanchala
+ScriptFile=/usr/share/plymouth/themes/sanchala/sanchala.script

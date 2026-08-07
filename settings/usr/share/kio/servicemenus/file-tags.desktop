@@ -1,0 +1,49 @@
+[Desktop Entry]
+Type=Service
+ServiceTypes=KonqPopupMenu/Plugin
+MimeType=all/allfiles;inode/directory;
+Actions=setTagImportant;setTagWork;setTagPersonal;setTagArchive;removeAllTags
+X-KDE-Priority=TopLevel
+X-KDE-StartupNotify=false
+X-KDE-Submenu=Tags
+X-KDE-Submenu-Icon=tag
+
+[Desktop Action setTagImportant]
+Name=⭐ Important
+Name[es]=⭐ Importante
+Name[fr]=⭐ Important
+Name[de]=⭐ Wichtig
+Icon=rating
+Exec=sh -c 'kioclient5 setattr "%f" "xdg.tags" "Important"'
+
+[Desktop Action setTagWork]
+Name=💼 Work
+Name[es]=💼 Trabajo
+Name[fr]=💼 Travail
+Name[de]=💼 Arbeit
+Icon=folder-briefcase
+Exec=sh -c 'kioclient5 setattr "%f" "xdg.tags" "Work"'
+
+[Desktop Action setTagPersonal]
+Name=🏠 Personal
+Name[es]=🏠 Personal
+Name[fr]=🏠 Personnel
+Name[de]=🏠 Persönlich
+Icon=user-home
+Exec=sh -c 'kioclient5 setattr "%f" "xdg.tags" "Personal"'
+
+[Desktop Action setTagArchive]
+Name=📦 Archive
+Name[es]=📦 Archivo
+Name[fr]=📦 Archive
+Name[de]=📦 Archiv
+Icon=folder-tar
+Exec=sh -c 'kioclient5 setattr "%f" "xdg.tags" "Archive"'
+
+[Desktop Action removeAllTags]
+Name=Remove All Tags
+Name[es]=Eliminar todas las etiquetas
+Name[fr]=Supprimer toutes les étiquettes
+Name[de]=Alle Tags entfernen
+Icon=edit-clear
+Exec=sh -c 'kioclient5 setattr "%f" "xdg.tags" ""'

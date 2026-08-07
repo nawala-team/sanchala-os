@@ -1,0 +1,203 @@
+#!/bin/bash
+# ============================================================
+# SANCHALA OS - Media Library Indexer
+# ============================================================
+# Automatic media library scanning and metadata indexing
+# Provides unified media database for all apps
+# ============================================================
+
+set -euo pipefail
+
+MEDIA_DB_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/sanchala/media"
+MEDIA_DB="${MEDIA_DB_DIR}/library.db"
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/sanchala/media"
+THUMB_DIR="${CACHE_DIR}/thumbnails"
+LOG_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/sanchala/media-indexer.log"
+
+# Default paths to scan
+MUSIC_DIRS=("$HOME/Music")
+VIDEO_DIRS=("$HOME/Videos")
+PHOTO_DIRS=("$HOME/Pictures")
+
+# File extensions
+AUDIO_EXTS="mp3|flac|ogg|opus|m4a|wav|wma|aac|alac|ape|wv|mka"
+VIDEO_EXTS="mp4|mkv|webm|avi|mov|wmv|flv|m4v|mpg|mpeg|ts|vob"
+IMAGE_EXTS="jpg|jpeg|png|gif|webp|heic|heif|avif|tiff|tif|bmp|raw|cr2|nef|arw|dng"
+
+log() {
+    local level="$1"; shift
+    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    echo "[$timestamp] [$level] $*" >> "$LOG_FILE"
+    [[ "${VERBOSE:-0}" == "1" ]] && echo "[$level] $*"
+}
+
+init_database() {
+    mkdir -p "$MEDIA_DB_DIR" "$CACHE_DIR" "$THUMB_DIR" "$(dirname "$LOG_FILE")"
+    
+    [[ -f "$MEDIA_DB" ]] && return 0
+    
+    log "INFO" "Creating media database..."
+    sqlite3 "$MEDIA_DB" <<'EOF'
+CREATE TABLE IF NOT EXISTS audio (
+    id INTEGER PRIMARY KEY, path TEXT UNIQUE NOT NULL,
+    title TEXT, artist TEXT, album TEXT, album_artist TEXT, genre TEXT,
+    year INTEGER, track_number INTEGER, duration REAL, bitrate INTEGER,
+    sample_rate INTEGER, format TEXT, size INTEGER, mtime INTEGER,
+    rating INTEGER DEFAULT 0, play_count INTEGER DEFAULT 0,
+    added_at INTEGER DEFAULT (strftime('%s', 'now'))
+);
+CREATE TABLE IF NOT EXISTS video (
+    id INTEGER PRIMARY KEY, path TEXT UNIQUE NOT NULL,
+    title TEXT, duration REAL, width INTEGER, height INTEGER,
+    codec TEXT, bitrate INTEGER, format TEXT, size INTEGER, mtime INTEGER,
+    thumbnail_hash TEXT, rating INTEGER DEFAULT 0, play_count INTEGER DEFAULT 0,
+    last_position REAL DEFAULT 0, added_at INTEGER DEFAULT (strftime('%s', 'now'))
+);
+CREATE TABLE IF NOT EXISTS image (
+    id INTEGER PRIMARY KEY, path TEXT UNIQUE NOT NULL,
+    title TEXT, width INTEGER, height INTEGER, format TEXT,
+    date_taken INTEGER, gps_lat REAL, gps_lon REAL,
+    size INTEGER, mtime INTEGER, thumbnail_hash TEXT,
+    rating INTEGER DEFAULT 0, added_at INTEGER DEFAULT (strftime('%s', 'now'))
+);
+CREATE TABLE IF NOT EXISTS playlists (
+    id INTEGER PRIMARY KEY, name TEXT NOT NULL, type TEXT DEFAULT 'audio',
+    created_at INTEGER DEFAULT (strftime('%s', 'now'))
+);
+CREATE INDEX IF NOT EXISTS idx_audio_artist ON audio(artist);
+CREATE INDEX IF NOT EXISTS idx_audio_album ON audio(album);
+CREATE INDEX IF NOT EXISTS idx_video_duration ON video(duration);
+CREATE INDEX IF NOT EXISTS idx_image_date ON image(date_taken);
+EOF
+    log "INFO" "Database initialized"
+}
+
+extract_audio_metadata() {
+    ffprobe -v quiet -print_format json -show_format -show_streams "$1" 2>/dev/null
+}
+
+scan_audio_files() {
+    local dir="$1" count=0
+    log "INFO" "Scanning audio in: $dir"
+    
+    while IFS= read -r -d '' file; do
+        local mtime=$(stat -c %Y "$file" 2>/dev/null || echo 0)
+        local size=$(stat -c %s "$file" 2>/dev/null || echo 0)
+        local existing=$(sqlite3 "$MEDIA_DB" "SELECT mtime FROM audio WHERE path='${file//\'/\'\'}'" 2>/dev/null)
+        [[ "$existing" == "$mtime" ]] && continue
+        
+        local meta=$(extract_audio_metadata "$file")
+        if [[ -n "$meta" ]]; then
+            local title=$(echo "$meta" | jq -r '.format.tags.title // empty' 2>/dev/null | head -1)
+            local artist=$(echo "$meta" | jq -r '.format.tags.artist // empty' 2>/dev/null | head -1)
+            local album=$(echo "$meta" | jq -r '.format.tags.album // empty' 2>/dev/null | head -1)
+            local duration=$(echo "$meta" | jq -r '.format.duration // 0' 2>/dev/null)
+            [[ -z "$title" ]] && title=$(basename "${file%.*}")
+            
+            sqlite3 "$MEDIA_DB" "INSERT OR REPLACE INTO audio (path,title,artist,album,duration,size,mtime)
+                VALUES ('${file//\'/\'\'}','${title//\'/\'\'}','${artist//\'/\'\'}','${album//\'/\'\'}',${duration:-0},$size,$mtime)" 2>/dev/null
+            ((count++))
+        fi
+    done < <(find "$dir" -type f -regextype posix-extended -iregex ".*\.($AUDIO_EXTS)$" -print0 2>/dev/null)
+    log "INFO" "Indexed $count audio files"
+}
+
+scan_video_files() {
+    local dir="$1" count=0
+    log "INFO" "Scanning video in: $dir"
+    
+    while IFS= read -r -d '' file; do
+        local mtime=$(stat -c %Y "$file" 2>/dev/null || echo 0)
+        local size=$(stat -c %s "$file" 2>/dev/null || echo 0)
+        local existing=$(sqlite3 "$MEDIA_DB" "SELECT mtime FROM video WHERE path='${file//\'/\'\'}'" 2>/dev/null)
+        [[ "$existing" == "$mtime" ]] && continue
+        
+        local meta=$(ffprobe -v quiet -print_format json -show_format -show_streams -select_streams v:0 "$file" 2>/dev/null)
+        if [[ -n "$meta" ]]; then
+            local title=$(echo "$meta" | jq -r '.format.tags.title // empty' 2>/dev/null | head -1)
+            local duration=$(echo "$meta" | jq -r '.format.duration // 0' 2>/dev/null)
+            local width=$(echo "$meta" | jq -r '.streams[0].width // 0' 2>/dev/null)
+            local height=$(echo "$meta" | jq -r '.streams[0].height // 0' 2>/dev/null)
+            [[ -z "$title" ]] && title=$(basename "${file%.*}")
+            
+            # Generate thumbnail
+            local hash=$(echo -n "$file" | md5sum | cut -d' ' -f1)
+            [[ ! -f "${THUMB_DIR}/${hash}.jpg" ]] && \
+                ffmpeg -i "$file" -ss 00:00:05 -vframes 1 -vf "scale=320:-1" -q:v 5 "${THUMB_DIR}/${hash}.jpg" 2>/dev/null || true
+            
+            sqlite3 "$MEDIA_DB" "INSERT OR REPLACE INTO video (path,title,duration,width,height,size,mtime,thumbnail_hash)
+                VALUES ('${file//\'/\'\'}','${title//\'/\'\'}',${duration:-0},${width:-0},${height:-0},$size,$mtime,'$hash')" 2>/dev/null
+            ((count++))
+        fi
+    done < <(find "$dir" -type f -regextype posix-extended -iregex ".*\.($VIDEO_EXTS)$" -print0 2>/dev/null)
+    log "INFO" "Indexed $count video files"
+}
+
+scan_image_files() {
+    local dir="$1" count=0
+    log "INFO" "Scanning images in: $dir"
+    
+    while IFS= read -r -d '' file; do
+        local mtime=$(stat -c %Y "$file" 2>/dev/null || echo 0)
+        local size=$(stat -c %s "$file" 2>/dev/null || echo 0)
+        local existing=$(sqlite3 "$MEDIA_DB" "SELECT mtime FROM image WHERE path='${file//\'/\'\'}'" 2>/dev/null)
+        [[ "$existing" == "$mtime" ]] && continue
+        
+        local title=$(basename "${file%.*}")
+        local width=0 height=0 format=""
+        if command -v identify &>/dev/null; then
+            read -r width height format < <(identify -format '%w %h %m' "$file" 2>/dev/null | head -1) || true
+        fi
+        
+        # Generate thumbnail
+        local hash=$(echo -n "$file" | md5sum | cut -d' ' -f1)
+        [[ ! -f "${THUMB_DIR}/${hash}.jpg" ]] && command -v convert &>/dev/null && \
+            convert "$file" -thumbnail 320x320 -auto-orient "${THUMB_DIR}/${hash}.jpg" 2>/dev/null || true
+        
+        sqlite3 "$MEDIA_DB" "INSERT OR REPLACE INTO image (path,title,width,height,format,size,mtime,thumbnail_hash)
+            VALUES ('${file//\'/\'\'}','${title//\'/\'\'}',${width:-0},${height:-0},'${format//\'/\'\'}', $size,$mtime,'$hash')" 2>/dev/null
+        ((count++))
+    done < <(find "$dir" -type f -regextype posix-extended -iregex ".*\.($IMAGE_EXTS)$" -print0 2>/dev/null)
+    log "INFO" "Indexed $count image files"
+}
+
+full_scan() {
+    log "INFO" "Starting full media library scan..."
+    for dir in "${MUSIC_DIRS[@]}"; do [[ -d "$dir" ]] && scan_audio_files "$dir"; done
+    for dir in "${VIDEO_DIRS[@]}"; do [[ -d "$dir" ]] && scan_video_files "$dir"; done
+    for dir in "${PHOTO_DIRS[@]}"; do [[ -d "$dir" ]] && scan_image_files "$dir"; done
+    log "INFO" "Full scan complete"
+}
+
+show_stats() {
+    echo "=== SANCHALA Media Library Statistics ==="
+    echo "Audio: $(sqlite3 "$MEDIA_DB" "SELECT COUNT(*) FROM audio" 2>/dev/null || echo 0) files"
+    echo "Video: $(sqlite3 "$MEDIA_DB" "SELECT COUNT(*) FROM video" 2>/dev/null || echo 0) files"
+    echo "Image: $(sqlite3 "$MEDIA_DB" "SELECT COUNT(*) FROM image" 2>/dev/null || echo 0) files"
+    echo "Artists: $(sqlite3 "$MEDIA_DB" "SELECT COUNT(DISTINCT artist) FROM audio WHERE artist!=''" 2>/dev/null || echo 0)"
+    echo "Albums: $(sqlite3 "$MEDIA_DB" "SELECT COUNT(DISTINCT album) FROM audio WHERE album!=''" 2>/dev/null || echo 0)"
+}
+
+usage() {
+    cat <<EOF
+SANCHALA Media Library Indexer
+Usage: $(basename "$0") [COMMAND]
+Commands: scan, scan-audio, scan-video, scan-images, stats, init, help
+EOF
+}
+
+main() {
+    local cmd="${1:-help}"
+    init_database
+    case "$cmd" in
+        scan) full_scan ;;
+        scan-audio) for d in "${MUSIC_DIRS[@]}"; do [[ -d "$d" ]] && scan_audio_files "$d"; done ;;
+        scan-video) for d in "${VIDEO_DIRS[@]}"; do [[ -d "$d" ]] && scan_video_files "$d"; done ;;
+        scan-images) for d in "${PHOTO_DIRS[@]}"; do [[ -d "$d" ]] && scan_image_files "$d"; done ;;
+        stats) show_stats ;;
+        init) rm -f "$MEDIA_DB"; init_database; echo "Database initialized" ;;
+        help|*) usage ;;
+    esac
+}
+
+main "$@"

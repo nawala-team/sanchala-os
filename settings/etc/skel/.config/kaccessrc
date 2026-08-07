@@ -1,0 +1,59 @@
+# ============================================
+# SANCHALA OS - KDE Accessibility Settings
+# ============================================
+# KDE accessibility daemon configuration
+# ~/.config/kaccessrc
+# ============================================
+
+[Bell]
+# Visual bell for system sounds
+VisibleBell=false
+VisibleBellInvert=false
+VisibleBellColor=#FF0000
+VisibleBellPause=500
+
+[Keyboard]
+# Sticky Keys - press modifiers sequentially
+StickyKeys=false
+StickyKeysLatch=true
+StickyKeysAutoOff=true
+StickyKeysBeep=true
+StickyKeysLock=true
+
+# Slow Keys - ignore brief key presses
+SlowKeys=false
+SlowKeysDelay=500
+SlowKeysPressBeep=true
+SlowKeysAcceptBeep=true
+SlowKeysRejectBeep=true
+
+# Bounce Keys - ignore repeated key presses
+BounceKeys=false
+BounceKeysDelay=500
+BounceKeysRejectBeep=true
+
+# Toggle Keys - sound for Caps/Num/Scroll Lock
+ToggleKeysBeep=true
+
+# Keyboard Gestures
+KeyboardGestures=true
+
+[Mouse]
+# Mouse Keys - control pointer with numpad
+MouseKeys=false
+MouseKeysDelay=160
+MouseKeysInterval=5
+MouseKeysTimeToMax=1000
+MouseKeysMaxSpeed=500
+MouseKeysCurve=0
+
+[ScreenReader]
+# Screen reader integration (Orca)
+Enabled=false
+
+[AccessX]
+# AccessX timeout - auto-disable accessibility features
+AccessXTimeout=false
+AccessXTimeoutDelay=30
+AccessXBeep=true
+AccessXFeedback=true

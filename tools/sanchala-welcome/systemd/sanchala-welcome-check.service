@@ -1,0 +1,14 @@
+[Unit]
+Description=Sanchala First Boot Check
+Documentation=man:sanchala-welcome(1)
+After=graphical.target
+ConditionPathExists=!/var/lib/sanchala/welcome/first-boot-complete
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/sanchala-welcome
+RemainAfterExit=yes
+Environment=DISPLAY=:0
+
+[Install]
+WantedBy=graphical-session.target

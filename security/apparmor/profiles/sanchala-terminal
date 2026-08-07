@@ -1,0 +1,94 @@
+# ============================================
+# SANCHALA OS - Terminal Emulator AppArmor Profile
+# ============================================
+# For GNOME Terminal, Konsole, Alacritty, etc.
+# ============================================
+
+#include <tunables/global>
+
+profile sanchala-terminal flags=(attach_disconnected,mediate_deleted) {
+  #include <abstractions/base>
+  #include <abstractions/bash>
+  #include <abstractions/consoles>
+  #include <abstractions/nameservice>
+
+  # Terminal needs broader access but still restricted
+  
+  # Deny most sensitive paths
+  deny /boot/** wklx,
+  deny /etc/shadow r,
+  deny /etc/gshadow r,
+  deny /proc/kcore r,
+  deny /dev/mem rwklx,
+  deny /dev/kmem rwklx,
+
+  # User home (controlled by shell)
+  owner @{HOME}/** rwkl,
+
+  # System binaries
+  /usr/bin/* rix,
+  /usr/local/bin/* rix,
+  /bin/* rix,
+  /sbin/* rix,
+  /usr/sbin/* rix,
+
+  # Libraries
+  /usr/lib/** rm,
+  /usr/lib64/** rm,
+  /lib/** rm,
+  /lib64/** rm,
+
+  # System read access
+  /etc/** r,
+  /usr/share/** r,
+  /var/lib/** r,
+
+  # Proc filesystem
+  owner @{PROC}/@{pid}/** r,
+  @{PROC}/version r,
+  @{PROC}/meminfo r,
+  @{PROC}/cpuinfo r,
+  @{PROC}/loadavg r,
+  @{PROC}/uptime r,
+  @{PROC}/sys/kernel/hostname r,
+
+  # Sys filesystem (limited)
+  /sys/devices/system/cpu/** r,
+  /sys/class/** r,
+
+  # Tmp access
+  /tmp/** rwkl,
+  /var/tmp/** rwkl,
+
+  # PTY/TTY
+  /dev/ptmx rw,
+  /dev/pts/* rw,
+  /dev/tty rw,
+  /dev/tty[0-9]* rw,
+
+  # Shells
+  /usr/bin/bash rix,
+  /usr/bin/zsh rix,
+  /usr/bin/fish rix,
+  /usr/bin/sh rix,
+
+  # Network (for ssh, wget, curl, etc.)
+  network inet stream,
+  network inet6 stream,
+  network inet dgram,
+  network inet6 dgram,
+  network unix stream,
+  network unix dgram,
+  network netlink raw,
+
+  # DBus
+  dbus send bus=session,
+  dbus receive bus=session,
+
+  # Wayland/X11
+  owner /run/user/*/wayland-* rw,
+  /tmp/.X11-unix/* rw,
+
+  # Allow spawning child processes
+  capability sys_tty_config,
+}

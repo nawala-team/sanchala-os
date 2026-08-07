@@ -1,0 +1,199 @@
+# ============================================================================
+# SANCHALA OS - libinput Device Quirks
+# ============================================================================
+# Version: 1.0 | MacBook-quality touchpad experience
+# Location: /etc/libinput/local-overrides.quirks
+#
+# These quirks override default libinput behavior for specific devices
+# to achieve smooth, responsive, and intuitive input handling.
+# ============================================================================
+
+# ============================================================================
+# APPLE TOUCHPADS - Premium Glass Trackpad Experience
+# ============================================================================
+
+[Apple MacBook Trackpad]
+MatchVendor=0x05AC
+MatchProduct=0x0*
+AttrPressureRange=10:8
+AttrPalmPressureThreshold=180
+AttrThumbPressureThreshold=100
+AttrPalmSizeThreshold=100
+AttrSizeHint=104x75
+AttrResolutionHint=400x400
+
+[Apple Magic Trackpad]
+MatchVendor=0x05AC
+MatchProduct=0x030E
+AttrPressureRange=8:6
+AttrPalmPressureThreshold=200
+AttrThumbPressureThreshold=110
+AttrSizeHint=130x110
+
+[Apple Magic Trackpad 2]
+MatchVendor=0x05AC
+MatchProduct=0x0265
+AttrPressureRange=6:4
+AttrPalmPressureThreshold=220
+AttrThumbPressureThreshold=120
+AttrSizeHint=160x115
+
+# ============================================================================
+# PRECISION TOUCHPADS - Windows Precision Touchpad Protocol
+# ============================================================================
+
+[Microsoft Precision Touchpad]
+MatchUdevType=touchpad
+MatchDMIModalias=dmi:*svnMicrosoft*
+AttrPressureRange=8:6
+AttrPalmPressureThreshold=150
+AttrThumbPressureThreshold=90
+ModelPrecisionTouchpad=1
+
+[Dell Precision Touchpad]
+MatchUdevType=touchpad
+MatchDMIModalias=dmi:*svnDell*
+AttrPressureRange=10:8
+AttrPalmPressureThreshold=160
+AttrThumbPressureThreshold=95
+ModelPrecisionTouchpad=1
+
+[HP Precision Touchpad]
+MatchUdevType=touchpad
+MatchDMIModalias=dmi:*svnHP*
+AttrPressureRange=10:8
+AttrPalmPressureThreshold=160
+AttrThumbPressureThreshold=95
+
+[Lenovo ThinkPad Touchpad]
+MatchUdevType=touchpad
+MatchDMIModalias=dmi:*svnLENOVO*pnThinkPad*
+AttrPressureRange=12:10
+AttrPalmPressureThreshold=170
+AttrThumbPressureThreshold=100
+ModelThinkpadT450Touchpad=1
+
+[ASUS Touchpad]
+MatchUdevType=touchpad
+MatchDMIModalias=dmi:*svnASUS*
+AttrPressureRange=10:8
+AttrPalmPressureThreshold=155
+AttrThumbPressureThreshold=90
+
+# ============================================================================
+# SYNAPTICS TOUCHPADS - Common in older laptops
+# ============================================================================
+
+[Synaptics TouchPad Generic]
+MatchVendor=0x06CB
+MatchUdevType=touchpad
+AttrPressureRange=15:12
+AttrPalmPressureThreshold=140
+AttrThumbPressureThreshold=85
+
+[Synaptics Intertouch]
+MatchVendor=0x06CB
+MatchUdevType=touchpad
+MatchBus=i2c
+AttrPressureRange=10:8
+ModelSynapticsSerialTouchpad=0
+
+# ============================================================================
+# ELAN TOUCHPADS - Common in many modern laptops
+# ============================================================================
+
+[ELAN Touchpad Generic]
+MatchVendor=0x04F3
+MatchUdevType=touchpad
+AttrPressureRange=12:10
+AttrPalmPressureThreshold=150
+AttrThumbPressureThreshold=90
+
+[ELAN Touchpad I2C]
+MatchName=*ELAN*
+MatchUdevType=touchpad
+MatchBus=i2c
+AttrPressureRange=10:8
+AttrPalmPressureThreshold=160
+AttrThumbPressureThreshold=95
+
+# ============================================================================
+# ALPS TOUCHPADS
+# ============================================================================
+
+[ALPS Touchpad Generic]
+MatchVendor=0x044E
+MatchUdevType=touchpad
+AttrPressureRange=18:15
+AttrPalmPressureThreshold=130
+AttrThumbPressureThreshold=80
+
+[ALPS Dual Point]
+MatchVendor=0x044E
+MatchName=*DualPoint*
+AttrPressureRange=20:16
+AttrPalmPressureThreshold=125
+
+# ============================================================================
+# TOUCHSCREEN DEVICES
+# ============================================================================
+
+[Generic Touchscreen]
+MatchUdevType=touchscreen
+AttrPalmPressureThreshold=200
+AttrTouchSizeRange=30:20
+
+[Wacom Touchscreen]
+MatchVendor=0x056A
+MatchUdevType=touchscreen
+AttrPressureRange=8:6
+AttrTouchSizeRange=25:18
+
+# ============================================================================
+# POINTING STICKS (TrackPoints)
+# ============================================================================
+
+[Lenovo TrackPoint]
+MatchName=*TrackPoint*
+MatchDMIModalias=dmi:*svnLENOVO*
+AttrTrackpointMultiplier=1.0
+ModelTrackpoint=1
+
+[Dell PointStick]
+MatchName=*PointStick*
+MatchDMIModalias=dmi:*svnDell*
+AttrTrackpointMultiplier=0.9
+
+# ============================================================================
+# STYLUS/PEN DEVICES
+# ============================================================================
+
+[Wacom Pen Generic]
+MatchVendor=0x056A
+MatchUdevType=tablet
+AttrPressureRange=1:0
+AttrTabletSmoothing=0
+
+[Microsoft Surface Pen]
+MatchName=*Surface*Pen*
+MatchUdevType=tablet
+AttrPressureRange=1:0
+
+# ============================================================================
+# GAMING MICE - Low latency settings
+# ============================================================================
+
+[Gaming Mouse Generic]
+MatchUdevType=mouse
+MatchBus=usb
+AttrEventCodeDisable=REL_WHEEL_HI_RES;REL_HWHEEL_HI_RES
+
+[Logitech Gaming Mouse]
+MatchVendor=0x046D
+MatchUdevType=mouse
+AttrEventCodeDisable=REL_WHEEL_HI_RES
+
+[Razer Mouse]
+MatchVendor=0x1532
+MatchUdevType=mouse
+AttrEventCodeDisable=REL_WHEEL_HI_RES

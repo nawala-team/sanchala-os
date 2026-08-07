@@ -1,0 +1,25 @@
+{
+  "name": "sanchala-phone-link",
+  "version": "1.0.0",
+  "description": "Connect and sync with Android/iOS devices",
+  "author": "Sanchala OS Team",
+  "category": "Network",
+  "settings": {
+    "enabled": true,
+    "pairedDevices": [],
+    "syncContacts": true,
+    "syncMessages": true,
+    "syncPhotos": false,
+    "syncNotifications": true,
+    "syncClipboard": true,
+    "allowCalls": true,
+    "allowScreenMirror": true,
+    "autoConnect": true,
+    "connectionType": "wifi",
+    "hotspotSharing": false,
+    "fileTransfer": true,
+    "batteryStatus": true,
+    "notificationFilters": []
+  },
+  "permissions": ["network", "bluetooth", "notifications", "contacts"]
+}

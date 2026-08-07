@@ -1,0 +1,77 @@
+# ============================================================================
+# SANCHALA OS - Printers Configuration Template
+# ============================================================================
+# Location: /etc/cups/printers.conf
+# Note: This is a template. CUPS manages this file automatically.
+# ============================================================================
+# 
+# CUPS will auto-populate this file when printers are added.
+# Below are examples for manual configuration reference.
+#
+# ============================================================================
+
+# ===========================================
+# PDF Virtual Printer (Auto-installed)
+# ===========================================
+# <Printer PDF>
+#   UUID urn:uuid:sanchala-cups-pdf-printer
+#   Info CUPS-PDF Virtual Printer
+#   Location Local
+#   MakeModel CUPS-PDF (Virtual PDF Printer)
+#   DeviceURI cups-pdf:/
+#   State Idle
+#   StateTime 0
+#   Type 8425668
+#   Accepting Yes
+#   Shared No
+#   JobSheets none none
+#   QuotaPeriod 0
+#   PageLimit 0
+#   KLimit 0
+#   OpPolicy default
+#   ErrorPolicy stop-printer
+# </Printer>
+
+# ===========================================
+# Network Printer Example (IPP)
+# ===========================================
+# <Printer NetworkPrinter>
+#   UUID urn:uuid:your-printer-uuid
+#   Info Office Printer
+#   Location Office Room 101
+#   MakeModel HP LaserJet Series
+#   DeviceURI ipp://printer.local:631/ipp/print
+#   State Idle
+#   StateTime 0
+#   Type 36932
+#   Accepting Yes
+#   Shared No
+#   JobSheets none none
+#   QuotaPeriod 0
+#   PageLimit 0
+#   KLimit 0
+#   OpPolicy default
+#   ErrorPolicy stop-printer
+# </Printer>
+
+# ===========================================
+# USB Printer Example
+# ===========================================
+# <Printer USBPrinter>
+#   UUID urn:uuid:your-usb-printer-uuid
+#   Info USB Printer
+#   Location Desk
+#   MakeModel Brother HL-L2350DW
+#   DeviceURI usb://Brother/HL-L2350DW?serial=123456
+#   State Idle
+#   StateTime 0
+#   Type 36932
+#   Accepting Yes
+#   Shared No
+#   JobSheets none none
+#   QuotaPeriod 0
+#   PageLimit 0
+#   KLimit 0
+#   OpPolicy default
+#   ErrorPolicy stop-printer
+# </Printer>

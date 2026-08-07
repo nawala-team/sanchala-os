@@ -1,0 +1,31 @@
+.TH SANCHALA-GESTURES-SETTINGS 1 "2024" "Sanchala OS" "User Commands"
+.SH NAME
+sanchala-gestures-settings \- Touchpad and touchscreen gesture configuration
+.SH SYNOPSIS
+.B sanchala-gestures-settings
+[\fIcommand\fR] [\fIoptions\fR]
+.SH DESCRIPTION
+Configure multi-touch gestures for touchpad and touchscreen.
+.SH COMMANDS
+.TP
+.B status
+Show current gesture mappings
+.TP
+.B set \fIgesture\fR \fIaction\fR
+Map gesture to action
+.TP
+.B enable
+Enable gesture support
+.TP
+.B disable
+Disable gesture support
+.TP
+.B reset
+Reset to default gestures
+.SH GESTURES
+swipe-3-up, swipe-3-down, swipe-3-left, swipe-3-right, swipe-4-up, swipe-4-down, pinch-in, pinch-out
+.SH EXAMPLES
+.TP
+sanchala-gestures-settings set swipe-3-up overview
+.SH AUTHOR
+Sanchala OS Team

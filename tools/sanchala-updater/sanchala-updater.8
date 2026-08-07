@@ -1,0 +1,70 @@
+.TH SANCHALA-UPDATER 8 "August 2026" "Sanchala OS" "System Administration"
+.SH NAME
+sanchala-updater \- System update manager for Sanchala OS
+.SH SYNOPSIS
+.B sanchala-updater
+[\fIOPTIONS\fR] [\fICOMMAND\fR]
+.SH DESCRIPTION
+.B sanchala-updater
+manages system updates with automatic snapshot creation, delta updates,
+and safe rollback capabilities. It coordinates Pacman, Flatpak, and
+firmware updates.
+.SH COMMANDS
+.TP
+.B check
+Check for available updates
+.TP
+.B update \fR[\fB--security\fR|\fB--all\fR]
+Apply updates (creates snapshot first)
+.TP
+.B schedule \fR[\fBenable\fR|\fBdisable\fR|\fBstatus\fR]
+Manage automatic update schedule
+.TP
+.B history
+Show update history
+.TP
+.B rollback \fR[\fISNAPSHOT\fR]
+Rollback to previous state
+.TP
+.B changelog \fR[\fIPACKAGE\fR]
+Show package changelogs
+.SH OPTIONS
+.TP
+.B \-\-no-snapshot
+Skip pre-update snapshot (not recommended)
+.TP
+.B \-\-download-only
+Download updates without installing
+.TP
+.B \-\-reboot
+Reboot after update if required
+.TP
+.B \-\-json
+Output in JSON format
+.TP
+.B \-y, \-\-yes
+Skip confirmation prompts
+.SH EXAMPLES
+.TP
+Check for updates:
+.B sanchala-updater check
+.TP
+Apply security updates only:
+.B sudo sanchala-updater update --security
+.TP
+Full system update:
+.B sudo sanchala-updater update --all
+.SH FILES
+.TP
+.I /etc/sanchala/updater/updater.toml
+Configuration file
+.TP
+.I /var/lib/sanchala/updater/
+Update state and history
+.SH SEE ALSO
+.BR pacman (8),
+.BR flatpak (1),
+.BR sanchala-backup (1),
+.BR snapper (8)
+.SH AUTHOR
+Sanchala OS Team <dev@sanchala.id>

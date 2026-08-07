@@ -1,0 +1,36 @@
+# Sanchala Privacy Daemon
+# Enforces privacy settings and monitors for violations
+
+[Unit]
+Description=Sanchala Privacy Daemon
+Documentation=man:sanchala-privd(8)
+After=network.target sanchala-guardian.service
+Wants=sanchala-guardian.service
+
+[Service]
+Type=dbus
+BusName=id.sanchala.Privacy
+ExecStart=/usr/bin/sanchala-privd
+Restart=on-failure
+RestartSec=5
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+MemoryDenyWriteExecute=true
+LockPersonality=true
+
+# Allow read access to config
+ReadOnlyPaths=/etc/sanchala
+ReadWritePaths=/var/lib/sanchala/privacy
+ReadWritePaths=/var/log/sanchala
+
+[Install]
+WantedBy=multi-user.target

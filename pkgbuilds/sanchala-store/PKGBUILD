@@ -1,0 +1,51 @@
+# Maintainer: Sanchala Team <dev@sanchala.id>
+
+pkgname=sanchala-store
+pkgver=1.0.0
+pkgrel=1
+pkgdesc='Sanchala OS Software Store (Flatpak/Pacman frontend)'
+arch=('x86_64' 'aarch64')
+url='https://sanchala.id'
+license=('GPL3')
+groups=('sanchala')
+depends=(
+    'qt6-base'
+    'qt6-declarative'
+    'flatpak'
+    'packagekit-qt6'
+    'appstream-qt'
+    'polkit'
+)
+makedepends=('cmake' 'qt6-tools' 'extra-cmake-modules')
+optdepends=(
+    'fwupd: firmware updates'
+)
+
+build() {
+    cd "$srcdir/sanchala-store"
+    cmake -B build \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DCMAKE_BUILD_TYPE=Release
+    cmake --build build
+}
+
+package() {
+    cd "$srcdir/sanchala-store"
+    DESTDIR="$pkgdir" cmake --install build
+    
+    # Desktop entry
+    install -Dm644 "sanchala-store.desktop" \
+        "$pkgdir/usr/share/applications/sanchala-store.desktop"
+    
+    # Icon
+    install -Dm644 "icons/sanchala-store.svg" \
+        "$pkgdir/usr/share/icons/hicolor/scalable/apps/sanchala-store.svg"
+    
+    # Polkit rules
+    install -Dm644 "polkit/sanchala-store.rules" \
+        "$pkgdir/usr/share/polkit-1/rules.d/sanchala-store.rules"
+    
+    # AppStream metadata
+    install -Dm644 "sanchala-store.metainfo.xml" \
+        "$pkgdir/usr/share/metainfo/sanchala-store.metainfo.xml"
+}

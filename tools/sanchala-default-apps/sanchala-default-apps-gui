@@ -1,0 +1,93 @@
+#!/usr/bin/env python3
+"""Sanchala Default Applications GUI"""
+import sys, subprocess, os
+from pathlib import Path
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+
+MIME_TYPES = {
+    "Web Browser": ["x-scheme-handler/http", "x-scheme-handler/https"],
+    "Email Client": ["x-scheme-handler/mailto"],
+    "File Manager": ["inode/directory"],
+    "Text Editor": ["text/plain"],
+    "Image Viewer": ["image/jpeg", "image/png", "image/gif"],
+    "Video Player": ["video/mp4", "video/x-matroska"],
+    "Music Player": ["audio/mpeg", "audio/ogg"],
+    "PDF Reader": ["application/pdf"],
+}
+
+class DefaultApps(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Sanchala Default Applications")
+        self.setMinimumSize(500, 400)
+        self.combos = {}
+        self.init_ui()
+    
+    def init_ui(self):
+        w = QWidget()
+        self.setCentralWidget(w)
+        layout = QVBoxLayout(w)
+        
+        form = QFormLayout()
+        for category, mimes in MIME_TYPES.items():
+            combo = QComboBox()
+            combo.setMinimumWidth(250)
+            self.load_apps(combo, mimes[0])
+            self.combos[category] = (combo, mimes)
+            form.addRow(f"{category}:", combo)
+        layout.addLayout(form)
+        
+        layout.addStretch()
+        
+        btn_row = QHBoxLayout()
+        apply_btn = QPushButton("Apply")
+        apply_btn.clicked.connect(self.apply_settings)
+        btn_row.addStretch()
+        btn_row.addWidget(apply_btn)
+        layout.addLayout(btn_row)
+    
+    def load_apps(self, combo, mime):
+        apps = set()
+        # Find apps that can handle this mime type
+        for path in ["/usr/share/applications", str(Path.home() / ".local/share/applications")]:
+            for f in Path(path).glob("*.desktop") if Path(path).exists() else []:
+                try:
+                    content = f.read_text()
+                    if "MimeType=" in content:
+                        name = ""
+                        for line in content.split("\n"):
+                            if line.startswith("Name="):
+                                name = line.split("=", 1)[1]
+                                break
+                        if name:
+                            apps.add((name, f.name))
+                except: pass
+        
+        # Get current default
+        try:
+            current = subprocess.check_output(["xdg-mime", "query", "default", mime], text=True).strip()
+        except:
+            current = ""
+        
+        combo.clear()
+        combo.addItem("(None)", "")
+        for name, desktop in sorted(apps):
+            combo.addItem(name, desktop)
+            if desktop == current:
+                combo.setCurrentIndex(combo.count() - 1)
+    
+    def apply_settings(self):
+        for category, (combo, mimes) in self.combos.items():
+            desktop = combo.currentData()
+            if desktop:
+                for mime in mimes:
+                    subprocess.run(["xdg-mime", "default", desktop, mime])
+        QMessageBox.information(self, "Applied", "Default applications updated.")
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    w = DefaultApps()
+    w.show()
+    sys.exit(app.exec())

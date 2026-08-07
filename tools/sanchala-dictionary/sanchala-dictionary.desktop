@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Sanchala Dictionary
+Comment=Dictionary and Thesaurus
+Exec=sanchala-dictionary
+Icon=accessories-dictionary
+Terminal=false
+Type=Application
+Categories=Office;Dictionary;

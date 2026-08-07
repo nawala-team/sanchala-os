@@ -1,0 +1,39 @@
+#!/bin/bash
+# Sanchala Display Settings - Monitor Configuration
+set -euo pipefail
+
+list_displays() {
+    echo "=== Connected Displays ==="
+    xrandr --query | grep " connected" | while read -r line; do
+        name=$(echo "$line" | cut -d' ' -f1)
+        res=$(echo "$line" | grep -oP '\d+x\d+' | head -1)
+        echo "  $name: $res"
+    done
+}
+
+set_resolution() {
+    local display="$1" res="$2"
+    xrandr --output "$display" --mode "$res" && echo "Set $display to $res"
+}
+
+set_brightness() {
+    local level="$1"
+    for d in $(xrandr --query | grep " connected" | cut -d' ' -f1); do
+        xrandr --output "$d" --brightness "$level"
+    done
+    echo "Brightness set to $level"
+}
+
+rotate_display() {
+    local display="$1" dir="${2:-normal}"
+    xrandr --output "$display" --rotate "$dir" && echo "Rotated $display to $dir"
+}
+
+case "${1:-list}" in
+    list|-l) list_displays ;;
+    resolution|-r) set_resolution "$2" "$3" ;;
+    brightness|-b) set_brightness "$2" ;;
+    rotate) rotate_display "$2" "${3:-normal}" ;;
+    gui) exec sanchala-display-settings-gui ;;
+    *) echo "Usage: $0 {list|resolution|brightness|rotate|gui}" ;;
+esac

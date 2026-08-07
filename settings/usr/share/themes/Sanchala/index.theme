@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=X-GNOME-Metatheme
+Name=Sanchala
+Comment=Sanchala OS Light Theme
+Encoding=UTF-8
+
+[X-GNOME-Metatheme]
+GtkTheme=Sanchala
+MetacityTheme=Sanchala
+IconTheme=sanchala-icons
+CursorTheme=sanchala-cursors
+ButtonLayout=close,minimize,maximize:menu

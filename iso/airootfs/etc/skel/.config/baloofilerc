@@ -1,0 +1,75 @@
+# ============================================================
+# SANCHALA OS - Baloo File Indexer Configuration
+# ============================================================
+# High-performance, privacy-conscious file indexing
+# Spotlight-quality instant search with content indexing
+# ============================================================
+
+[General]
+dbVersion=2
+only basic indexing=false
+index hidden folders=false
+first run=false
+exclude folders[$e]=$HOME/.cache,$HOME/.local/share/Trash,$HOME/.mozilla,$HOME/.config/BraveSoftware,$HOME/snap,$HOME/.npm,$HOME/.cargo,$HOME/.rustup,$HOME/.local/share/baloo,$HOME/.wine,$HOME/.steam,$HOME/.gnupg,$HOME/.ssh,$HOME/.pki,$HOME/.password-store,$HOME/.local/share/keyrings,$HOME/.config/sanchala/keyring,/tmp,/var/tmp,/var/cache,/var/log,/proc,/sys,/dev,/run
+exclude filters=*.o,*.la,*.lo,*.loT,*.moc,moc_*.cpp,qrc_*.cpp,ui_*.h,*.rcc,*.pyc,*.pyo,__pycache__,*.class,*.jar,*.so,*.so.*,*.a,*.dll,*.exe,*.deb,*.rpm,*.tar,*.tar.*,*.gz,*.bz2,*.xz,*.zip,*.7z,*.rar,*.iso,*.img,*.vmdk,*.swap,*.lock,*.pid,*.log,*.tmp,*.temp,*.bak,*~,*.swp,.git,.svn,.hg,node_modules,vendor,__pycache__,.venv,build,dist,target,*.min.js,*.min.css
+
+[Basic Settings]
+Indexing-Enabled=true
+
+[ContentIndexing]
+enabled=true
+indexText=true
+maxFileSize=15728640
+indexPlainText=true
+indexRichText=true
+indexPDF=true
+indexOfficeDocuments=true
+indexEbooks=true
+indexSourceCode=true
+indexMarkdown=true
+indexImageMetadata=true
+indexAudioMetadata=true
+indexVideoMetadata=true
+indexArchiveContents=false
+
+[Performance]
+initialBatchSize=50
+reducedMemoryIndexing=true
+indexOnBattery=false
+lowPriority=true
+maxConcurrentFiles=4
+indexDuringIdle=true
+idleTimeSeconds=120
+memoryLimit=256
+
+[Database]
+backend=lmdb
+path=$HOME/.local/share/baloo
+autoCompact=true
+compactInterval=7
+maxSize=2
+
+[RealTimeMonitoring]
+enabled=true
+watchedDirectories=
+indexDelay=2000
+maxWatches=65536
+
+[SearchRanking]
+fileNameWeight=10
+contentWeight=5
+recentAccessWeight=8
+frequentAccessWeight=6
+fileTypeWeight=3
+pathDepthPenalty=1
+boostDesktop=true
+boostDocuments=true
+boostDownloads=true
+boostHome=true
+
+[Privacy]
+clearOnLogout=false
+respectNoIndex=true
+respectPermissions=true
+encryptDatabase=false
+anonymizeHistoryDays=30

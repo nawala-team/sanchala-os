@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Workspaces
+Comment=Virtual desktop management
+Exec=sanchala-workspaces status
+Icon=preferences-desktop-virtual-desktops
+Terminal=false
+Type=Application
+Categories=Settings;DesktopSettings;
+Keywords=workspace;virtual;desktop;

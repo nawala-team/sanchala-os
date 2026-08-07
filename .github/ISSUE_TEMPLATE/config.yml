@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Community Discussions
+    url: https://github.com/sanchala-os/sanchala-os/discussions
+    about: Ask questions and discuss with the community
+  - name: 📖 Documentation
+    url: https://sanchala.id/docs
+    about: Check documentation before opening an issue
+  - name: 🔒 Security Vulnerability (Private)
+    url: mailto:security@sanchala.id
+    about: For critical security issues, email us privately

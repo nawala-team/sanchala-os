@@ -1,0 +1,15 @@
+[Unit]
+Description=Sanchala OS Identity Service
+Documentation=man:fprintd(8) man:pam_u2f(8)
+After=graphical.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/bin/true
+
+# Ensure fprintd is ready
+ExecStartPost=/usr/bin/systemctl --no-block start fprintd.service
+
+[Install]
+WantedBy=multi-user.target

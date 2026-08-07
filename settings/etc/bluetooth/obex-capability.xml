@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SANCHALA OS - OBEX Capability Exchange -->
+<Capability Version="1.0">
+  <General>
+    <Manufacturer>Sanchala OS</Manufacturer>
+    <Model>Desktop</Model>
+    <SN>SANCHALA-001</SN>
+    <OEM>Sanchala Project</OEM>
+    <SW>
+      <Version>1.0</Version>
+      <Date>2024-01-01</Date>
+    </SW>
+    <FW>
+      <Version>1.0</Version>
+      <Date>2024-01-01</Date>
+    </FW>
+    <HW>
+      <Version>1.0</Version>
+      <Date>2024-01-01</Date>
+    </HW>
+  </General>
+  <Service>
+    <Name>OBEX File Transfer</Name>
+    <UUID>00001106-0000-1000-8000-00805f9b34fb</UUID>
+    <Version>1.2</Version>
+    <Type>OBEXFileTransfer</Type>
+  </Service>
+  <Service>
+    <Name>OBEX Object Push</Name>
+    <UUID>00001105-0000-1000-8000-00805f9b34fb</UUID>
+    <Version>1.2</Version>
+    <Type>OBEXObjectPush</Type>
+  </Service>
+  <Access>
+    <Object Type="*/*" Operation="get,put,delete"/>
+  </Access>
+</Capability>

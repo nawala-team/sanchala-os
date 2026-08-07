@@ -1,0 +1,55 @@
+# ============================================
+# SANCHALA OS - Default AppArmor Profile
+# ============================================
+# Applied to all applications by default
+# ============================================
+
+#include <tunables/global>
+
+profile sanchala-default flags=(attach_disconnected) {
+  #include <abstractions/base>
+  #include <abstractions/nameservice>
+
+  # Deny sensitive system paths
+  deny /boot/** rwklx,
+  deny /etc/shadow r,
+  deny /etc/gshadow r,
+  deny /etc/passwd w,
+  deny /etc/group w,
+  deny /etc/sudoers r,
+  deny /etc/sudoers.d/** r,
+  
+  # Deny access to other users' homes
+  deny /home/*/** rw,
+  deny /root/** rw,
+  
+  # Allow own home
+  owner @{HOME}/** rw,
+  
+  # Deny kernel/system manipulation
+  deny /proc/sys/** w,
+  deny /sys/** w,
+  deny /dev/mem rwklx,
+  deny /dev/kmem rwklx,
+  deny /dev/port rwklx,
+  
+  # Allow common paths
+  /usr/** r,
+  /lib/** r,
+  /lib64/** r,
+  /opt/** r,
+  
+  # Allow tmp
+  /tmp/** rw,
+  /var/tmp/** rw,
+  
+  # Allow running programs
+  /usr/bin/* ix,
+  /usr/lib/** ix,
+  
+  # Network access (can be restricted per-app)
+  network inet stream,
+  network inet6 stream,
+  network inet dgram,
+  network inet6 dgram,
+}

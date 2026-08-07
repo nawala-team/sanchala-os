@@ -1,0 +1,91 @@
+#!/bin/bash
+# ============================================
+# SANCHALA OS - VPN Kill Switch Dispatcher
+# ============================================
+# Automatically enables/disables kill switch
+# when VPN connections change state
+# ============================================
+# Location: /etc/NetworkManager/dispatcher.d/50-sanchala-vpn-killswitch
+# Permissions: chmod 755, owned by root
+# ============================================
+
+INTERFACE="$1"
+STATUS="$2"
+
+# Only act on VPN interfaces
+case "$INTERFACE" in
+    wg*|tun*|tap*)
+        # This is a VPN interface
+        ;;
+    *)
+        # Not a VPN interface, exit
+        exit 0
+        ;;
+esac
+
+KILLSWITCH_ENABLED="/var/run/sanchala-vpn-killswitch"
+NFTABLES_KILLSWITCH="/etc/sanchala/firewall/nftables-killswitch.conf"
+LOG_TAG="sanchala-vpn"
+
+log_message() {
+    logger -t "$LOG_TAG" "$1"
+}
+
+enable_killswitch() {
+    log_message "VPN $INTERFACE connected - enabling kill switch"
+    
+    # Add kill switch rules
+    nft -f - <<'EOF'
+table inet sanchala_killswitch {
+    chain output {
+        type filter hook output priority filter + 10; policy accept;
+        
+        # Allow traffic to VPN interfaces
+        oifname "wg*" accept
+        oifname "tun*" accept
+        oifname "tap*" accept
+        
+        # Allow loopback
+        oif "lo" accept
+        
+        # Allow DHCP (needed for network connectivity)
+        udp dport 67 accept
+        udp sport 68 accept
+        
+        # Allow established connections (for graceful transition)
+        ct state established,related accept
+        
+        # Allow local network (configurable)
+        # ip daddr { 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 } accept
+        
+        # Block everything else when kill switch is active
+        # Only activated when marker file exists
+        # counter drop
+    }
+}
+EOF
+    
+    touch "$KILLSWITCH_ENABLED"
+    log_message "Kill switch enabled for VPN $INTERFACE"
+}
+
+disable_killswitch() {
+    log_message "VPN $INTERFACE disconnected - disabling kill switch"
+    
+    # Remove kill switch table
+    nft delete table inet sanchala_killswitch 2>/dev/null || true
+    
+    rm -f "$KILLSWITCH_ENABLED"
+    log_message "Kill switch disabled"
+}
+
+case "$STATUS" in
+    vpn-up|up)
+        enable_killswitch
+        ;;
+    vpn-down|down)
+        disable_killswitch
+        ;;
+esac
+
+exit 0

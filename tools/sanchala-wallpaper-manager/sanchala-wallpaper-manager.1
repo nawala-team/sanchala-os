@@ -1,0 +1,31 @@
+.TH SANCHALA-WALLPAPER-MANAGER 1 "2024" "Sanchala OS" "User Commands"
+.SH NAME
+sanchala-wallpaper-manager \- Desktop and lock screen wallpaper management
+.SH SYNOPSIS
+.B sanchala-wallpaper-manager
+[\fIcommand\fR] [\fIoptions\fR]
+.SH DESCRIPTION
+Set and manage wallpapers with slideshow support and per-workspace backgrounds.
+.SH COMMANDS
+.TP
+.B set \fIimage\fR
+Set desktop wallpaper
+.TP
+.B lockscreen \fIimage\fR
+Set lock screen wallpaper
+.TP
+.B slideshow \fIdirectory\fR [\-i \fIinterval\fR]
+Enable wallpaper slideshow
+.TP
+.B list
+List wallpaper collection
+.TP
+.B download
+Download new wallpapers
+.SH EXAMPLES
+.TP
+sanchala-wallpaper-manager set ~/Pictures/wallpaper.jpg
+.TP
+sanchala-wallpaper-manager slideshow ~/Wallpapers -i 30
+.SH AUTHOR
+Sanchala OS Team

@@ -1,0 +1,98 @@
+#!/usr/bin/env python3
+"""Sanchala Sound Settings GUI"""
+import sys, subprocess
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+
+class SoundSettings(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Sanchala Sound Settings")
+        self.setMinimumSize(450, 350)
+        self.init_ui()
+        self.load_devices()
+        self.update_volume()
+    
+    def init_ui(self):
+        w = QWidget()
+        self.setCentralWidget(w)
+        layout = QVBoxLayout(w)
+        
+        # Output section
+        out_grp = QGroupBox("Output")
+        out_l = QVBoxLayout(out_grp)
+        self.output_combo = QComboBox()
+        out_l.addWidget(self.output_combo)
+        vol_row = QHBoxLayout()
+        vol_row.addWidget(QLabel("Volume:"))
+        self.volume = QSlider(Qt.Orientation.Horizontal)
+        self.volume.setRange(0, 150)
+        self.volume.valueChanged.connect(self.on_volume_change)
+        self.vol_lbl = QLabel("0%")
+        vol_row.addWidget(self.volume, 1)
+        vol_row.addWidget(self.vol_lbl)
+        out_l.addLayout(vol_row)
+        self.mute_btn = QPushButton("Mute")
+        self.mute_btn.setCheckable(True)
+        self.mute_btn.clicked.connect(self.toggle_mute)
+        out_l.addWidget(self.mute_btn)
+        layout.addWidget(out_grp)
+        
+        # Input section
+        in_grp = QGroupBox("Input")
+        in_l = QVBoxLayout(in_grp)
+        self.input_combo = QComboBox()
+        in_l.addWidget(self.input_combo)
+        mic_row = QHBoxLayout()
+        mic_row.addWidget(QLabel("Mic Level:"))
+        self.mic_vol = QSlider(Qt.Orientation.Horizontal)
+        self.mic_vol.setRange(0, 100)
+        self.mic_vol.setValue(100)
+        mic_row.addWidget(self.mic_vol, 1)
+        in_l.addLayout(mic_row)
+        layout.addWidget(in_grp)
+        
+        layout.addStretch()
+    
+    def load_devices(self):
+        try:
+            out = subprocess.check_output(["pactl", "list", "sinks", "short"], text=True)
+            for line in out.strip().split("\n"):
+                if line:
+                    parts = line.split("\t")
+                    self.output_combo.addItem(parts[1] if len(parts) > 1 else parts[0])
+        except: pass
+        try:
+            out = subprocess.check_output(["pactl", "list", "sources", "short"], text=True)
+            for line in out.strip().split("\n"):
+                if line and ".monitor" not in line:
+                    parts = line.split("\t")
+                    self.input_combo.addItem(parts[1] if len(parts) > 1 else parts[0])
+        except: pass
+    
+    def update_volume(self):
+        try:
+            out = subprocess.check_output(["pactl", "get-sink-volume", "@DEFAULT_SINK@"], text=True)
+            import re
+            m = re.search(r'(\d+)%', out)
+            if m:
+                vol = int(m.group(1))
+                self.volume.blockSignals(True)
+                self.volume.setValue(vol)
+                self.vol_lbl.setText(f"{vol}%")
+                self.volume.blockSignals(False)
+        except: pass
+    
+    def on_volume_change(self, val):
+        subprocess.run(["pactl", "set-sink-volume", "@DEFAULT_SINK@", f"{val}%"])
+        self.vol_lbl.setText(f"{val}%")
+    
+    def toggle_mute(self):
+        subprocess.run(["pactl", "set-sink-mute", "@DEFAULT_SINK@", "toggle"])
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    w = SoundSettings()
+    w.show()
+    sys.exit(app.exec())

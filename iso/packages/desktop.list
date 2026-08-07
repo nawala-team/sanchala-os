@@ -1,0 +1,215 @@
+# ============================================
+# SANCHALA OS - Desktop Environment Packages
+# ============================================
+# Optimized for 60fps smooth desktop experience
+# with comprehensive GPU support
+# ============================================
+
+# ===========================================
+# GPU DRIVERS - AMD (Open Source, Recommended)
+# ===========================================
+mesa
+lib32-mesa
+vulkan-radeon
+lib32-vulkan-radeon
+libva-mesa-driver
+lib32-libva-mesa-driver
+mesa-vdpau
+lib32-mesa-vdpau
+xf86-video-amdgpu
+amdvlk
+
+# ===========================================
+# GPU DRIVERS - Intel
+# ===========================================
+vulkan-intel
+lib32-vulkan-intel
+intel-media-driver
+libva-intel-driver
+lib32-libva-intel-driver
+xf86-video-intel
+
+# ===========================================
+# GPU DRIVERS - NVIDIA (Proprietary)
+# ===========================================
+# Installed conditionally by sanchala-gpu-detect
+# nvidia-dkms
+# nvidia-utils
+# lib32-nvidia-utils
+# nvidia-settings
+# opencl-nvidia
+# libva-nvidia-driver
+
+# ===========================================
+# GPU DRIVERS - Common/Fallback
+# ===========================================
+xf86-video-vesa
+xf86-video-fbdev
+
+# ===========================================
+# Vulkan & Graphics Libraries
+# ===========================================
+vulkan-icd-loader
+lib32-vulkan-icd-loader
+vulkan-tools
+vulkan-mesa-layers
+lib32-vulkan-mesa-layers
+
+# ===========================================
+# Video Acceleration (VA-API/VDPAU)
+# ===========================================
+libva
+lib32-libva
+libva-utils
+vdpauinfo
+libvdpau
+lib32-libvdpau
+
+# ===========================================
+# OpenCL Support
+# ===========================================
+ocl-icd
+lib32-ocl-icd
+opencl-clover-mesa
+clinfo
+
+# ===========================================
+# KDE Plasma Desktop
+# ===========================================
+plasma-meta
+kde-applications-meta
+sddm
+
+# Plasma Essentials
+plasma-desktop
+plasma-workspace
+plasma-wayland-session
+plasma-nm
+plasma-pa
+powerdevil
+bluedevil
+kscreen
+kdeplasma-addons
+kinfocenter
+kgamma
+colord-kde
+
+# KDE Apps
+dolphin
+konsole
+kate
+ark
+spectacle
+gwenview
+okular
+kcalc
+krunner
+systemsettings
+
+# ===========================================
+# Wayland Stack
+# ===========================================
+wayland
+wayland-protocols
+wayland-utils
+xorg-xwayland
+qt6-wayland
+qt5-wayland
+kwayland
+kwayland-integration
+plasma-wayland-protocols
+wl-clipboard
+
+# ===========================================
+# Display & Monitor Management
+# ===========================================
+xdg-desktop-portal
+xdg-desktop-portal-kde
+xdg-desktop-portal-gtk
+libinput
+xf86-input-libinput
+ddcutil
+i2c-tools
+
+# ===========================================
+# HiDPI & Scaling
+# ===========================================
+# Handled via KDE settings, no extra packages needed
+# Qt scaling configured in environment.d
+
+# ===========================================
+# Fonts (Optimized for HiDPI)
+# ===========================================
+ttf-dejavu
+ttf-liberation
+noto-fonts
+noto-fonts-cjk
+noto-fonts-emoji
+ttf-jetbrains-mono
+inter-font
+ttf-fira-code
+ttf-roboto
+ttf-ubuntu-font-family
+fontconfig
+
+# ===========================================
+# Audio (PipeWire Stack)
+# ===========================================
+pipewire
+pipewire-pulse
+pipewire-alsa
+pipewire-jack
+wireplumber
+lib32-pipewire
+
+# ===========================================
+# Bluetooth
+# ===========================================
+bluez
+bluez-utils
+
+# ===========================================
+# Printing
+# ===========================================
+cups
+cups-pdf
+system-config-printer
+
+# ===========================================
+# GTK/Qt Integration
+# ===========================================
+kde-gtk-config
+breeze-gtk
+qt6ct
+qt5ct
+adwaita-qt5
+adwaita-qt6
+
+# ===========================================
+# Themes & Appearance
+# ===========================================
+kvantum
+kvantum-qt5
+
+# ===========================================
+# File Manager Extras
+# ===========================================
+kdegraphics-thumbnailers
+ffmpegthumbs
+kimageformats
+kio-extras
+
+# ===========================================
+# Archive Support
+# ===========================================
+unrar
+p7zip
+unarchiver
+
+# ===========================================
+# Gaming & Performance (Optional)
+# ===========================================
+gamemode
+lib32-gamemode
+mangohud
+lib32-mangohud

@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+KEYS="/etc/sanchala/secure-boot/keys"
+case "${1:-status}" in
+  status) [[ -d /sys/firmware/efi ]] && echo "UEFI: Yes" || echo "UEFI: No"; mokutil --sb-state 2>/dev/null || echo "Unknown" ;;
+  verify) sbverify --list "${2:-/boot/vmlinuz}" 2>/dev/null && echo Signed || echo "Not signed" ;;
+  sign) [[ $EUID -eq 0 ]] || exit 1; sbsign --key "$KEYS/db.key" --cert "$KEYS/db.crt" -o "$2.s" "$2"; mv "$2.s" "$2" ;;
+  generate-keys) [[ $EUID -eq 0 ]] || exit 1; mkdir -p "$KEYS"; openssl req -x509 -newkey rsa:4096 -days 3650 -nodes -keyout "$KEYS/db.key" -out "$KEYS/db.crt" -subj "/CN=Sanchala/" 2>/dev/null ;;
+  *) echo "Usage: sanchala-secure-boot {status|verify|sign|generate-keys}" ;;
+esac

@@ -1,0 +1,66 @@
+# Sanchala Scheduler Configuration
+# /etc/sanchala/scheduler/scheduler.toml
+
+[general]
+# Enable scheduler service
+enabled = true
+
+# Log level: debug, info, warning, error
+log_level = "info"
+
+# Log retention days
+log_retention_days = 30
+
+[maintenance]
+# System maintenance tasks (require root)
+
+[maintenance.trim]
+enabled = true
+schedule = "weekly"
+description = "SSD TRIM for optimal performance"
+
+[maintenance.cache_cleanup]
+enabled = true
+schedule = "monthly"
+description = "Clean package cache"
+
+[maintenance.journal_rotation]
+enabled = true
+schedule = "weekly"
+max_size = "500M"
+max_age = "2weeks"
+
+[maintenance.backup]
+enabled = true
+schedule = "daily"
+time = "03:00"
+description = "Automatic system backup"
+
+[user_defaults]
+# Default settings for user tasks
+
+# Allow persistent timers (run missed tasks on next boot)
+persistent = true
+
+# Random delay to avoid thundering herd
+randomized_delay = "60s"
+
+# Default nice value for tasks
+nice = 10
+
+# Default IO scheduling class
+io_class = "idle"
+
+[notifications]
+# Desktop notifications for task events
+enabled = true
+
+# Notify on task completion
+on_complete = true
+
+# Notify on task failure
+on_failure = true
+
+# Notify before scheduled maintenance
+maintenance_reminder = true
+reminder_minutes = 15

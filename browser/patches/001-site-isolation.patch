@@ -1,0 +1,46 @@
+diff --git a/chrome/browser/chrome_content_browser_client.cc b/chrome/browser/chrome_content_browser_client.cc
+--- a/chrome/browser/chrome_content_browser_client.cc
++++ b/chrome/browser/chrome_content_browser_client.cc
+@@ -1,5 +1,7 @@
+ // Copyright 2024 Sanchala OS Project - Security Hardening Patch
+ 
++#include "browser/src/core/sanchala_browser.h"
++
+ // SANCHALA SECURITY PATCH: Strict Site Isolation
+ // Force strict site isolation for all origins
+ 
+@@ -100,6 +102,15 @@ bool ChromeContentBrowserClient::ShouldEnableStrictSiteIsolation() {
++#ifdef SANCHALA_BROWSER
++  // Sanchala: Always enable strict site isolation
++  return true;
++#else
+   return base::FeatureList::IsEnabled(features::kSitePerProcess);
++#endif
+ }
+
++// SANCHALA: Enhanced process isolation
++bool ChromeContentBrowserClient::ShouldLockProcessToSite() {
++  return true;  // Always lock
++}
++
+ // SANCHALA SECURITY PATCH: Permission Hardening
+ // Default deny for sensitive permissions
+@@ -200,6 +211,20 @@ blink::mojom::PermissionStatus ChromeContentBrowserClient::GetPermissionStatus(
++#ifdef SANCHALA_BROWSER
++  auto* browser = sanchala::SanchalaBrowser::GetInstance();
++  if (browser && browser->GetConfig().permission_hardening) {
++    // Default deny for sensitive permissions unless explicitly granted
++    switch (permission) {
++      case PermissionType::GEOLOCATION:
++      case PermissionType::AUDIO_CAPTURE:
++      case PermissionType::VIDEO_CAPTURE:
++      case PermissionType::NOTIFICATIONS:
++      case PermissionType::SENSORS:
++        return blink::mojom::PermissionStatus::ASK;
++      default:
++        break;
++    }
++  }
++#endif
+   return GetPermissionStatusInternal(permission, origin);
+ }

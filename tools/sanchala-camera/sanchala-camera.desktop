@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Sanchala Camera
+Comment=Professional Camera Application with AI Features
+Exec=sanchala-camera
+Icon=camera-photo
+Terminal=false
+Type=Application
+Categories=Graphics;Photography;Video;
+Keywords=camera;photo;video;capture;selfie;portrait;
+StartupNotify=true

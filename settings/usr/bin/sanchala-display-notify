@@ -1,0 +1,53 @@
+#!/bin/bash
+# ============================================================================
+# SANCHALA OS - Display Notification Helper
+# ============================================================================
+# Location: /usr/bin/sanchala-display-notify
+# Purpose: Send notifications about display events
+# ============================================================================
+
+set -euo pipefail
+
+ACTION="${1:-}"
+CONNECTOR="${2:-unknown}"
+
+notify_user() {
+    local title="$1"
+    local message="$2"
+    local icon="${3:-video-display}"
+    
+    # Find active user session
+    local user
+    user=$(who | grep -E '\(:0\)|\(tty' | head -1 | awk '{print $1}' || echo "")
+    
+    if [[ -n "$user" ]]; then
+        local uid
+        uid=$(id -u "$user" 2>/dev/null || echo "")
+        if [[ -n "$uid" ]]; then
+            sudo -u "$user" DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$uid/bus" \
+                notify-send -i "$icon" "$title" "$message" 2>/dev/null || true
+        fi
+    fi
+}
+
+case "$ACTION" in
+    hotplug)
+        logger -t sanchala-display "Hotplug event: $CONNECTOR"
+        notify_user "Display Event" "$CONNECTOR display activity detected"
+        ;;
+    check-projector)
+        # Check if connected display might be a projector
+        # (Usually lower resolution, specific aspect ratios)
+        logger -t sanchala-display "Checking for projector..."
+        ;;
+    connected)
+        notify_user "Display Connected" "$CONNECTOR display is now available"
+        ;;
+    disconnected)
+        notify_user "Display Disconnected" "$CONNECTOR display was removed"
+        ;;
+    *)
+        echo "Usage: $0 {hotplug|connected|disconnected|check-projector} [connector]"
+        exit 1
+        ;;
+esac

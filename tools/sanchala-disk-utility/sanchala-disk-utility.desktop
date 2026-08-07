@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Sanchala Disk Utility
+Comment=Manage disks and partitions
+GenericName=Disk Management
+Exec=sanchala-disk-utility --gui
+Icon=drive-harddisk
+Terminal=false
+Type=Application
+Categories=System;Utility;
+Keywords=disk;partition;format;mount;storage;

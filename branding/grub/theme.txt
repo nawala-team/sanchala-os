@@ -1,0 +1,107 @@
+# SANCHALA OS GRUB Theme
+# Version: 1.0
+
+# ============================================
+# GLOBAL
+# ============================================
+title-text: ""
+desktop-image: "background.png"
+desktop-color: "#0D0D0D"
+terminal-font: "Inter Regular 16"
+terminal-box: "terminal_box_*.png"
+
+# ============================================
+# LOGO
+# ============================================
++ image {
+    id = "__logo__"
+    left = 50%-80
+    top = 60
+    width = 160
+    height = 160
+    file = "logo.png"
+}
+
++ label {
+    id = "__title__"
+    left = 50%-200
+    top = 240
+    width = 400
+    height = 32
+    align = "center"
+    color = "#FFFFFF"
+    font = "Inter Bold 32"
+    text = "SANCHALA OS"
+}
+
++ label {
+    id = "__version__"
+    left = 50%-100
+    top = 280
+    width = 200
+    height = 20
+    align = "center"
+    color = "#9E9E9E"
+    font = "Inter Regular 16"
+    text = "Version 1.0 Gati"
+}
+
+# ============================================
+# BOOT MENU
+# ============================================
++ boot_menu {
+    id = "__boot_menu__"
+    left = 50%-350
+    top = 340
+    width = 700
+    height = 320
+    
+    item_font = "Inter Regular 24"
+    item_color = "#E0E0E0"
+    item_height = 48
+    item_padding = 12
+    item_icon_space = 16
+    item_spacing = 4
+    
+    selected_item_font = "Inter Regular 24"
+    selected_item_color = "#FFFFFF"
+    selected_item_pixmap_style = "select_*.png"
+    
+    icon_width = 32
+    icon_height = 32
+    
+    scrollbar = true
+    scrollbar_width = 6
+    scrollbar_thumb = "scrollbar_thumb.png"
+    
+    menu_pixmap_style = "menu_box_*.png"
+}
+
+# ============================================
+# TIMEOUT
+# ============================================
++ label {
+    id = "__timeout__"
+    left = 50%-150
+    top = 700
+    width = 300
+    height = 24
+    align = "center"
+    color = "#9E9E9E"
+    font = "Inter Regular 16"
+    text = "Starting in %d seconds..."
+}
+
+# ============================================
+# HELP BAR
+# ============================================
++ label {
+    left = 50%-200
+    top = 760
+    width = 400
+    height = 24
+    align = "center"
+    color = "#536DFE"
+    font = "Inter Regular 14"
+    text = "[E] Edit    [C] Console    [Enter] Boot"
+}

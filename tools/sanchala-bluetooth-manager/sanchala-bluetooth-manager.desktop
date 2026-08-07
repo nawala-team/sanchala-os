@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Sanchala Bluetooth
+Comment=Manage Bluetooth devices
+Exec=sanchala-bluetooth-manager-gui
+Icon=bluetooth
+Type=Application
+Categories=Settings;HardwareSettings;
+Keywords=bluetooth;wireless;devices;

@@ -1,0 +1,44 @@
+# Sanchala OS Parental Controls PKGBUILD
+# Maintainer: Sanchala OS Team
+
+pkgname=sanchala-parental
+pkgver=1.0.0
+pkgrel=1
+pkgdesc="Parental controls and screen time management for Sanchala OS"
+arch=('x86_64')
+url="https://sanchala.id"
+license=('GPL3')
+depends=('systemd' 'polkit' 'dbus' 'sqlite')
+makedepends=('rust' 'cargo')
+backup=('etc/sanchala/parental/config.toml')
+
+build() {
+    cd "$srcdir/sanchala-parental"
+    cargo build --release
+}
+
+package() {
+    cd "$srcdir/sanchala-parental"
+    
+    # Binaries
+    install -Dm755 target/release/sanchala-parental "$pkgdir/usr/bin/sanchala-parental"
+    install -Dm755 target/release/sanchala-parental-daemon "$pkgdir/usr/bin/sanchala-parental-daemon"
+    
+    # Configuration
+    install -Dm644 data/config.toml.default "$pkgdir/etc/sanchala/parental/config.toml"
+    
+    # Age profiles
+    install -dm755 "$pkgdir/usr/share/sanchala/parental/profiles"
+    install -Dm644 profiles/*.toml "$pkgdir/usr/share/sanchala/parental/profiles/"
+    
+    # Systemd
+    install -Dm644 ../settings/etc/systemd/system/sanchala-parental.service \
+        "$pkgdir/usr/lib/systemd/system/sanchala-parental.service"
+    
+    # D-Bus
+    install -Dm644 ../settings/etc/dbus-1/interfaces/id.sanchala.Parental.xml \
+        "$pkgdir/usr/share/dbus-1/interfaces/id.sanchala.Parental.xml"
+    
+    # Data directory
+    install -dm750 "$pkgdir/var/lib/sanchala/parental"
+}

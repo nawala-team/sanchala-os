@@ -1,0 +1,88 @@
+# Maintainer: Sanchala OS Team <team@sanchala.org>
+# SANCHALA OS - Accessibility Tools Package
+
+pkgname=sanchala-accessibility
+pkgver=1.0.0
+pkgrel=1
+pkgdesc="Sanchala OS accessibility tools and configurations for WCAG 2.1 AA compliance"
+arch=('any')
+url="https://sanchala.org"
+license=('GPL3')
+groups=('sanchala-desktop')
+
+depends=(
+    'orca'
+    'speech-dispatcher'
+    'espeak-ng'
+    'at-spi2-core'
+    'at-spi2-atk'
+    'qt5-accessibility'
+    'kdeaccessibility'
+)
+
+optdepends=(
+    'brltty: Braille display support'
+    'onboard: On-screen keyboard alternative'
+    'maliit-keyboard: Touch keyboard'
+    'festival: Alternative speech synthesizer'
+    'svox-pico-bin: Pico TTS engine'
+)
+
+source=(
+    'sanchala-accessibility'
+    'accessibility.conf'
+    'profiles.conf'
+    'cursor.conf'
+    'keyboard-nav.conf'
+    'orca-user-settings.conf'
+    'SanchalaHighContrastLight.colors'
+    'SanchalaHighContrastDark.colors'
+    'kcm_sanchala_accessibility.desktop'
+    'main.qml'
+    'visionSection.qml'
+    'mobilitySection.qml'
+    'hearingSection.qml'
+    'readingSection.qml'
+)
+
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+
+package() {
+    # CLI tool
+    install -Dm755 sanchala-accessibility "$pkgdir/usr/bin/sanchala-accessibility"
+    
+    # User config templates (skel)
+    install -Dm644 accessibility.conf "$pkgdir/etc/skel/.config/sanchala/accessibility/accessibility.conf"
+    install -Dm644 profiles.conf "$pkgdir/etc/skel/.config/sanchala/accessibility/profiles.conf"
+    install -Dm644 cursor.conf "$pkgdir/etc/skel/.config/sanchala/accessibility/cursor.conf"
+    install -Dm644 keyboard-nav.conf "$pkgdir/etc/skel/.config/sanchala/accessibility/keyboard-nav.conf"
+    install -Dm644 orca-user-settings.conf "$pkgdir/etc/skel/.config/orca/user-settings.conf"
+    
+    # High contrast color schemes
+    install -Dm644 SanchalaHighContrastLight.colors "$pkgdir/usr/share/color-schemes/SanchalaHighContrastLight.colors"
+    install -Dm644 SanchalaHighContrastDark.colors "$pkgdir/usr/share/color-schemes/SanchalaHighContrastDark.colors"
+    
+    # KCM module desktop file
+    install -Dm644 kcm_sanchala_accessibility.desktop "$pkgdir/usr/share/kservices5/kcm_sanchala_accessibility.desktop"
+    
+    # QML UI files
+    install -Dm644 main.qml "$pkgdir/usr/share/sanchala/accessibility/ui/main.qml"
+    install -Dm644 visionSection.qml "$pkgdir/usr/share/sanchala/accessibility/ui/visionSection.qml"
+    install -Dm644 mobilitySection.qml "$pkgdir/usr/share/sanchala/accessibility/ui/mobilitySection.qml"
+    install -Dm644 hearingSection.qml "$pkgdir/usr/share/sanchala/accessibility/ui/hearingSection.qml"
+    install -Dm644 readingSection.qml "$pkgdir/usr/share/sanchala/accessibility/ui/readingSection.qml"
+    
+    # Documentation
+    install -dm755 "$pkgdir/usr/share/doc/sanchala-os/accessibility"
+}
+
+post_install() {
+    echo "==> Sanchala OS Accessibility Tools installed"
+    echo ""
+    echo "Quick start:"
+    echo "  - Toggle screen reader: Alt+Super+S"
+    echo "  - Open accessibility settings: Super+U"
+    echo "  - Toggle high contrast: Super+Alt+H"
+    echo ""
+    echo "For more information, see /usr/share/doc/sanchala-os/accessibility/"
+}

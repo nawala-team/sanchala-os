@@ -1,0 +1,207 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0
+# Sanchala Weather - Beautiful Weather Application
+"""Sanchala Weather - Elegant weather forecasting with macOS-level polish"""
+
+import os, sys, json, argparse, sqlite3, urllib.request
+from pathlib import Path
+from datetime import datetime
+from typing import Optional, Dict, List
+
+VERSION = "1.0.0"
+CONFIG_DIR = Path.home() / ".config" / "sanchala" / "weather"
+CACHE_DIR = Path.home() / ".cache" / "sanchala" / "weather"
+
+ICONS = {"clear": "☀️", "cloudy": "☁️", "rain": "🌧️", "snow": "🌨️", "storm": "⛈️", 
+         "fog": "🌫️", "wind": "💨", "partly_cloudy": "⛅", "night": "🌙"}
+
+class WeatherConfig:
+    def __init__(self):
+        CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+        CACHE_DIR.mkdir(parents=True, exist_ok=True)
+        self.file = CONFIG_DIR / "config.json"
+        self.data = self._load()
+    
+    def _load(self) -> Dict:
+        defaults = {"units": "metric", "locations": [], "default": 0,
+                    "show_humidity": True, "show_wind": True, "show_uv": True}
+        if self.file.exists():
+            try:
+                with open(self.file) as f: defaults.update(json.load(f))
+            except: pass
+        return defaults
+    
+    def save(self): 
+        with open(self.file, 'w') as f: json.dump(self.data, f, indent=2)
+    
+
+
+class WeatherAPI:
+    GEO_URL = "https://geocoding-api.open-meteo.com/v1/search"
+    API_URL = "https://api.open-meteo.com/v1/forecast"
+    
+    def __init__(self, config): self.config = config
+    
+    def _fetch(self, url) -> Optional[Dict]:
+        try:
+            req = urllib.request.Request(url, headers={'User-Agent': 'Sanchala-Weather/1.0'})
+            with urllib.request.urlopen(req, timeout=10) as r:
+                return json.loads(r.read().decode())
+        except: return None
+    
+    def geocode(self, query: str) -> List[Dict]:
+        data = self._fetch(f"{self.GEO_URL}?name={urllib.parse.quote(query)}&count=10")
+        if data and "results" in data:
+            return [{"name": r["name"], "country": r.get("country", ""),
+                     "lat": r["latitude"], "lon": r["longitude"]} for r in data["results"]]
+        return []
+    
+    def get_weather(self, lat: float, lon: float) -> Optional[Dict]:
+        u = self.config.get("units", "metric")
+        temp, wind = ("celsius", "kmh") if u == "metric" else ("fahrenheit", "mph")
+        params = f"latitude={lat}&longitude={lon}&temperature_unit={temp}&wind_speed_unit={wind}"
+        params += "&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,uv_index"
+        params += "&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_probability_max"
+        params += "&hourly=temperature_2m,weather_code,precipitation_probability&timezone=auto&forecast_days=7"
+        return self._fetch(f"{self.API_URL}?{params}")
+    
+    def code_to_icon(self, code: int) -> tuple:
+        codes = {0: ("Clear", "clear"), 1: ("Mainly clear", "clear"), 2: ("Partly cloudy", "partly_cloudy"),
+                 3: ("Overcast", "cloudy"), 45: ("Fog", "fog"), 51: ("Drizzle", "rain"),
+                 61: ("Rain", "rain"), 71: ("Snow", "snow"), 95: ("Thunderstorm", "storm")}
+        desc, key = codes.get(code, ("Unknown", "cloudy"))
+
+class WeatherApp:
+    def __init__(self):
+        self.config = WeatherConfig()
+        self.api = WeatherAPI(self.config)
+    
+    def _get_location(self, args) -> Optional[Dict]:
+        if hasattr(args, 'location') and args.location:
+            results = self.api.geocode(args.location)
+            return results[0] if results else None
+        locs = self.config.get("locations", [])
+        idx = self.config.get("default", 0)
+        return locs[idx] if locs and 0 <= idx < len(locs) else None
+    
+    def show_current(self, args):
+        loc = self._get_location(args)
+        if not loc: print("❌ No location. Add: sanchala-weather add <city>"); return 1
+        w = self.api.get_weather(loc["lat"], loc["lon"])
+        if not w: print("❌ Failed to fetch weather"); return 1
+        
+        c = w.get("current", {})
+        d = w.get("daily", {})
+        u = "°C" if self.config.get("units") == "metric" else "°F"
+        desc, icon = self.api.code_to_icon(c.get("weather_code", 0))
+        
+        print(f"\n{icon}  {loc['name']}, {loc.get('country', '')}")
+        print("━" * 40)
+        print(f"   {c.get('temperature_2m', 0):.0f}{u}  {desc}")
+        print(f"   Feels like {c.get('apparent_temperature', 0):.0f}{u}")
+        if d.get("temperature_2m_max"):
+            print(f"   H: {d['temperature_2m_max'][0]:.0f}{u}  L: {d['temperature_2m_min'][0]:.0f}{u}")
+        print(f"\n   💧 Humidity: {c.get('relative_humidity_2m', 0)}%")
+        print(f"   💨 Wind: {c.get('wind_speed_10m', 0):.0f} {'km/h' if u == '°C' else 'mph'}")
+        print(f"   ☀️  UV Index: {c.get('uv_index', 0):.0f}\n")
+        return 0
+    
+    def show_forecast(self, args):
+        loc = self._get_location(args)
+        if not loc: print("❌ No location set"); return 1
+        w = self.api.get_weather(loc["lat"], loc["lon"])
+        if not w: return 1
+        
+        d = w.get("daily", {})
+        u = "°C" if self.config.get("units") == "metric" else "°F"
+        days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+        
+        print(f"\n📅 7-Day Forecast - {loc['name']}")
+        print("━" * 40)
+        for i, date in enumerate(d.get("time", [])[:7]):
+            dt = datetime.strptime(date, "%Y-%m-%d")
+            day = "Today" if i == 0 else days[dt.weekday()]
+            desc, icon = self.api.code_to_icon(d.get("weather_code", [0])[i])
+            hi, lo = d["temperature_2m_max"][i], d["temperature_2m_min"][i]
+            prob = d.get("precipitation_probability_max", [0])[i]
+            rain = f" 💧{prob}%" if prob > 20 else ""
+            print(f"   {day:5}  {icon}  {hi:.0f}/{lo:.0f}{u}{rain}")
+        print()
+        return 0
+    
+    def add_location(self, args):
+        results = self.api.geocode(args.location)
+        if not results: print("❌ Location not found"); return 1
+        loc = results[0]
+        locs = self.config.get("locations", [])
+        locs.append(loc)
+        self.config.set("locations", locs)
+        if len(locs) == 1: self.config.set("default", 0)
+        print(f"✅ Added '{loc['name']}, {loc['country']}'")
+        return 0
+    
+    def list_locations(self, args):
+        locs = self.config.get("locations", [])
+        if not locs: print("No locations saved"); return 0
+        print("\n📍 Saved Locations:")
+        for i, l in enumerate(locs):
+            star = "★" if i == self.config.get("default", 0) else " "
+            print(f"  {star} {i+1}. {l['name']}, {l.get('country', '')}")
+        print()
+        return 0
+    
+    def set_default(self, args):
+        try:
+            idx = int(args.index) - 1
+            locs = self.config.get("locations", [])
+            if 0 <= idx < len(locs):
+                self.config.set("default", idx)
+                print(f"✅ Default: {locs[idx]['name']}")
+                return 0
+        except: pass
+        print("❌ Invalid index"); return 1
+    
+    def set_units(self, args):
+        if args.unit in ("metric", "c", "celsius"):
+            self.config.set("units", "metric"); print("✅ Units: Metric (°C)")
+        elif args.unit in ("imperial", "f", "fahrenheit"):
+            self.config.set("units", "imperial"); print("✅ Units: Imperial (°F)")
+        else: print(f"Current: {self.config.get('units', 'metric')}")
+        return 0
+
+def main():
+    p = argparse.ArgumentParser(prog="sanchala-weather", description="🌤️ Sanchala Weather")
+    p.add_argument("--version", action="version", version=f"%(prog)s {VERSION}")
+    sub = p.add_subparsers(dest="cmd")
+    
+    s = sub.add_parser("current", aliases=["now"], help="Current weather")
+    s.add_argument("location", nargs="?")
+    
+    s = sub.add_parser("forecast", aliases=["week"], help="7-day forecast")
+    s.add_argument("location", nargs="?")
+    
+    s = sub.add_parser("add", help="Add location")
+    s.add_argument("location")
+    
+    sub.add_parser("list", aliases=["ls"], help="List locations")
+    
+    s = sub.add_parser("default", help="Set default location")
+    s.add_argument("index")
+    
+    s = sub.add_parser("units", help="Set units")
+    s.add_argument("unit", nargs="?")
+    
+    args = p.parse_args()
+    app = WeatherApp()
+    
+    cmds = {"current": app.show_current, "now": app.show_current,
+            "forecast": app.show_forecast, "week": app.show_forecast,
+            "add": app.add_location, "list": app.list_locations, "ls": app.list_locations,
+            "default": app.set_default, "units": app.set_units}
+    
+    if args.cmd in cmds: return cmds[args.cmd](args)
+    args.location = None
+    return app.show_current(args)
+
+if __name__ == "__main__": sys.exit(main())
+

@@ -1,0 +1,40 @@
+# ============================================================================
+# SANCHALA OS - KWallet Integration Configuration
+# ============================================================================
+# KDE Wallet integration for Plasma users
+# ============================================================================
+
+[Wallet]
+# Enable KWallet subsystem
+Enabled=true
+
+# Launch KWallet manager on access
+Launch Manager=false
+
+# Prompt to save passwords
+Prompt on Open=false
+
+# Use kwallet for storing network passwords
+Use One Wallet=true
+
+# Default wallet name
+Default Wallet=kdewallet
+
+# Close wallet on screensaver
+Close When Idle=false
+
+# Idle timeout (minutes)
+Idle Timeout=10
+
+# Close wallet on lid close
+Close on Screensaver=false
+
+# First use wizard
+First Use=false
+
+[PAM]
+# Enable PAM auto-unlock
+Enabled=true
+
+# Unlock wallet with login password
+# Requires pam_kwallet5.so in PAM stack

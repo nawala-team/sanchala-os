@@ -1,0 +1,34 @@
+{
+  "name": "sanchala-network-monitor",
+  "version": "1.0.0",
+  "description": "Real-time network traffic monitoring and analysis",
+  "author": "Sanchala OS Team",
+  "license": "GPL-3.0",
+  "category": "Network",
+  "settings": {
+    "refreshInterval": 1000,
+    "showBandwidth": true,
+    "showConnections": true,
+    "showPackets": true,
+    "alertThresholds": {
+      "bandwidthWarning": 80,
+      "bandwidthCritical": 95,
+      "packetLossWarning": 1,
+      "packetLossCritical": 5
+    },
+    "interfaces": "all",
+    "logRetention": 7,
+    "graphHistory": 3600
+  },
+  "notifications": {
+    "enabled": true,
+    "sounds": true,
+    "thresholdAlerts": true,
+    "connectionAlerts": true
+  },
+  "export": {
+    "formats": ["csv", "json", "pcap"],
+    "autoExport": false,
+    "exportPath": "~/Documents/NetworkLogs"
+  }
+}

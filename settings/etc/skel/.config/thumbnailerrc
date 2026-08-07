@@ -1,0 +1,43 @@
+# ============================================
+# SANCHALA OS - Thumbnail Generator Settings  
+# ============================================
+# Fast thumbnail generation with caching
+# ============================================
+
+[General]
+# Enable thumbnail generation
+Enabled=true
+
+# Maximum file size for thumbnails (50MB)
+MaximumSize=52428800
+
+# Maximum remote file size (5MB)
+MaximumRemoteSize=5242880
+
+# Save thumbnails to disk
+SaveThumbnails=true
+
+# Thumbnail quality (0-100)
+Quality=85
+
+[Images]
+# Use high quality scaling
+HighQuality=true
+# Fast preview for large images
+FastPreview=true
+
+[Videos]
+# Generate video thumbnails
+Enabled=true
+# Time offset for thumbnail (10%)
+TimeOffset=10
+
+[Documents]
+# Generate document thumbnails
+Enabled=true
+# First page only
+FirstPageOnly=true
+
+[Archives]
+# Show archive contents preview
+Enabled=true

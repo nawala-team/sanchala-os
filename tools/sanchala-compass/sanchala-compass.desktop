@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Sanchala Compass
+Comment=Digital Compass
+Exec=sanchala-compass
+Icon=compass
+Terminal=false
+Type=Application
+Categories=Utility;

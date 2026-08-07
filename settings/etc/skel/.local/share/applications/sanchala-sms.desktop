@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Phone SMS
+GenericName=SMS Messenger
+Comment=Send and receive SMS from your phone
+Exec=kdeconnect-sms
+Icon=phone-symbolic
+Terminal=false
+Type=Application
+Categories=Network;Chat;Telephony;
+Keywords=sms;text;message;phone;

@@ -1,0 +1,15 @@
+# Automatic Package Cache Cleanup Hook
+# Runs after every pacman transaction
+# /etc/pacman.d/hooks/paccache.hook
+
+[Trigger]
+Operation = Remove
+Operation = Install
+Operation = Upgrade
+Type = Package
+Target = *
+
+[Action]
+Description = Cleaning package cache (keeping last 2 versions)...
+When = PostTransaction
+Exec = /usr/bin/paccache -rk2

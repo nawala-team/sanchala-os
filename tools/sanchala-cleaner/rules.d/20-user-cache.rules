@@ -1,0 +1,27 @@
+# Sanchala Cleaner - User Cache Rules
+# Paths to clean from user directories
+
+# Browser caches
+.cache/mozilla/firefox
+.cache/chromium
+.cache/google-chrome
+.cache/BraveSoftware
+.cache/vivaldi
+.cache/opera
+
+# Application caches
+.cache/thumbnails
+.cache/mesa_shader_cache
+.cache/fontconfig
+.cache/gstreamer-1.0
+.cache/pip
+.cache/yarn
+.cache/npm
+
+# IDE caches (be careful)
+# .cache/JetBrains
+# .cache/vscode-cpptools
+
+# Build caches
+.cache/go-build
+.cargo/registry/cache

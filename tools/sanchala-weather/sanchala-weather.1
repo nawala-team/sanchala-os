@@ -1,0 +1,46 @@
+.TH SANCHALA-WEATHER 1 "2024" "Sanchala OS" "User Commands"
+.SH NAME
+sanchala-weather \- Beautiful weather forecasting application
+.SH SYNOPSIS
+.B sanchala-weather
+[\fIcommand\fR] [\fIoptions\fR]
+.SH DESCRIPTION
+Sanchala Weather provides elegant weather forecasting with current conditions,
+7-day forecast, and hourly predictions using the Open-Meteo API.
+.SH COMMANDS
+.TP
+.B current, now
+Show current weather for default or specified location
+.TP
+.B forecast, week
+Show 7-day weather forecast
+.TP
+.B add \fIlocation\fR
+Add a location to saved locations
+.TP
+.B list, ls
+List saved locations
+.TP
+.B default \fIindex\fR
+Set default location by index
+.TP
+.B units \fImetric|imperial\fR
+Set temperature units
+.SH EXAMPLES
+.TP
+Show current weather:
+.B sanchala-weather current
+.TP
+Add a city:
+.B sanchala-weather add "New York"
+.TP
+Show forecast for specific city:
+.B sanchala-weather forecast Paris
+.SH FILES
+.TP
+.I ~/.config/sanchala/weather/config.json
+User configuration file
+.SH AUTHOR
+Sanchala OS Team
+.SH SEE ALSO
+.BR sanchala-nightlight (1)

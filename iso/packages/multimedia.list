@@ -1,0 +1,210 @@
+# ============================================
+# SANCHALA OS - Multimedia Codec Packages
+# ============================================
+# Complete codec support for audio/video
+# ============================================
+
+# ===========================================
+# PipeWire Stack (Core Audio)
+# ===========================================
+pipewire
+pipewire-alsa
+pipewire-pulse
+pipewire-jack
+pipewire-v4l2
+pipewire-zeroconf
+wireplumber
+lib32-pipewire
+lib32-pipewire-jack
+
+# ===========================================
+# GStreamer Framework
+# ===========================================
+gstreamer
+gst-plugins-base
+gst-plugins-base-libs
+gst-plugins-good
+gst-plugins-bad
+gst-plugins-ugly
+gst-plugin-pipewire
+gst-plugin-va
+gst-libav
+lib32-gst-plugins-base
+lib32-gst-plugins-good
+
+# ===========================================
+# FFmpeg (Universal Media Framework)
+# ===========================================
+ffmpeg
+ffmpeg4.4
+
+# ===========================================
+# Audio Codecs
+# ===========================================
+# Lossless
+flac
+wavpack
+alac
+
+# Lossy
+lame
+vorbis-tools
+opus
+opus-tools
+libvorbis
+libogg
+
+# AAC
+faac
+faad2
+
+# MP3
+mpg123
+lib32-mpg123
+
+# ===========================================
+# Video Codecs
+# ===========================================
+# AV1 (modern, royalty-free)
+dav1d
+rav1e
+svt-av1
+libvpx
+aom
+
+# H.264/H.265
+x264
+x265
+
+# Theora
+libtheora
+
+# ===========================================
+# Container Formats
+# ===========================================
+libmatroska
+libwebm
+
+# ===========================================
+# Hardware Video Acceleration
+# ===========================================
+# VA-API (Intel/AMD)
+libva
+libva-utils
+lib32-libva
+libva-mesa-driver
+lib32-libva-mesa-driver
+intel-media-driver
+libva-intel-driver
+lib32-libva-intel-driver
+
+# VDPAU
+libvdpau
+lib32-libvdpau
+vdpauinfo
+mesa-vdpau
+lib32-mesa-vdpau
+
+# NVIDIA (optional, installed by gpu-detect)
+# libva-nvidia-driver
+# nvidia-utils
+
+# ===========================================
+# Camera/Video Capture
+# ===========================================
+v4l-utils
+libv4l
+lib32-libv4l
+libcamera
+libcamera-tools
+gphoto2
+libgphoto2
+
+# Virtual camera
+v4l2loopback-dkms
+
+# ===========================================
+# Bluetooth Audio Codecs
+# ===========================================
+libldac
+libfreeaptx
+
+# ===========================================
+# Pro Audio Tools
+# ===========================================
+realtime-privileges
+rtkit
+alsa-utils
+alsa-plugins
+lib32-alsa-plugins
+
+# JACK compatibility
+jack2
+lib32-jack2
+a2jmidid
+qjackctl
+
+# ===========================================
+# CD/DVD Support
+# ===========================================
+libcdio
+libdvdread
+libdvdnav
+libdvdcss
+libbluray
+
+# ===========================================
+# Image Codecs (for thumbnails)
+# ===========================================
+libwebp
+libavif
+libjxl
+libheif
+libraw
+
+# ===========================================
+# Subtitle Support
+# ===========================================
+libass
+
+# ===========================================
+# Metadata/Tags
+# ===========================================
+taglib
+libmediainfo
+
+# ===========================================
+# Screen Recording
+# ===========================================
+xdg-desktop-portal
+xdg-desktop-portal-kde
+wf-recorder
+slurp
+grim
+
+# ===========================================
+# Screenshot & Annotation Tools
+# ===========================================
+spectacle
+flameshot
+ksnip
+krita
+imagemagick
+
+# ===========================================
+# OCR (Text Extraction)
+# ===========================================
+tesseract
+tesseract-data-eng
+tesseract-data-deu
+tesseract-data-fra
+tesseract-data-spa
+tesseract-data-jpn
+tesseract-data-chi_sim
+
+# ===========================================
+# Screen Recording (Advanced)
+# ===========================================
+obs-studio
+simplescreenrecorder
+gifski

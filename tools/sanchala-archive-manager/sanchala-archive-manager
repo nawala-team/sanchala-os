@@ -1,0 +1,53 @@
+#!/bin/bash
+# Sanchala Archive Manager - Compression/Extraction Tool
+set -euo pipefail
+
+extract() {
+    local file="$1" dest="${2:-.}"
+    case "$file" in
+        *.tar.gz|*.tgz) tar xzf "$file" -C "$dest" ;;
+        *.tar.bz2|*.tbz2) tar xjf "$file" -C "$dest" ;;
+        *.tar.xz|*.txz) tar xJf "$file" -C "$dest" ;;
+        *.tar) tar xf "$file" -C "$dest" ;;
+        *.zip) unzip -q "$file" -d "$dest" ;;
+        *.rar) unrar x "$file" "$dest" ;;
+        *.7z) 7z x "$file" -o"$dest" ;;
+        *.gz) gunzip -k "$file" ;;
+        *.bz2) bunzip2 -k "$file" ;;
+        *.xz) unxz -k "$file" ;;
+        *) echo "Unknown format: $file"; return 1 ;;
+    esac
+    echo "Extracted: $file"
+}
+
+compress() {
+    local fmt="$1" output="$2"; shift 2
+    case "$fmt" in
+        tar.gz|tgz) tar czf "$output" "$@" ;;
+        tar.bz2) tar cjf "$output" "$@" ;;
+        tar.xz) tar cJf "$output" "$@" ;;
+        zip) zip -r "$output" "$@" ;;
+        7z) 7z a "$output" "$@" ;;
+        *) echo "Unknown format: $fmt"; return 1 ;;
+    esac
+    echo "Created: $output"
+}
+
+list_contents() {
+    local file="$1"
+    case "$file" in
+        *.tar.*|*.tar) tar tf "$file" ;;
+        *.zip) unzip -l "$file" ;;
+        *.rar) unrar l "$file" ;;
+        *.7z) 7z l "$file" ;;
+        *) echo "Unknown format"; return 1 ;;
+    esac
+}
+
+case "${1:-gui}" in
+    extract|-x) extract "$2" "${3:-.}" ;;
+    compress|-c) compress "$2" "$3" "${@:4}" ;;
+    list|-l) list_contents "$2" ;;
+    gui) exec sanchala-archive-manager-gui "$@" ;;
+    *) echo "Usage: $0 {extract|compress|list|gui}" ;;
+esac

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Window Rules
+Comment=Per-application window behavior
+Exec=sanchala-window-rules gui
+Icon=preferences-system-windows-actions
+Terminal=false
+Type=Application
+Categories=Settings;DesktopSettings;
+Keywords=window;rules;position;

@@ -1,0 +1,63 @@
+# Maintainer: Sanchala Team <team@sanchala.id>
+# PKGBUILD for sanchala-diagnostics
+
+pkgname=sanchala-diagnostics
+pkgver=1.0.0
+pkgrel=1
+pkgdesc="macOS-style Activity Monitor and System Information for Sanchala OS"
+arch=('any')
+url="https://github.com/sanchala-os/sanchala-diagnostics"
+license=('GPL3')
+depends=('bash' 'coreutils' 'procps-ng' 'iproute2' 'util-linux')
+optdepends=(
+    'btop: interactive system monitor'
+    'htop: fallback system monitor'
+    'smartmontools: SMART disk monitoring'
+    'lm_sensors: temperature and fan monitoring'
+    'pciutils: PCI device information'
+    'usbutils: USB device information'
+    'sysstat: I/O statistics (iostat)'
+    'vnstat: network bandwidth monitoring'
+    'speedtest-cli: internet speed testing'
+    'bind-tools: DNS diagnostics (dig)'
+    'mtr: network path analysis'
+    'nmap: port scanning'
+)
+backup=('etc/sanchala/diagnostics/diagnostics.toml')
+source=("$pkgname-$pkgver.tar.gz")
+sha256sums=('SKIP')
+
+package() {
+    cd "$srcdir/$pkgname-$pkgver"
+    
+    # Main binary
+    install -Dm755 sanchala-diagnostics "$pkgdir/usr/bin/sanchala-diagnostics"
+    
+    # Library files
+    install -Dm644 lib/system.sh "$pkgdir/usr/lib/sanchala/diagnostics/system.sh"
+    install -Dm644 lib/process.sh "$pkgdir/usr/lib/sanchala/diagnostics/process.sh"
+    install -Dm644 lib/disk.sh "$pkgdir/usr/lib/sanchala/diagnostics/disk.sh"
+    install -Dm644 lib/network.sh "$pkgdir/usr/lib/sanchala/diagnostics/network.sh"
+    install -Dm644 lib/hardware.sh "$pkgdir/usr/lib/sanchala/diagnostics/hardware.sh"
+    
+    # Configuration
+    install -Dm644 config/diagnostics.toml "$pkgdir/etc/sanchala/diagnostics/diagnostics.toml"
+    install -Dm644 config/btop.conf "$pkgdir/etc/sanchala/diagnostics/btop.conf"
+    
+    # Documentation
+    install -Dm644 README.md "$pkgdir/usr/share/doc/$pkgname/README.md"
+    
+    # Man page
+    install -Dm644 sanchala-diagnostics.1 "$pkgdir/usr/share/man/man1/sanchala-diagnostics.1"
+    
+    # Desktop entry
+    install -Dm644 sanchala-diagnostics.desktop "$pkgdir/usr/share/applications/sanchala-diagnostics.desktop"
+    
+    # Create state directories
+    install -dm755 "$pkgdir/var/lib/sanchala/diagnostics"
+    install -dm755 "$pkgdir/var/log/sanchala"
+    
+    # Update library path in main script
+    sed -i 's|SCRIPT_DIR=.*|SCRIPT_DIR="/usr/lib/sanchala/diagnostics"|' \
+        "$pkgdir/usr/bin/sanchala-diagnostics"
+}

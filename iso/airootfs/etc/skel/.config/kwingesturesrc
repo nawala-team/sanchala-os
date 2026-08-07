@@ -1,0 +1,29 @@
+# ============================================================================
+# SANCHALA OS - KWin Touchpad Gesture Shortcuts
+# ============================================================================
+# Additional kwin shortcuts for touchpad gestures integration
+# Location: ~/.config/kwinrc (append to existing)
+# ============================================================================
+
+[Plugins]
+touchpadgesturesEnabled=true
+
+[TouchpadGestures]
+# Enable KWin's built-in touchpad gestures
+# These work alongside Touchégg for complete coverage
+
+# 3-finger swipes (handled by kwin directly on Wayland)
+SwipeLeftAction=SwitchDesktopNext
+SwipeRightAction=SwitchDesktopPrevious
+SwipeUpAction=Overview
+SwipeDownAction=ToggleShowDesktop
+
+# 4-finger swipes
+FourFingerSwipeLeftAction=SwitchWindow
+FourFingerSwipeRightAction=SwitchWindowReverse
+FourFingerSwipeUpAction=DesktopGrid
+FourFingerSwipeDownAction=ToggleShowDesktop
+
+# Pinch gestures
+PinchInAction=ShowDesktop
+PinchOutAction=Overview

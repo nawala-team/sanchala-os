@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Sanchala Region & Language
+Comment=Configure language and regional formats
+Exec=sanchala-region-settings-gui
+Icon=preferences-desktop-locale
+Type=Application
+Categories=Settings;System;
+Keywords=language;locale;region;format;

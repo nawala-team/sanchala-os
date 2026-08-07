@@ -1,0 +1,19 @@
+# ============================================
+# SANCHALA OS - System Monitor Shortcuts
+# ============================================
+
+[Shortcuts]
+# Navigation
+search=Ctrl+F
+quit=Ctrl+Q
+
+# Process management
+kill_process=Ctrl+Alt+K
+end_process=Del
+show_process_properties=Alt+Return
+
+# View
+refresh=F5
+show_all_processes=Ctrl+A
+show_user_processes=Ctrl+U
+show_system_processes=Ctrl+S

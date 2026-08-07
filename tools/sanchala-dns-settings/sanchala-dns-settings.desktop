@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=DNS Settings
+Comment=Configure DNS servers and DNS-over-HTTPS
+Exec=sanchala-dns-settings
+Icon=network-server
+Terminal=false
+Type=Application
+Categories=Network;Settings;System;
+Keywords=dns;nameserver;resolver;doh;dnssec;
+StartupNotify=true

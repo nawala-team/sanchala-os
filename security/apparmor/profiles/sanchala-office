@@ -1,0 +1,74 @@
+# ============================================
+# SANCHALA OS - Office Application AppArmor Profile
+# ============================================
+# For LibreOffice, OnlyOffice, etc.
+# ============================================
+
+#include <tunables/global>
+
+profile sanchala-office flags=(attach_disconnected,mediate_deleted) {
+  #include <abstractions/base>
+  #include <abstractions/dbus-session-strict>
+  #include <abstractions/gnome>
+  #include <abstractions/nameservice>
+  #include <abstractions/ssl_certs>
+
+  # Deny sensitive paths
+  deny @{HOME}/.ssh/** rw,
+  deny @{HOME}/.gnupg/** rw,
+  deny @{HOME}/.pki/** rw,
+  deny @{HOME}/.mozilla/** rw,
+  deny @{HOME}/.config/BraveSoftware/** rw,
+  deny /etc/shadow r,
+  deny /boot/** rwklx,
+
+  # Document directories
+  owner @{HOME}/Documents/** rw,
+  owner @{HOME}/Downloads/** rw,
+  owner @{HOME}/Desktop/** rw,
+  owner @{HOME}/Templates/** rw,
+
+  # Configuration
+  owner @{HOME}/.config/libreoffice/** rw,
+  owner @{HOME}/.config/onlyoffice/** rw,
+
+  # Cache
+  owner @{HOME}/.cache/libreoffice/** rw,
+
+  # Temp files
+  /tmp/** rw,
+  owner /var/tmp/** rw,
+
+  # System libraries
+  /usr/lib/** rm,
+  /usr/share/** r,
+
+  # Fonts
+  /etc/fonts/** r,
+  owner @{HOME}/.fonts/** r,
+  owner @{HOME}/.local/share/fonts/** r,
+  /usr/share/fonts/** r,
+
+  # Printing
+  /usr/bin/lp rix,
+  /etc/cups/** r,
+  owner /run/user/*/cups/** rw,
+
+  # Proc
+  owner @{PROC}/@{pid}/** r,
+
+  # Network (for cloud save, templates)
+  network inet stream,
+  network inet6 stream,
+
+  # DBus
+  dbus send bus=session,
+  dbus receive bus=session,
+
+  # Wayland/X11
+  owner /run/user/*/wayland-* rw,
+  /tmp/.X11-unix/* rw,
+
+  # GPU
+  /dev/dri/** rw,
+}

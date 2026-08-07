@@ -1,0 +1,30 @@
+#!/bin/bash
+# Sanchala Mouse Settings - Mouse/Touchpad Configuration
+set -euo pipefail
+
+set_speed() {
+    local speed="$1"
+    xinput list --name-only | while read -r dev; do
+        xinput set-prop "$dev" "libinput Accel Speed" "$speed" 2>/dev/null || true
+    done
+    echo "Speed set to $speed"
+}
+
+set_left_handed() {
+    xinput list --name-only | while read -r dev; do
+        xinput set-prop "$dev" "libinput Left Handed Enabled" "${1:-1}" 2>/dev/null || true
+    done
+}
+
+list_devices() {
+    echo "=== Input Devices ==="
+    xinput list --short
+}
+
+case "${1:-gui}" in
+    speed|-s) set_speed "$2" ;;
+    left-handed) set_left_handed "${2:-1}" ;;
+    list|-l) list_devices ;;
+    gui) exec sanchala-mouse-settings-gui ;;
+    *) echo "Usage: $0 {speed|left-handed|list|gui}" ;;
+esac

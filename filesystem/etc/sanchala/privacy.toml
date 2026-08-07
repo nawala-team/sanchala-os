@@ -1,0 +1,38 @@
+# Sanchala OS Privacy Configuration
+# Privacy-first defaults - all telemetry OFF
+
+[telemetry]
+# All telemetry is disabled by default
+# Users can opt-in to specific categories
+crash_reports = false
+usage_statistics = false
+hardware_info = false
+app_diagnostics = false
+location_services = false
+search_suggestions = false
+spell_check_cloud = false
+font_rendering_cloud = false
+
+[permissions]
+# Permission audit is enabled by default
+audit_enabled = true
+audit_retention_days = 30
+notify_on_access = true
+# Auto-revoke permissions not used in 90 days
+auto_revoke_unused_days = 90
+
+[network]
+# Network privacy features enabled by default
+dns_over_https = true
+mac_randomization = true
+hostname_randomization = true
+ipv6_privacy_extensions = true
+block_telemetry_domains = true
+
+[data_retention]
+# Minimal data retention for privacy
+recent_files_days = 7
+browser_history_days = 30
+search_history_days = 7
+clipboard_history_enabled = false
+thumbnail_cache_enabled = true

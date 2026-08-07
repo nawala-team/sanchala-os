@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kcfg xmlns="http://www.kde.org/standards/kcfg/1.0"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.kde.org/standards/kcfg/1.0
+                          http://www.kde.org/standards/kcfg/1.0/kcfg.xsd">
+    <kcfgfile name=""/>
+    
+    <group name="General">
+        <entry name="updateInterval" type="Int">
+            <label>Update interval in milliseconds</label>
+            <default>1000</default>
+        </entry>
+        
+        <entry name="showCpu" type="Bool">
+            <label>Show CPU usage</label>
+            <default>true</default>
+        </entry>
+        
+        <entry name="showMemory" type="Bool">
+            <label>Show memory usage</label>
+            <default>true</default>
+        </entry>
+        
+        <entry name="showNetwork" type="Bool">
+            <label>Show network throughput</label>
+            <default>false</default>
+        </entry>
+        
+        <entry name="showDisk" type="Bool">
+            <label>Show disk I/O</label>
+            <default>false</default>
+        </entry>
+        
+        <entry name="compactMode" type="Bool">
+            <label>Use compact display in panel</label>
+            <default>true</default>
+        </entry>
+    </group>
+</kcfg>

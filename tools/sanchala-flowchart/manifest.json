@@ -1,0 +1,10 @@
+{
+    "name": "Sanchala Flowchart",
+    "version": "2.0.0",
+    "description": "ASCII flowchart creator",
+    "category": "Productivity",
+    "icon": "📊",
+    "launch": "./flowchart.sh",
+    "author": "Sanchala OS",
+    "features": ["Create flowcharts", "Multiple node types", "ASCII rendering", "Export to text", "Templates"]
+}

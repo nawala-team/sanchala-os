@@ -1,0 +1,212 @@
+#!/bin/bash
+# SPDX-License-Identifier: GPL-3.0
+# Sanchala OS Update Daemon - Main Entry Point
+# Atomic updates with Btrfs snapshot integration
+
+set -euo pipefail
+
+readonly VERSION="1.0.0"
+readonly UPDATER_NAME="sanchala-updater"
+readonly CONFIG_DIR="/etc/sanchala-updater"
+readonly STATE_DIR="/var/lib/sanchala-updater"
+readonly CACHE_DIR="/var/cache/sanchala-updater"
+readonly LOG_FILE="/var/log/sanchala-updater.log"
+readonly LOCK_FILE="/run/sanchala-updater.lock"
+readonly LIB_DIR="/usr/lib/sanchala-updater"
+
+# Source library modules
+for lib in common snapshot delta notify; do
+    source "${LIB_DIR}/${lib}.sh" 2>/dev/null || \
+    source "$(dirname "$0")/lib/${lib}.sh" 2>/dev/null || true
+done
+
+cmd_check() {
+    log_info "Checking for updates..."
+    local updates_available=0
+    
+    if update_info=$(check_system_updates); then
+        updates_available=1
+        echo "System updates available:"
+        echo "$update_info"
+    fi
+    
+    if command -v flatpak &>/dev/null; then
+        if flatpak_updates=$(flatpak remote-ls --updates 2>/dev/null) && [[ -n "$flatpak_updates" ]]; then
+            updates_available=1
+            echo -e "\nFlatpak updates available:\n$flatpak_updates"
+        fi
+    fi
+    
+    [[ $updates_available -eq 0 ]] && log_info "System is up to date"
+    [[ "${NOTIFY_UPDATES:-true}" == "true" ]] && [[ $updates_available -eq 1 ]] && notify_updates_available
+    return 0
+}
+
+cmd_update() {
+    local force=false no_snapshot=false download_only=false
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --force|-f) force=true; shift ;;
+            --no-snapshot) no_snapshot=true; shift ;;
+            --download-only) download_only=true; shift ;;
+            *) die "Unknown option: $1" ;;
+        esac
+    done
+    
+    acquire_lock
+    log_info "Starting system update..."
+    pre_update_checks || die "Pre-update checks failed"
+    
+    local snapshot_num=""
+    if [[ "$no_snapshot" != "true" ]]; then
+        log_info "Creating pre-update snapshot..."
+        snapshot_num=$(create_pre_snapshot "System update")
+        log_info "Created snapshot #${snapshot_num}"
+    fi
+    
+    log_info "Downloading updates..."
+    if ! download_updates; then
+        [[ -n "$snapshot_num" ]] && log_warn "Download failed, snapshot #${snapshot_num} preserved"
+        die "Failed to download updates"
+    fi
+    
+    [[ "$download_only" == "true" ]] && { log_info "Updates downloaded."; return 0; }
+    
+    log_info "Applying updates..."
+    if ! apply_updates; then
+        log_error "Update failed!"
+        [[ -n "$snapshot_num" ]] && notify_update_failed "$snapshot_num"
+        die "Failed to apply updates"
+    fi
+    
+    [[ -n "$snapshot_num" ]] && create_post_snapshot "$snapshot_num" "Update completed"
+    run_hooks "post-update"
+    kernel_updated && regenerate_grub
+    notify_update_complete
+    log_info "Update completed successfully!"
+    reboot_required && { log_warn "Reboot required"; notify_reboot_required; }
+    release_lock
+}
+
+cmd_rollback() {
+    local snapshot_num="${1:-}" confirm="${2:-}"
+    
+    if [[ -z "$snapshot_num" ]]; then
+        echo "Available snapshots for rollback:"
+        snapper -c root list --columns number,date,description | head -20
+        echo -e "\nUsage: sanchala-updater rollback <snapshot_number>"
+        return 0
+    fi
+    
+    snapshot_exists "$snapshot_num" || die "Snapshot #${snapshot_num} does not exist"
+    
+    if [[ "$confirm" != "--yes" ]]; then
+        echo "⚠️  WARNING: This will rollback to snapshot #${snapshot_num}"
+        snapshot_info "$snapshot_num"
+        read -rp "Are you sure? [y/N] " response
+        [[ ! "$response" =~ ^[Yy]$ ]] && { echo "Cancelled"; return 0; }
+    fi
+    
+    acquire_lock
+    log_info "Rolling back to snapshot #${snapshot_num}..."
+    local safety_snap=$(create_pre_snapshot "Before rollback to #${snapshot_num}")
+    log_info "Created safety snapshot #${safety_snap}"
+    
+    perform_rollback "$snapshot_num" || die "Rollback failed"
+    notify_rollback_complete "$snapshot_num"
+    
+    echo -e "\n✅ Rollback prepared. Reboot to activate."
+    echo "   Recovery: Select snapshot #${safety_snap} from GRUB if needed."
+    release_lock
+}
+
+cmd_history() {
+    local count="${1:-10}"
+    echo "📋 Update History (last ${count})"
+    echo "=================================="
+    [[ -f "${STATE_DIR}/history.log" ]] && tail -n "$count" "${STATE_DIR}/history.log" || echo "No history"
+    echo -e "\n📸 System Snapshots"
+    snapper -c root list --columns number,date,type,description | tail -n "$((count + 1))"
+}
+
+cmd_status() {
+    echo "🔄 Sanchala Update System Status"
+    echo "================================="
+    echo "Last check: $(cat "${STATE_DIR}/last_check" 2>/dev/null || echo Never)"
+    echo "Last update: $(cat "${STATE_DIR}/last_update" 2>/dev/null || echo Never)"
+    echo ""
+    systemctl is-enabled sanchala-updater.timer &>/dev/null && echo "Auto-update: Enabled" || echo "Auto-update: Disabled"
+    reboot_required && echo "⚠️  Reboot required" || echo "✅ No reboot required"
+    echo -e "\n📸 Snapshots: $(snapper -c root list 2>/dev/null | wc -l) total"
+}
+
+cmd_clean() {
+    log_info "Cleaning update cache..."
+    command -v pacman &>/dev/null && pacman -Sc --noconfirm 2>/dev/null || true
+    find "${CACHE_DIR}" -mtime +7 -delete 2>/dev/null || true
+    log_info "Cache cleaned"
+}
+
+cmd_daemon() {
+    log_info "Starting update daemon..."
+    mkdir -p "$STATE_DIR" "$CACHE_DIR"
+    load_config
+    
+    while true; do
+        if check_system_updates &>/dev/null; then
+            log_info "Updates available"
+            [[ "${AUTO_DOWNLOAD:-true}" == "true" ]] && download_updates
+            [[ "${AUTO_INSTALL:-false}" == "true" ]] && within_update_window && cmd_update --force
+            notify_updates_available
+        fi
+        date > "${STATE_DIR}/last_check"
+        sleep "${CHECK_INTERVAL:-3600}"
+    done
+}
+
+usage() {
+    cat <<EOF
+Sanchala OS Update System v${VERSION}
+
+USAGE: ${UPDATER_NAME} <command> [options]
+
+COMMANDS:
+    check             Check for available updates
+    update            Download and apply updates
+    rollback [num]    Rollback to a snapshot
+    history [count]   Show update history
+    status            Show system status
+    clean             Clean update cache
+    daemon            Run as background daemon
+
+OPTIONS:
+    --force, -f       Skip confirmation prompts
+    --no-snapshot     Don't create pre-update snapshot
+    --download-only   Download without installing
+
+EXAMPLES:
+    ${UPDATER_NAME} check
+    ${UPDATER_NAME} update
+    ${UPDATER_NAME} rollback 42
+EOF
+}
+
+main() {
+    [[ $EUID -ne 0 ]] && [[ ! "${1:-}" =~ ^(status|check|history|help)$ ]] && die "Root required"
+    load_config 2>/dev/null || true
+    
+    case "${1:-help}" in
+        check)    cmd_check "${@:2}" ;;
+        update)   cmd_update "${@:2}" ;;
+        rollback) cmd_rollback "${@:2}" ;;
+        history)  cmd_history "${@:2}" ;;
+        status)   cmd_status ;;
+        clean)    cmd_clean ;;
+        daemon)   cmd_daemon ;;
+        help|--help|-h) usage ;;
+        version|--version|-v) echo "${UPDATER_NAME} v${VERSION}" ;;
+        *) die "Unknown command: $1" ;;
+    esac
+}
+
+main "$@"

@@ -1,0 +1,11 @@
+[Unit]
+Description=Weekly Sanchala System Cleanup
+Documentation=man:sanchala-cleaner(1)
+
+[Timer]
+OnCalendar=weekly
+RandomizedDelaySec=3600
+Persistent=true
+
+[Install]
+WantedBy=timers.target

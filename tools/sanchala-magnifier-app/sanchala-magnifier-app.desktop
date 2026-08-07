@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Sanchala Magnifier
+Comment=Screen Magnifier
+Exec=sanchala-magnifier-app
+Icon=zoom
+Terminal=false
+Type=Application
+Categories=Utility;Accessibility;

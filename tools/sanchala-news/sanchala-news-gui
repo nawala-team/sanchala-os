@@ -1,0 +1,66 @@
+#!/usr/bin/env python3
+"""Sanchala News - News Reader"""
+import sys, json
+from datetime import datetime
+from pathlib import Path
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+
+class NewsApp(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Sanchala News")
+        self.setMinimumSize(900, 600)
+        self.data_dir = Path.home() / ".local/share/sanchala/news"
+        self.data_dir.mkdir(parents=True, exist_ok=True)
+        self.init_ui()
+    
+    def init_ui(self):
+        self.setStyleSheet("QMainWindow{background:#1e1e2e;}QLabel{color:#cdd6f4;}QPushButton{background:#313244;color:#cdd6f4;border:none;padding:10px;border-radius:6px;}QPushButton:hover{background:#45475a;}QScrollArea{border:none;}")
+        c = QWidget(); self.setCentralWidget(c); m = QVBoxLayout(c)
+        
+        # Categories
+        cats = QHBoxLayout()
+        for cat in ["🔥 For You", "🌍 World", "💼 Business", "💻 Tech", "🎮 Gaming", "🏀 Sports", "🎬 Entertainment", "🔬 Science"]:
+            b = QPushButton(cat); cats.addWidget(b)
+            b.clicked.connect(lambda _, c=cat: self.load_category(c))
+        m.addLayout(cats)
+        
+        # News feed
+        scroll = QScrollArea(); scroll.setWidgetResizable(True)
+        feed = QWidget(); self.feed_layout = QVBoxLayout(feed)
+        
+        news = [
+            {"title": "SanchalaOS 2.0 Released with Revolutionary Features", "source": "Tech Daily", "time": "2 hours ago", "img": "🖥️", "cat": "Tech"},
+            {"title": "Global Markets Rally on Positive Economic Data", "source": "Finance Times", "time": "3 hours ago", "img": "📈", "cat": "Business"},
+            {"title": "Scientists Discover New Renewable Energy Source", "source": "Science Weekly", "time": "4 hours ago", "img": "🔬", "cat": "Science"},
+            {"title": "Major Sports League Announces Expansion Plans", "source": "Sports Network", "time": "5 hours ago", "img": "🏆", "cat": "Sports"},
+            {"title": "New AI Breakthrough Changes Computing Forever", "source": "AI Today", "time": "6 hours ago", "img": "🤖", "cat": "Tech"},
+        ]
+        
+        for n in news:
+            card = QFrame(); card.setStyleSheet("background:#313244;border-radius:10px;padding:15px;margin:5px;")
+            cl = QHBoxLayout(card)
+            img = QLabel(n["img"]); img.setStyleSheet("font-size:48px;"); img.setFixedWidth(80)
+            cl.addWidget(img)
+            txt = QVBoxLayout()
+            title = QLabel(n["title"]); title.setStyleSheet("font-size:16px;font-weight:bold;"); title.setWordWrap(True)
+            meta = QLabel(f"{n['source']} • {n['time']} • {n['cat']}"); meta.setStyleSheet("color:#888;")
+            txt.addWidget(title); txt.addWidget(meta)
+            cl.addLayout(txt, 1)
+            acts = QVBoxLayout()
+            for icon in ["🔖", "📤"]:
+                b = QPushButton(icon); b.setFixedSize(36, 36); acts.addWidget(b)
+            cl.addLayout(acts)
+            self.feed_layout.addWidget(card)
+        
+        self.feed_layout.addStretch()
+        scroll.setWidget(feed)
+        m.addWidget(scroll)
+    
+    def load_category(self, cat):
+        self.statusBar().showMessage(f"Loading {cat}...", 2000)
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv); w = NewsApp(); w.show(); sys.exit(app.exec())

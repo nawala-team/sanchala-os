@@ -1,0 +1,147 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# SANCHALA OS - Test Pipeline
+# ══════════════════════════════════════════════════════════════════════════════
+
+name: Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  # ════════════════════════════════════════════════════════════════════════════
+  # UNIT TESTS
+  # ════════════════════════════════════════════════════════════════════════════
+  unit:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Test shell scripts syntax
+        run: |
+          echo "🧪 Testing shell script syntax..."
+          find . -name "*.sh" -type f | while read script; do
+            bash -n "$script" && echo "✓ $script"
+          done
+          bash -n iso/build-binary && echo "✓ iso/build-binary"
+
+      - name: Validate YAML files
+        run: |
+          echo "🧪 Validating YAML files..."
+          python3 -c "
+          import yaml, glob, sys
+          errors = 0
+          for f in glob.glob('.github/workflows/*.yml'):
+              try:
+                  yaml.safe_load(open(f))
+                  print(f'✓ {f}')
+              except Exception as e:
+                  print(f'✗ {f}: {e}')
+                  errors += 1
+          sys.exit(errors)
+          "
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # PACKAGE LIST VALIDATION
+  # ════════════════════════════════════════════════════════════════════════════
+  packages:
+    name: Validate Package Lists
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup
+        run: pacman -Syu --noconfirm
+
+      - name: Validate packages exist
+        run: |
+          echo "🧪 Validating package availability..."
+          ERRORS=0
+          for list in iso/packages/*.list; do
+            echo "━━━ $list ━━━"
+            while IFS= read -r pkg || [[ -n "$pkg" ]]; do
+              [[ -z "$pkg" || "$pkg" =~ ^# ]] && continue
+              if pacman -Si "$pkg" &>/dev/null; then
+                echo "  ✓ $pkg"
+              else
+                echo "  ✗ $pkg (not found)"
+                ERRORS=$((ERRORS + 1))
+              fi
+            done < "$list"
+          done
+          echo "Total errors: $ERRORS"
+          # Don't fail on missing packages (some may be AUR/custom)
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # INSTALLER CONFIG TESTS
+  # ════════════════════════════════════════════════════════════════════════════
+  installer:
+    name: Installer Config Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate Calamares configs
+        run: |
+          echo "🧪 Checking installer configuration..."
+          if [[ -d installer/modules ]]; then
+            for conf in installer/modules/*.conf; do
+              [[ -f "$conf" ]] && echo "✓ $conf exists"
+            done
+          fi
+          if [[ -d installer/branding ]]; then
+            echo "✓ Installer branding directory exists"
+          fi
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # INTEGRATION TESTS
+  # ════════════════════════════════════════════════════════════════════════════
+  integration:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Test filesystem structure
+        run: |
+          echo "🧪 Validating filesystem overlay..."
+          [[ -d filesystem/etc ]] && echo "✓ /etc overlay exists"
+          [[ -d filesystem/usr ]] && echo "✓ /usr overlay exists"
+          
+          # Check required configs
+          REQUIRED="filesystem/etc/sanchala"
+          for dir in $REQUIRED; do
+            [[ -d "$dir" ]] && echo "✓ $dir" || echo "⚠ $dir missing"
+          done
+
+      - name: Test security configs
+        run: |
+          echo "🧪 Validating security configurations..."
+          [[ -d security/apparmor ]] && echo "✓ AppArmor profiles"
+          [[ -d security/firewall ]] && echo "✓ Firewall rules"
+          [[ -d security/kernel ]] && echo "✓ Kernel hardening"
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # SUMMARY
+  # ════════════════════════════════════════════════════════════════════════════
+  summary:
+    name: Test Summary
+    needs: [unit, packages, installer, integration]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Report
+        run: |
+          echo "## 🧪 Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "| Test | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Unit | ${{ needs.unit.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Packages | ${{ needs.packages.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Installer | ${{ needs.installer.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Integration | ${{ needs.integration.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY

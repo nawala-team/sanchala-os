@@ -1,0 +1,135 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0
+# Sanchala Hot Corners - macOS-style hot corners
+"""Trigger actions when moving mouse to screen corners"""
+
+import sys, json, argparse, subprocess
+from pathlib import Path
+
+VERSION = "1.0.0"
+CONFIG_DIR = Path.home() / ".config" / "sanchala" / "hot-corners"
+
+ACTIONS = {
+    "none": "Do Nothing",
+    "overview": "Show Overview",
+    "desktop": "Show Desktop",
+    "lock": "Lock Screen",
+    "sleep": "Put Display to Sleep",
+    "screensaver": "Start Screensaver",
+    "notifications": "Show Notifications",
+    "app_menu": "Application Menu",
+}
+
+class HotCornersConfig:
+    def __init__(self):
+        CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+        self.file = CONFIG_DIR / "config.json"
+        self.data = self._load()
+    
+    def _load(self):
+        defaults = {"enabled": True, "delay": 300,
+                    "top_left": "overview", "top_right": "desktop",
+                    "bottom_left": "none", "bottom_right": "lock"}
+        if self.file.exists():
+            try: defaults.update(json.load(open(self.file)))
+            except: pass
+        return defaults
+    
+    def save(self):
+        with open(self.file, 'w') as f: json.dump(self.data, f, indent=2)
+        self._apply()
+    
+    def _apply(self):
+        # Apply to KWin
+        corners = {"top_left": "TopLeft", "top_right": "TopRight",
+                   "bottom_left": "BottomLeft", "bottom_right": "BottomRight"}
+        action_map = {"overview": "Overview", "desktop": "ShowDesktopGrid", "lock": "LockScreen"}
+        
+        for corner, kwin_corner in corners.items():
+            action = self.data.get(corner, "none")
+            kwin_action = action_map.get(action, "None")
+            subprocess.run(["kwriteconfig5", "--file", "kwinrc", "--group", "Effect-overview",
+                           "--key", f"BorderActivate{kwin_corner}", 
+                           "9" if action == "overview" else "0"], capture_output=True)
+
+def cmd_status(args):
+    config = HotCornersConfig()
+    print(f"\n📐 Hot Corners\n" + "━"*40)
+    print(f"  Enabled: {'Yes' if config.data['enabled'] else 'No'}")
+    print(f"  Delay:   {config.data['delay']}ms\n")
+    print(f"  ┌─────────────────────────────────┐")
+    print(f"  │ {ACTIONS[config.data['top_left']][:12]:^12}     {ACTIONS[config.data['top_right']][:12]:^12} │")
+    print(f"  │                                 │")
+    print(f"  │                                 │")
+    print(f"  │ {ACTIONS[config.data['bottom_left']][:12]:^12}     {ACTIONS[config.data['bottom_right']][:12]:^12} │")
+    print(f"  └─────────────────────────────────┘")
+    print()
+    return 0
+
+def cmd_set(args):
+    config = HotCornersConfig()
+    corner = args.corner.replace("-", "_")
+    action = args.action
+    
+    if corner not in ["top_left", "top_right", "bottom_left", "bottom_right"]:
+        print(f"❌ Invalid corner. Use: top-left, top-right, bottom-left, bottom-right")
+        return 1
+    
+    if action not in ACTIONS:
+        print(f"❌ Invalid action. Available: {', '.join(ACTIONS.keys())}")
+        return 1
+    
+    config.data[corner] = action
+    config.save()
+    print(f"✅ {corner.replace('_', ' ').title()}: {ACTIONS[action]}")
+    return 0
+
+def cmd_enable(args):
+    config = HotCornersConfig()
+    config.data["enabled"] = True
+    config.save()
+    print("✅ Hot corners enabled")
+    return 0
+
+def cmd_disable(args):
+    config = HotCornersConfig()
+    config.data["enabled"] = False
+    config.save()
+    print("✅ Hot corners disabled")
+    return 0
+
+def cmd_actions(args):
+    print(f"\n⚡ Available Actions:\n")
+    for key, desc in ACTIONS.items():
+        print(f"  {key:15} - {desc}")
+    print()
+    return 0
+
+def cmd_delay(args):
+    config = HotCornersConfig()
+    config.data["delay"] = args.ms
+    config.save()
+    print(f"✅ Delay: {args.ms}ms")
+    return 0
+
+def main():
+    p = argparse.ArgumentParser(prog="sanchala-hot-corners", description="📐 Hot Corners")
+    p.add_argument("--version", action="version", version=f"%(prog)s {VERSION}")
+    sub = p.add_subparsers(dest="cmd")
+    
+    sub.add_parser("status", help="Show status")
+    s = sub.add_parser("set", help="Set corner action")
+    s.add_argument("corner", help="Corner: top-left, top-right, bottom-left, bottom-right")
+    s.add_argument("action", help="Action to trigger")
+    sub.add_parser("enable", help="Enable hot corners")
+    sub.add_parser("disable", help="Disable hot corners")
+    sub.add_parser("actions", help="List available actions")
+    s = sub.add_parser("delay", help="Set delay"); s.add_argument("ms", type=int)
+    
+    args = p.parse_args()
+    cmds = {"status": cmd_status, "set": cmd_set, "enable": cmd_enable,
+            "disable": cmd_disable, "actions": cmd_actions, "delay": cmd_delay}
+    if args.cmd in cmds: return cmds[args.cmd](args)
+    return cmd_status(args)
+
+if __name__ == "__main__": sys.exit(main())

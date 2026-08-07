@@ -1,0 +1,25 @@
+# ============================================
+# SANCHALA OS - V4L2 udev Rules
+# ============================================
+# Camera and video device permissions
+# ============================================
+
+# Grant video group access to V4L2 devices
+KERNEL=="video[0-9]*", GROUP="video", MODE="0660"
+KERNEL=="vbi[0-9]*", GROUP="video", MODE="0660"
+KERNEL=="radio[0-9]*", GROUP="video", MODE="0660"
+
+# Logitech webcams - additional permissions
+SUBSYSTEM=="usb", ATTR{idVendor}=="046d", MODE="0666", GROUP="video"
+
+# V4L2 loopback devices (virtual cameras)
+KERNEL=="video[0-9]*", ATTR{name}=="v4l2loopback*", GROUP="video", MODE="0660"
+
+# Grant access to media devices for hardware video decoding
+KERNEL=="media[0-9]*", GROUP="video", MODE="0660"
+
+# Integrated camera controls
+KERNEL=="v4l-subdev*", GROUP="video", MODE="0660"
+
+# USB cameras - set high priority for latency
+ACTION=="add", SUBSYSTEM=="usb", ATTR{bInterfaceClass}=="0e", ATTR{bInterfaceSubClass}=="01", ATTR{power/control}="on"

@@ -1,0 +1,130 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0
+# Sanchala Night Light - Blue light filter for eye comfort
+"""Reduce blue light emission for comfortable viewing at night"""
+
+import sys, json, argparse, subprocess, os
+from pathlib import Path
+from datetime import datetime, time
+
+VERSION = "1.0.0"
+CONFIG_DIR = Path.home() / ".config" / "sanchala" / "nightlight"
+
+class NightLightConfig:
+    def __init__(self):
+        CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+        self.file = CONFIG_DIR / "config.json"
+        self.data = self._load()
+    
+    def _load(self):
+        defaults = {"enabled": False, "temperature": 4500, "schedule": "sunset",
+                    "start": "20:00", "end": "06:00", "transition": 30}
+        if self.file.exists():
+            try: defaults.update(json.load(open(self.file)))
+            except: pass
+        return defaults
+    
+    def save(self):
+        with open(self.file, 'w') as f: json.dump(self.data, f, indent=2)
+
+def set_temperature(temp: int):
+    """Apply color temperature using various backends"""
+    backends = [
+        f"busctl --user set-property org.kde.KWin /ColorCorrect org.kde.kwin.ColorCorrect nightColorTemperature u {temp}",
+        f"redshift -P -O {temp}",
+        f"gammastep -O {temp}",
+    ]
+    for cmd in backends:
+        if subprocess.run(cmd, shell=True, capture_output=True).returncode == 0:
+            return True
+    return False
+
+def reset_temperature():
+    backends = ["redshift -x", "gammastep -x", 
+                "busctl --user set-property org.kde.KWin /ColorCorrect org.kde.kwin.ColorCorrect nightColorTemperature u 6500"]
+    for cmd in backends:
+        subprocess.run(cmd, shell=True, capture_output=True)
+
+def cmd_on(args):
+    config = NightLightConfig()
+    temp = args.temperature or config.data["temperature"]
+    if set_temperature(temp):
+        config.data["enabled"] = True
+        config.data["temperature"] = temp
+        config.save()
+        print(f"🌙 Night Light ON ({temp}K)")
+    else:
+        print("❌ Failed to enable. Install: redshift or gammastep")
+        return 1
+    return 0
+
+def cmd_off(args):
+    config = NightLightConfig()
+    reset_temperature()
+    config.data["enabled"] = False
+    config.save()
+    print("☀️  Night Light OFF")
+    return 0
+
+def cmd_toggle(args):
+    config = NightLightConfig()
+    if config.data["enabled"]: return cmd_off(args)
+    else: return cmd_on(args)
+
+def cmd_temperature(args):
+    config = NightLightConfig()
+    temp = args.value
+    if temp < 1000 or temp > 10000:
+        print("Temperature must be between 1000K and 10000K")
+        return 1
+    config.data["temperature"] = temp
+    config.save()
+    if config.data["enabled"]: set_temperature(temp)
+    print(f"✅ Temperature set to {temp}K")
+    return 0
+
+def cmd_status(args):
+    config = NightLightConfig()
+    status = "ON" if config.data["enabled"] else "OFF"
+    print(f"\n🌙 Night Light Status\n" + "━"*35)
+    print(f"  Status:      {status}")
+    print(f"  Temperature: {config.data['temperature']}K")
+    print(f"  Schedule:    {config.data['schedule']}")
+    if config.data['schedule'] == 'manual':
+        print(f"  Hours:       {config.data['start']} - {config.data['end']}")
+    print()
+    return 0
+
+def cmd_schedule(args):
+    config = NightLightConfig()
+    if args.mode == "sunset":
+        config.data["schedule"] = "sunset"
+    elif args.mode == "manual":
+        config.data["schedule"] = "manual"
+        if args.start: config.data["start"] = args.start
+        if args.end: config.data["end"] = args.end
+    elif args.mode == "off":
+        config.data["schedule"] = "off"
+    config.save()
+    print(f"✅ Schedule: {config.data['schedule']}")
+    return 0
+
+def main():
+    p = argparse.ArgumentParser(prog="sanchala-nightlight", description="🌙 Night Light")
+    p.add_argument("--version", action="version", version=f"%(prog)s {VERSION}")
+    sub = p.add_subparsers(dest="cmd")
+    s = sub.add_parser("on", help="Enable"); s.add_argument("-t","--temperature",type=int)
+    sub.add_parser("off", help="Disable")
+    sub.add_parser("toggle", help="Toggle")
+    s = sub.add_parser("temperature", aliases=["temp"], help="Set temperature"); s.add_argument("value",type=int)
+    sub.add_parser("status", help="Show status")
+    s = sub.add_parser("schedule", help="Set schedule")
+    s.add_argument("mode", choices=["sunset","manual","off"])
+    s.add_argument("--start"); s.add_argument("--end")
+    args = p.parse_args()
+    cmds = {"on": cmd_on, "off": cmd_off, "toggle": cmd_toggle, "temperature": cmd_temperature,
+            "temp": cmd_temperature, "status": cmd_status, "schedule": cmd_schedule}
+    if args.cmd in cmds: return cmds[args.cmd](args)
+    return cmd_status(args)
+
+if __name__ == "__main__": sys.exit(main())

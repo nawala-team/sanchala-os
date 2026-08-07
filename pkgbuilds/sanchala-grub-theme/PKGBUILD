@@ -1,0 +1,35 @@
+# Maintainer: Sanchala Team <dev@sanchala.id>
+
+pkgname=sanchala-grub-theme
+pkgver=1.0.0
+pkgrel=1
+pkgdesc='Sanchala OS GRUB bootloader theme'
+arch=('any')
+url='https://sanchala.id'
+license=('GPL3')
+groups=('sanchala')
+depends=('grub')
+
+package() {
+    # Install GRUB theme
+    install -dm755 "$pkgdir/usr/share/grub/themes/sanchala"
+    
+    # Copy theme files
+    cp -r "$srcdir/grub-theme/"* "$pkgdir/usr/share/grub/themes/sanchala/"
+    
+    # Install theme.txt
+    install -Dm644 "$srcdir/theme.txt" \
+        "$pkgdir/usr/share/grub/themes/sanchala/theme.txt"
+    
+    # Install grub default config snippet
+    install -Dm644 /dev/stdin "$pkgdir/etc/default/grub.d/sanchala-theme.cfg" << 'EOF'
+# Sanchala OS GRUB Theme
+GRUB_THEME="/usr/share/grub/themes/sanchala/theme.txt"
+GRUB_GFXMODE="auto"
+GRUB_GFXPAYLOAD_LINUX="keep"
+EOF
+}
+
+post_install() {
+    echo ">>> Run 'grub-mkconfig -o /boot/grub/grub.cfg' to apply the theme"
+}

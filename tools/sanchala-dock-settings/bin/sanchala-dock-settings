@@ -1,0 +1,135 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0
+# Sanchala Dock Settings - macOS-style dock configuration
+"""Configure the dock with icons, position, behavior, and animations"""
+
+import sys, json, argparse, subprocess
+from pathlib import Path
+
+VERSION = "1.0.0"
+CONFIG_DIR = Path.home() / ".config" / "sanchala" / "dock"
+
+class DockConfig:
+    def __init__(self):
+        CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+        self.file = CONFIG_DIR / "config.json"
+        self.data = self._load()
+    
+    def _load(self):
+        defaults = {
+            "position": "bottom", "icon_size": 48, "autohide": False,
+            "magnification": True, "magnification_size": 64,
+            "show_recent": True, "recent_count": 3,
+            "animation": "zoom", "minimize_effect": "genie",
+            "show_trash": True, "show_apps_button": True,
+            "pinned_apps": ["org.kde.dolphin", "firefox", "org.kde.konsole"]
+        }
+        if self.file.exists():
+            try: defaults.update(json.load(open(self.file)))
+            except: pass
+        return defaults
+    
+    def save(self):
+        with open(self.file, 'w') as f: json.dump(self.data, f, indent=2)
+        self._apply()
+    
+    def _apply(self):
+        # Apply to Latte Dock or Plasma Panel
+        subprocess.run(["kwriteconfig5", "--file", "lattedockrc", "--group", "UniversalSettings",
+                       "--key", "currentLayout", "sanchala"], capture_output=True)
+
+def cmd_status(args):
+    config = DockConfig()
+    print(f"\n🚀 Dock Settings\n" + "━"*40)
+    print(f"  Position:      {config.data['position']}")
+    print(f"  Icon Size:     {config.data['icon_size']}px")
+    print(f"  Auto-hide:     {'Yes' if config.data['autohide'] else 'No'}")
+    print(f"  Magnification: {'Yes' if config.data['magnification'] else 'No'}")
+    print(f"  Animation:     {config.data['animation']}")
+    print(f"\n  Pinned Apps:   {len(config.data['pinned_apps'])}")
+    print()
+    return 0
+
+def cmd_position(args):
+    config = DockConfig()
+    config.data["position"] = args.pos
+    config.save()
+    print(f"✅ Dock position: {args.pos}")
+    return 0
+
+def cmd_size(args):
+    config = DockConfig()
+    config.data["icon_size"] = args.pixels
+    config.save()
+    print(f"✅ Icon size: {args.pixels}px")
+    return 0
+
+def cmd_autohide(args):
+    config = DockConfig()
+    config.data["autohide"] = args.state == "on"
+    config.save()
+    print(f"✅ Auto-hide: {args.state}")
+    return 0
+
+def cmd_magnification(args):
+    config = DockConfig()
+    if args.state == "on":
+        config.data["magnification"] = True
+        if args.size: config.data["magnification_size"] = args.size
+    else:
+        config.data["magnification"] = False
+    config.save()
+    print(f"✅ Magnification: {args.state}")
+    return 0
+
+def cmd_pin(args):
+    config = DockConfig()
+    app = args.app
+    if app not in config.data["pinned_apps"]:
+        config.data["pinned_apps"].append(app)
+        config.save()
+        print(f"✅ Pinned: {app}")
+    return 0
+
+def cmd_unpin(args):
+    config = DockConfig()
+    if args.app in config.data["pinned_apps"]:
+        config.data["pinned_apps"].remove(args.app)
+        config.save()
+        print(f"✅ Unpinned: {args.app}")
+    return 0
+
+def cmd_animation(args):
+    config = DockConfig()
+    config.data["animation"] = args.effect
+    config.save()
+    print(f"✅ Animation: {args.effect}")
+    return 0
+
+def main():
+    p = argparse.ArgumentParser(prog="sanchala-dock-settings", description="🚀 Dock Settings")
+    p.add_argument("--version", action="version", version=f"%(prog)s {VERSION}")
+    sub = p.add_subparsers(dest="cmd")
+    
+    sub.add_parser("status", help="Show settings")
+    s = sub.add_parser("position", help="Set position")
+    s.add_argument("pos", choices=["top","bottom","left","right"])
+    s = sub.add_parser("size", help="Set icon size"); s.add_argument("pixels", type=int)
+    s = sub.add_parser("autohide", help="Auto-hide"); s.add_argument("state", choices=["on","off"])
+    s = sub.add_parser("magnification", help="Magnification")
+    s.add_argument("state", choices=["on","off"]); s.add_argument("-s","--size",type=int)
+    s = sub.add_parser("pin", help="Pin app"); s.add_argument("app")
+    s = sub.add_parser("unpin", help="Unpin app"); s.add_argument("app")
+    s = sub.add_parser("animation", help="Animation effect")
+    s.add_argument("effect", choices=["zoom","fade","slide","bounce","none"])
+    sub.add_parser("gui", help="Open GUI")
+    
+    args = p.parse_args()
+    cmds = {"status": cmd_status, "position": cmd_position, "size": cmd_size,
+            "autohide": cmd_autohide, "magnification": cmd_magnification,
+            "pin": cmd_pin, "unpin": cmd_unpin, "animation": cmd_animation,
+            "gui": lambda a: subprocess.Popen(["latte-dock", "--preferences"]) or 0}
+    if args.cmd in cmds: return cmds[args.cmd](args)
+    return cmd_status(args)
+
+if __name__ == "__main__": sys.exit(main())

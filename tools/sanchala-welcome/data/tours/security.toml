@@ -1,0 +1,51 @@
+# Security Features Tour
+[tour]
+id = "security"
+name = "Security Features"
+description = "Discover Sanchala Guardian and system protection"
+estimated_minutes = 2
+
+[[steps]]
+id = "intro"
+title = "8 Layers of Security"
+description = "Sanchala OS protects you with enterprise-grade security, from boot to runtime."
+target = { type = "fullscreen" }
+position = "center"
+media = { type = "image", path = "/usr/share/sanchala/welcome/images/security-layers.png" }
+
+[[steps]]
+id = "guardian"
+title = "Sanchala Guardian"
+description = "Your security command center. Monitor threats, manage firewall, and audit your system."
+target = { type = "fullscreen" }
+position = "center"
+action = { type = "open_app", app_id = "id.sanchala.Guardian" }
+
+[[steps]]
+id = "firewall"
+title = "Smart Firewall"
+description = "Application-level firewall controls which apps can access the network."
+target = { type = "area", x = 100, y = 200, width = 400, height = 300 }
+position = "right"
+
+[[steps]]
+id = "permissions"
+title = "Permission Manager"
+description = "Like mobile phones - apps must ask permission for camera, microphone, and location."
+target = { type = "fullscreen" }
+position = "center"
+action = { type = "show_settings", page = "permissions" }
+
+[[steps]]
+id = "updates"
+title = "Secure Updates"
+description = "All updates are cryptographically signed. Automatic security updates keep you safe."
+target = { type = "fullscreen" }
+position = "center"
+
+[[steps]]
+id = "complete"
+title = "Stay Protected"
+description = "Sanchala Guardian runs quietly in the background. You'll be notified of any threats."
+target = { type = "fullscreen" }
+position = "center"

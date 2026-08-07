@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Sanchala Energy Settings
+Comment=Power and battery management
+Exec=sanchala-energy-settings-gui
+Icon=preferences-system-power-management
+Type=Application
+Categories=Settings;System;
+Keywords=power;battery;energy;sleep;

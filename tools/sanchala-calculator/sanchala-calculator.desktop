@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Sanchala Calculator
+Comment=Scientific Calculator
+Exec=sanchala-calculator-gui
+Icon=accessories-calculator
+Type=Application
+Categories=Utility;Calculator;
+Keywords=calculator;math;scientific;

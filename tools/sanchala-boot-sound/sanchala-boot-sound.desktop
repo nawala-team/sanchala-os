@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Boot Sound
+Comment=Configure startup and shutdown sounds
+GenericName=Boot Sound Settings
+Exec=sanchala-boot-sound
+Icon=audio-speakers
+Type=Application
+Categories=Settings;HardwareSettings;
+Keywords=boot;startup;sound;chime;shutdown;
+StartupNotify=true

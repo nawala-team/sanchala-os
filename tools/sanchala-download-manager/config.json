@@ -1,0 +1,30 @@
+{
+  "name": "sanchala-download-manager",
+  "version": "1.0.0",
+  "description": "Advanced download manager with resume support",
+  "author": "Sanchala OS Team",
+  "category": "Network",
+  "settings": {
+    "downloadDir": "~/Downloads",
+    "maxConcurrent": 3,
+    "maxSegments": 8,
+    "maxSpeed": 0,
+    "autoResume": true,
+    "autoRetry": true,
+    "retryAttempts": 5,
+    "retryDelay": 10,
+    "userAgent": "Sanchala Download Manager/1.0",
+    "clipboard": true,
+    "browserIntegration": true,
+    "scheduler": {
+      "enabled": false,
+      "startTime": "02:00",
+      "endTime": "06:00"
+    },
+    "notifications": true,
+    "soundOnComplete": true,
+    "virusScan": true,
+    "categorize": true
+  },
+  "permissions": ["network", "filesystem", "clipboard", "notifications"]
+}

@@ -1,0 +1,15 @@
+[Desktop Entry]
+Version=1.0
+Name=Sanchala Settings
+Name[id]=Pengaturan Sanchala
+Comment=Configure Sanchala OS settings
+Comment[id]=Konfigurasikan pengaturan Sanchala OS
+GenericName=System Settings
+Exec=/usr/bin/sanchala-settings %f
+Terminal=false
+Type=Application
+Icon=sanchala-settings
+Categories=System;Settings;
+MimeType=application/x-sanchala-config;
+Keywords=settings;preferences;configuration;
+StartupNotify=true

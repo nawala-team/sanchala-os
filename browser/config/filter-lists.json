@@ -1,0 +1,59 @@
+// Sanchala Browser - Filter Lists Configuration
+// Default ad/tracker blocking rules
+
+{
+  "version": 1,
+  "name": "Sanchala Shield Default Lists",
+  "lists": [
+    {
+      "id": "easylist",
+      "name": "EasyList",
+      "url": "https://easylist.to/easylist/easylist.txt",
+      "enabled": true,
+      "type": "ads"
+    },
+    {
+      "id": "easyprivacy",
+      "name": "EasyPrivacy",
+      "url": "https://easylist.to/easylist/easyprivacy.txt",
+      "enabled": true,
+      "type": "trackers"
+    },
+    {
+      "id": "fanboy-annoyance",
+      "name": "Fanboy's Annoyance List",
+      "url": "https://easylist.to/easylist/fanboy-annoyance.txt",
+      "enabled": true,
+      "type": "annoyances"
+    },
+    {
+      "id": "ublock-filters",
+      "name": "uBlock Origin Filters",
+      "url": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/filters.txt",
+      "enabled": true,
+      "type": "ads"
+    },
+    {
+      "id": "ublock-privacy",
+      "name": "uBlock Origin Privacy",
+      "url": "https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/privacy.txt",
+      "enabled": true,
+      "type": "trackers"
+    },
+    {
+      "id": "peter-lowe",
+      "name": "Peter Lowe's Ad and tracking server list",
+      "url": "https://pgl.yoyo.org/adservers/serverlist.php?hostformat=adblockplus&showintro=1&mimetype=plaintext",
+      "enabled": true,
+      "type": "ads"
+    },
+    {
+      "id": "malware-domains",
+      "name": "Malware Domain List",
+      "url": "https://malware-filter.gitlab.io/malware-filter/urlhaus-filter-online.txt",
+      "enabled": true,
+      "type": "malware"
+    }
+  ],
+  "custom_rules": []
+}

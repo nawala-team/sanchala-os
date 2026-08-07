@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Sanchala Date & Time
+Comment=Configure date, time and timezone
+Exec=sanchala-datetime-settings-gui
+Icon=preferences-system-time
+Type=Application
+Categories=Settings;System;
+Keywords=date;time;timezone;clock;

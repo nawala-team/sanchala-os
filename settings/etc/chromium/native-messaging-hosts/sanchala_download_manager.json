@@ -1,0 +1,11 @@
+{
+  "name": "sanchala_download_manager",
+  "description": "Sanchala OS Download Manager Integration",
+  "path": "/usr/lib/sanchala/sanchala-browser-download.sh",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://sanchaladownloadmanager/",
+    "chrome-extension://*/",
+    "chromium-extension://*/"
+  ]
+}

@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Sanchala Feedback
+Comment=Send Feedback
+Exec=sanchala-feedback
+Icon=mail-mark-important
+Terminal=false
+Type=Application
+Categories=Utility;

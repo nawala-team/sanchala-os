@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Sanchala Hotspot
+Comment=WiFi Hotspot Manager
+Exec=sanchala-hotspot-gui
+Icon=network-wireless-hotspot
+Type=Application
+Categories=Settings;Network;
+Keywords=hotspot;wifi;tether;share;

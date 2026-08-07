@@ -1,0 +1,21 @@
+{
+    "KPlugin": {
+        "Id": "sanchala-tiling",
+        "Name": "Sanchala Tiling",
+        "Description": "Intelligent window tiling system for SANCHALA OS with macOS-inspired layouts",
+        "Icon": "preferences-system-windows-move",
+        "Authors": [
+            {
+                "Name": "SANCHALA OS Team",
+                "Email": "dev@sanchala.os"
+            }
+        ],
+        "Category": "Window Management",
+        "License": "GPL-3.0",
+        "Version": "1.0.0",
+        "Website": "https://sanchala.os",
+        "EnabledByDefault": true
+    },
+    "X-Plasma-API": "javascript",
+    "X-Plasma-MainScript": "contents/code/main.js"
+}

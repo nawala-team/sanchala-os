@@ -1,0 +1,51 @@
+.TH SANCHALA-WELCOME 1 "August 2026" "Sanchala OS" "User Commands"
+.SH NAME
+sanchala-welcome \- First-boot wizard and system tour for Sanchala OS
+.SH SYNOPSIS
+.B sanchala-welcome
+[\fIOPTIONS\fR] [\fICOMMAND\fR]
+.SH DESCRIPTION
+.B sanchala-welcome
+guides new users through initial system setup and provides interactive
+tours of Sanchala OS features. It runs automatically on first boot and
+can be relaunched for tours and tips.
+.SH COMMANDS
+.TP
+.B wizard
+Run the setup wizard (default on first boot)
+.TP
+.B tour \fR[\fINAME\fR]
+Start an interactive feature tour
+.TP
+.B tips
+Show tip of the day
+.TP
+.B reset
+Reset welcome state to show wizard again
+.SH OPTIONS
+.TP
+.B \-\-skip-wizard
+Skip directly to desktop
+.TP
+.B \-\-headless
+Run in non-interactive mode
+.TP
+.B \-\-json
+Output in JSON format
+.TP
+.B \-h, \-\-help
+Show help message
+.SH TOURS
+Available tours: desktop, security, privacy, productivity, customization
+.SH FILES
+.TP
+.I /etc/sanchala/welcome/
+System configuration
+.TP
+.I ~/.config/sanchala/welcome.toml
+User state file
+.SH SEE ALSO
+.BR sanchala-guardian (1),
+.BR sanchala-store (1)
+.SH AUTHOR
+Sanchala OS Team <dev@sanchala.id>

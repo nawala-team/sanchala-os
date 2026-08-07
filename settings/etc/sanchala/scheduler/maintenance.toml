@@ -1,0 +1,38 @@
+# Sanchala Scheduler - Maintenance Schedule Defaults
+# System-wide maintenance task definitions
+
+[trim]
+name = "SSD TRIM"
+service = "sanchala-trim"
+schedule = "weekly"
+requires_root = true
+description = "Discard unused blocks on SSD for optimal performance"
+
+[cache-cleanup]
+name = "Package Cache Cleanup"
+service = "sanchala-cache-cleanup"
+schedule = "monthly"
+requires_root = true
+description = "Remove old package cache files"
+
+[journal-cleanup]
+name = "Journal Rotation"
+service = "sanchala-journal-cleanup"
+schedule = "weekly"
+requires_root = true
+description = "Rotate and clean systemd journal logs"
+
+[update-check]
+name = "Update Check"
+service = "sanchala-update-check"
+schedule = "daily"
+requires_root = false
+description = "Check for available system updates"
+
+[backup]
+name = "Automatic Backup"
+service = "sanchala-backup"
+schedule = "daily"
+time = "03:00"
+requires_root = true
+description = "Create automatic system backup snapshot"

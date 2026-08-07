@@ -1,0 +1,33 @@
+#!/bin/bash
+# ============================================================================
+# SANCHALA OS - Security Initramfs Hook (Build)
+# ============================================================================
+# Install: /etc/initcpio/install/sanchala-security
+# Purpose: Add security components to initramfs
+# ============================================================================
+
+build() {
+    # Add security binaries
+    add_binary /usr/bin/tpm2_pcrread 2>/dev/null || true
+    
+    # Add kernel modules for security
+    add_module dm_crypt
+    add_module dm_integrity
+    add_module tpm_tis
+    add_module tpm_crb
+    
+    # Add security configs
+    add_file /etc/modprobe.d/sanchala-blacklist.conf 2>/dev/null || true
+    
+    # Add hook runtime
+    add_runscript
+}
+
+help() {
+    cat <<HELPEOF
+This hook adds Sanchala OS security components to initramfs:
+- TPM support for disk encryption
+- dm-crypt and dm-integrity modules
+- Module blacklist enforcement
+HELPEOF
+}

@@ -1,0 +1,60 @@
+#!/bin/bash
+# Sanchala AI - Model download helper
+
+RECOMMENDED_MODELS=(
+    "llama3.2:1b|1.3GB|Fast responses, low memory"
+    "llama3.2:3b|2.0GB|Balanced performance (recommended)"
+    "mistral:7b|4.1GB|High quality responses"
+    "codellama:7b|4.1GB|Code assistance"
+    "phi3:mini|2.3GB|Microsoft's efficient model"
+)
+
+show_models() {
+    echo "Available Models for Sanchala AI"
+    echo "================================="
+    echo ""
+    for model in "${RECOMMENDED_MODELS[@]}"; do
+        IFS='|' read -r name size desc <<< "$model"
+        printf "  %-15s %8s  %s\n" "$name" "($size)" "$desc"
+    done
+    echo ""
+    echo "Download: ollama pull <model-name>"
+    echo "Example:  ollama pull llama3.2:3b"
+}
+
+check_ollama() {
+    if ! command -v ollama &> /dev/null; then
+        echo "Ollama not installed. Install with:"
+        echo "  curl -fsSL https://ollama.com/install.sh | sh"
+        exit 1
+    fi
+}
+
+case "${1:-}" in
+    list)
+        check_ollama
+        ollama list
+        ;;
+    pull)
+        check_ollama
+        if [ -z "${2:-}" ]; then
+            echo "Usage: $0 pull <model-name>"
+            show_models
+            exit 1
+        fi
+        ollama pull "$2"
+        ;;
+    recommend)
+        show_models
+        ;;
+    *)
+        echo "Sanchala AI Model Manager"
+        echo ""
+        echo "Commands:"
+        echo "  list       Show installed models"
+        echo "  pull NAME  Download a model"
+        echo "  recommend  Show recommended models"
+        echo ""
+        show_models
+        ;;
+esac

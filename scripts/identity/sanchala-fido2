@@ -1,0 +1,125 @@
+#!/bin/bash
+# ============================================================================
+# SANCHALA OS - FIDO2/WebAuthn Key Management Tool
+# ============================================================================
+set -euo pipefail
+
+RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'
+BLUE='\033[0;34m'; CYAN='\033[0;36m'; NC='\033[0m'; BOLD='\033[1m'
+
+U2F_KEYS_FILE="/etc/sanchala/identity/u2f_keys"
+
+print_header() {
+    echo -e "\n${CYAN}╔════════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${CYAN}║${NC}${BOLD}        🔑  SANCHALA OS - Security Key Setup              ${NC}${CYAN}║${NC}"
+    echo -e "${CYAN}╚════════════════════════════════════════════════════════════╝${NC}\n"
+}
+
+print_success() { echo -e "${GREEN}✓${NC} $1"; }
+print_error() { echo -e "${RED}✗${NC} $1"; }
+print_info() { echo -e "${BLUE}ℹ${NC} $1"; }
+print_warning() { echo -e "${YELLOW}⚠${NC} $1"; }
+
+check_dependencies() {
+    local missing=()
+    command -v pamu2fcfg &>/dev/null || missing+=("pam-u2f")
+    command -v fido2-token &>/dev/null || missing+=("libfido2")
+    if [[ ${#missing[@]} -gt 0 ]]; then
+        print_error "Missing packages: ${missing[*]}"
+        echo -e "Install: ${BOLD}sudo pacman -S pam-u2f libfido2${NC}"
+        exit 1
+    fi
+}
+
+detect_keys() {
+    echo -e "${BLUE}Detecting security keys...${NC}"
+    local devices=$(fido2-token -L 2>/dev/null || true)
+    if [[ -z "$devices" ]]; then
+        print_warning "No FIDO2 security keys detected"
+        return 1
+    fi
+    echo -e "${BOLD}Detected:${NC}"
+    echo "$devices" | while read -r line; do
+        [[ -n "$line" ]] && echo -e "  ${GREEN}•${NC} $line"
+    done
+    return 0
+}
+
+list_enrolled() {
+    local user="${1:-$USER}"
+    echo -e "\n${BOLD}Enrolled keys for $user:${NC}"
+    [[ ! -f "$U2F_KEYS_FILE" ]] && { echo -e "  ${YELLOW}No keys enrolled${NC}"; return 1; }
+    grep -q "^${user}:" "$U2F_KEYS_FILE" || { echo -e "  ${YELLOW}No keys for user${NC}"; return 1; }
+    echo -e "  ${GREEN}✓${NC} Keys registered"
+}
+
+enroll_key() {
+    local user="${1:-$USER}"
+    echo -e "\n${BOLD}Enrolling security key for: $user${NC}"
+    detect_keys || return 1
+    echo -e "\nTouch your security key when LED blinks..."
+    read -rp "Press Enter when ready..."
+    local credential
+    if credential=$(pamu2fcfg -u "$user" 2>&1); then
+        if [[ -f "$U2F_KEYS_FILE" ]] && grep -q "^${user}:" "$U2F_KEYS_FILE"; then
+            local existing=$(grep "^${user}:" "$U2F_KEYS_FILE")
+            local new_key=$(echo "$credential" | cut -d: -f2-)
+            sudo sed -i "s|^${user}:.*|${existing}:${new_key}|" "$U2F_KEYS_FILE"
+        else
+            echo "$credential" | sudo tee -a "$U2F_KEYS_FILE" > /dev/null
+            sudo chmod 600 "$U2F_KEYS_FILE"
+        fi
+        print_success "Security key enrolled!"
+    else
+        print_error "Enrollment failed: $credential"
+        return 1
+    fi
+}
+
+revoke_keys() {
+    local user="${1:-$USER}"
+    [[ ! -f "$U2F_KEYS_FILE" ]] && { print_warning "No keys file"; return 1; }
+    read -rp "Remove ALL keys for $user? [y/N] " r
+    [[ "$r" =~ ^[Yy] ]] && sudo sed -i "/^${user}:/d" "$U2F_KEYS_FILE" && print_success "Keys revoked"
+}
+
+key_info() {
+    echo -e "\n${BOLD}Security Key Info${NC}"
+    fido2-token -L 2>/dev/null | while read -r line; do
+        [[ -n "$line" ]] && fido2-token -I "$(echo "$line" | cut -d: -f1)" 2>/dev/null
+    done
+}
+
+show_help() {
+    cat << EOF
+${BOLD}SANCHALA OS - Security Key Tool${NC}
+
+USAGE: sanchala-fido2 [COMMAND]
+
+COMMANDS:
+    setup    Guided setup (default)
+    enroll   Enroll new key
+    list     List enrolled keys
+    revoke   Revoke all keys for user
+    info     Show key information
+    help     Show this help
+
+SUPPORTED: YubiKey, SoloKey, Titan, Thetis, any FIDO2 key
+EOF
+}
+
+main() {
+    local cmd="${1:-setup}" user="${2:-$USER}"
+    case "$cmd" in
+        setup) print_header; check_dependencies; detect_keys || true; list_enrolled "$user" || true
+               read -rp "Enroll a key? [Y/n] " r; [[ ! "$r" =~ ^[Nn] ]] && enroll_key "$user" ;;
+        enroll) check_dependencies; enroll_key "$user" ;;
+        list) list_enrolled "$user" ;;
+        revoke) revoke_keys "$user" ;;
+        info) check_dependencies; key_info ;;
+        help|--help|-h) show_help ;;
+        *) print_error "Unknown: $cmd"; show_help; exit 1 ;;
+    esac
+}
+
+main "$@"

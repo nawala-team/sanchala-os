@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=QuickLook
+Comment=Preview files quickly without opening applications
+GenericName=File Previewer
+Exec=sanchala-quicklook %f
+Icon=document-preview
+Type=Application
+Categories=Utility;FileTools;
+Keywords=preview;quicklook;view;files;
+MimeType=application/octet-stream;
+StartupNotify=false

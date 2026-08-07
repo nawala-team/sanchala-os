@@ -1,0 +1,132 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# SANCHALA OS - Security Scanning Pipeline
+# ══════════════════════════════════════════════════════════════════════════════
+
+name: Security Scan
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 6 * * 1'  # Weekly Monday 6 AM UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  # ════════════════════════════════════════════════════════════════════════════
+  # SHELL SCRIPT SCANNING
+  # ════════════════════════════════════════════════════════════════════════════
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: './iso'
+          severity: warning
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # SECRET DETECTION
+  # ════════════════════════════════════════════════════════════════════════════
+  secrets:
+    name: Secret Detection
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: TruffleHog scan
+        uses: trufflesecurity/trufflehog@main
+        with:
+          extra_args: --only-verified
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # PKGBUILD AUDIT
+  # ════════════════════════════════════════════════════════════════════════════
+  pkgbuild:
+    name: PKGBUILD Audit
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup and audit
+        run: |
+          pacman -Syu --noconfirm && pacman -S --noconfirm namcap
+          echo "🔍 Auditing PKGBUILDs..."
+          for pkg in pkgbuilds/*/PKGBUILD; do
+            echo "📦 $(dirname $pkg | xargs basename)"
+            namcap "$pkg" 2>&1 | head -10 || true
+          done
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # CONFIG HARDENING CHECK
+  # ════════════════════════════════════════════════════════════════════════════
+  hardening:
+    name: Hardening Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check security configs
+        run: |
+          echo "🔍 Auditing security configurations..."
+          
+          # Check sysctl hardening
+          if [[ -f security/kernel/sysctl-hardening.conf ]]; then
+            echo "✓ Kernel hardening config found"
+            grep -c "=" security/kernel/sysctl-hardening.conf || true
+          fi
+          
+          # Check AppArmor profiles
+          PROFILES=$(find security/apparmor -type f 2>/dev/null | wc -l)
+          echo "✓ AppArmor profiles: $PROFILES"
+          
+          # Check firewall rules
+          if [[ -d security/firewall ]]; then
+            echo "✓ Firewall configuration found"
+          fi
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # SBOM GENERATION
+  # ════════════════════════════════════════════════════════════════════════════
+  sbom:
+    name: Generate SBOM
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: anchore/sbom-action@v0
+        with:
+          format: spdx-json
+          output-file: sbom.spdx.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: sbom.spdx.json
+          retention-days: 90
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # SUMMARY
+  # ════════════════════════════════════════════════════════════════════════════
+  summary:
+    name: Security Summary
+    needs: [shellcheck, secrets, pkgbuild, hardening, sbom]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Generate report
+        run: |
+          echo "## 🔒 Security Scan Results" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| ShellCheck | ${{ needs.shellcheck.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Secrets | ${{ needs.secrets.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| PKGBUILD | ${{ needs.pkgbuild.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Hardening | ${{ needs.hardening.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| SBOM | ${{ needs.sbom.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY

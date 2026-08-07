@@ -1,0 +1,89 @@
+# Maintainer: Sanchala Team <packages@sanchala.id>
+pkgname=sanchala-cloud
+pkgver=1.0.0
+pkgrel=1
+pkgdesc="Native cloud storage integration for Sanchala OS"
+arch=('x86_64')
+url="https://github.com/nicholaslourdes/sanchala-os"
+license=('GPL3')
+depends=(
+    'rclone'
+    'python'
+    'python-gobject'
+    'kio'
+    'kwallet'
+    'kdialog'
+    'libsecret'
+    'fuse3'
+    'sqlite'
+    'attr'
+)
+optdepends=(
+    'dolphin: File manager integration'
+    'plasma-workspace: System tray widget'
+)
+backup=(
+    'etc/sanchala-cloud/config.conf'
+)
+source=("$pkgname-$pkgver.tar.gz")
+sha256sums=('SKIP')
+
+package() {
+    cd "$srcdir/$pkgname-$pkgver"
+    
+    # Binaries
+    install -Dm755 bin/sanchala-cloud "$pkgdir/usr/bin/sanchala-cloud"
+    install -Dm755 bin/sanchala-cloud-auth "$pkgdir/usr/bin/sanchala-cloud-auth"
+    install -Dm755 bin/sanchala-cloud-status "$pkgdir/usr/bin/sanchala-cloud-status"
+    install -Dm755 bin/sanchala-cloud-tray "$pkgdir/usr/bin/sanchala-cloud-tray"
+    
+    # Library/daemon
+    install -Dm755 lib/sanchala-cloudd.py "$pkgdir/usr/lib/sanchala-cloud/sanchala-cloudd.py"
+    install -Dm644 lib/cloud_providers.py "$pkgdir/usr/lib/sanchala-cloud/cloud_providers.py"
+    install -Dm644 lib/status_monitor.py "$pkgdir/usr/lib/sanchala-cloud/status_monitor.py"
+    install -Dm644 lib/encryption.py "$pkgdir/usr/lib/sanchala-cloud/encryption.py"
+    
+    # KIO protocols
+    install -Dm644 kio/gdrive.protocol "$pkgdir/usr/share/kservices5/gdrive.protocol"
+    install -Dm644 kio/dropbox.protocol "$pkgdir/usr/share/kservices5/dropbox.protocol"
+    install -Dm644 kio/onedrive.protocol "$pkgdir/usr/share/kservices5/onedrive.protocol"
+    install -Dm644 kio/sanchalacloud.protocol "$pkgdir/usr/share/kservices5/sanchalacloud.protocol"
+    
+    # Systemd user services
+    install -Dm644 systemd/sanchala-cloudd.service "$pkgdir/usr/lib/systemd/user/sanchala-cloudd.service"
+    install -Dm644 systemd/sanchala-cloud-mount@.service "$pkgdir/usr/lib/systemd/user/sanchala-cloud-mount@.service"
+    install -Dm644 systemd/sanchala-cloud-sync@.timer "$pkgdir/usr/lib/systemd/user/sanchala-cloud-sync@.timer"
+    
+    # Polkit policy
+    install -Dm644 polkit/org.sanchala.cloud.policy "$pkgdir/usr/share/polkit-1/actions/org.sanchala.cloud.policy"
+    
+    # Icons
+    for icon in icons/*.svg; do
+        install -Dm644 "$icon" "$pkgdir/usr/share/icons/hicolor/scalable/status/$(basename "$icon")"
+    done
+    
+    # Plasma widget
+    install -Dm644 plasma/sanchala-cloud-widget/metadata.desktop \
+        "$pkgdir/usr/share/plasma/plasmoids/org.sanchala.cloud/metadata.desktop"
+    install -Dm644 plasma/sanchala-cloud-widget/contents/ui/main.qml \
+        "$pkgdir/usr/share/plasma/plasmoids/org.sanchala.cloud/contents/ui/main.qml"
+    
+    # Config
+    install -Dm644 ../settings/etc/sanchala-cloud/config.conf "$pkgdir/etc/sanchala-cloud/config.conf"
+    
+    # Desktop entry
+    install -Dm644 ../settings/usr/share/applications/sanchala-cloud.desktop \
+        "$pkgdir/usr/share/applications/sanchala-cloud.desktop"
+    
+    # Rclone templates
+    install -dm755 "$pkgdir/usr/share/sanchala-cloud/rclone"
+    install -Dm644 rclone/*.template "$pkgdir/usr/share/sanchala-cloud/rclone/"
+    install -Dm644 rclone/providers.json "$pkgdir/usr/share/sanchala-cloud/rclone/"
+}
+
+post_install() {
+    echo ">>> Enable the cloud sync daemon with:"
+    echo "    systemctl --user enable --now sanchala-cloudd"
+    echo ">>> Add your first cloud account with:"
+    echo "    sanchala-cloud add gdrive"
+}

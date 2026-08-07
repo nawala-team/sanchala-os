@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Sanchala Font Manager
+Comment=Install and manage fonts
+Exec=sanchala-font-manager --gui
+Icon=preferences-desktop-font
+Terminal=false
+Type=Application
+Categories=System;Settings;
+Keywords=font;typography;ttf;otf;

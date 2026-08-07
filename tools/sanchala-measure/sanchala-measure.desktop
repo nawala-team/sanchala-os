@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Sanchala Measure
+Comment=Measurement Tool
+Exec=sanchala-measure
+Icon=measure
+Terminal=false
+Type=Application
+Categories=Utility;

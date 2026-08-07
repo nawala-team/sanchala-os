@@ -1,0 +1,16 @@
+[Unit]
+Description=Sanchala OS aria2 Download Daemon
+Documentation=man:aria2c(1)
+After=network.target
+
+[Service]
+Type=forking
+User=%I
+Environment=HOME=/home/%I
+ExecStart=/usr/bin/aria2c --conf-path=/etc/aria2/aria2.conf --daemon=true
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

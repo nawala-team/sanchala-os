@@ -1,0 +1,15 @@
+[Desktop Entry]
+Version=1.0
+Name=Sanchala TCC
+Name[id]=Sanchala TCC
+Comment=Transparency, Consent and Control - Permission Manager
+Comment[id]=Transparansi, Persetujuan dan Kontrol - Manajer Izin
+GenericName=Permission Manager
+Exec=/usr/bin/sanchala-tcc %f
+Terminal=false
+Type=Application
+Icon=sanchala-tcc
+Categories=System;Security;Settings;
+MimeType=application/x-sanchala-permission;
+Keywords=permissions;privacy;access;control;tcc;
+StartupNotify=true

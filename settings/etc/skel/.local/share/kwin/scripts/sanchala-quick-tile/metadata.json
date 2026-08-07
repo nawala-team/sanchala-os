@@ -1,0 +1,15 @@
+{
+    "KPlugin": {
+        "Id": "sanchala-quick-tile",
+        "Name": "Sanchala Quick Tile",
+        "Description": "Enhanced window snapping with corner tiling and keyboard shortcuts",
+        "Icon": "preferences-system-windows-move",
+        "Authors": [{"Name": "SANCHALA OS Team", "Email": "dev@sanchala.os"}],
+        "Category": "Window Management",
+        "License": "GPL-3.0",
+        "Version": "1.0.0",
+        "EnabledByDefault": true
+    },
+    "X-Plasma-API": "javascript",
+    "X-Plasma-MainScript": "contents/code/main.js"
+}

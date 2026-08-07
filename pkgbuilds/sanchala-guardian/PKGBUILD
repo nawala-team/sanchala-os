@@ -1,0 +1,45 @@
+# Maintainer: Sanchala Team <dev@sanchala.id>
+
+pkgname=sanchala-guardian
+pkgver=1.0.0
+pkgrel=1
+pkgdesc='Sanchala OS Security Center'
+arch=('x86_64' 'aarch64')
+url='https://sanchala.id'
+license=('GPL3')
+groups=('sanchala')
+depends=(
+    'apparmor'
+    'firewalld'
+    'polkit'
+)
+makedepends=('rust' 'cargo')
+optdepends=(
+    'audit: system auditing'
+    'tpm2-tools: TPM support'
+)
+
+build() {
+    cd "$srcdir/sanchala-guardian"
+    cargo build --release
+}
+
+package() {
+    cd "$srcdir/sanchala-guardian"
+    
+    # Binary
+    install -Dm755 "target/release/sanchala-guardian" \
+        "$pkgdir/usr/bin/sanchala-guardian"
+    
+    # Desktop entry
+    install -Dm644 "sanchala-guardian.desktop" \
+        "$pkgdir/usr/share/applications/sanchala-guardian.desktop"
+    
+    # Systemd service
+    install -Dm644 "sanchala-guardian.service" \
+        "$pkgdir/usr/lib/systemd/system/sanchala-guardian.service"
+    
+    # Polkit rules
+    install -Dm644 "sanchala-guardian.rules" \
+        "$pkgdir/usr/share/polkit-1/rules.d/sanchala-guardian.rules"
+}

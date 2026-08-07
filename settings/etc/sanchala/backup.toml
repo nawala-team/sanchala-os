@@ -1,0 +1,117 @@
+# SPDX-License-Identifier: GPL-3.0
+# Sanchala OS - Backup Configuration
+# /etc/sanchala/backup.toml
+
+[snapshots]
+# Enable automatic snapshots
+enabled = true
+
+# Enable timeline snapshots (hourly, daily, weekly, monthly)
+timeline = true
+
+# Cleanup algorithm: timeline, number, empty-pre-post
+cleanup_algorithm = "timeline"
+
+[snapshots.retention]
+# Number of snapshots to keep for each interval
+hourly = 5
+daily = 7
+weekly = 4
+monthly = 6
+yearly = 2
+
+[pacman]
+# Create snapshot before package operations
+pre_snapshot = true
+
+# Create snapshot after package operations  
+post_snapshot = true
+
+# Description format for pacman snapshots
+description_format = "pacman: {operation} {packages}"
+
+[boot]
+# Enable GRUB snapshot integration
+grub_snapshots = true
+
+# Maximum snapshots in GRUB menu
+grub_limit = 10
+
+# Show snapshot date in GRUB
+grub_show_date = true
+
+[remote]
+# Enable remote backup
+enabled = false
+
+# Backup schedule: hourly, daily, weekly
+schedule = "daily"
+
+# Time for scheduled backup (24h format)
+time = "02:00"
+
+# Backend: restic, borg, rclone
+backend = "restic"
+
+[remote.restic]
+# Repository path (local, sftp, s3, etc)
+repository = ""
+
+# Password file for encryption
+password_file = "/etc/sanchala/backup-password"
+
+# Retention policy for remote backups
+keep_hourly = 24
+keep_daily = 7
+keep_weekly = 4
+keep_monthly = 12
+keep_yearly = 2
+
+[cloud]
+# Enable cloud sync (via rclone)
+enabled = false
+
+# rclone remote name
+remote = ""
+
+# Sync schedule
+schedule = "daily"
+time = "03:00"
+
+# Directories to sync
+sync_paths = ["/home"]
+
+[exclude]
+# Paths excluded from all backups
+paths = [
+    "/dev",
+    "/proc", 
+    "/sys",
+    "/tmp",
+    "/run",
+    "/mnt",
+    "/media",
+    "/lost+found",
+    "/var/cache",
+    "/var/tmp",
+    "/var/run",
+    "/home/*/.cache",
+    "/home/*/.local/share/Trash",
+    "/home/*/Downloads",
+    "*.tmp",
+    "*.swp",
+    "*.log",
+]
+
+[notifications]
+# Enable desktop notifications
+enabled = true
+
+# Notify on snapshot creation
+on_snapshot = false
+
+# Notify on backup completion
+on_backup = true
+
+# Notify on errors
+on_error = true

@@ -1,0 +1,22 @@
+{
+    "KPlugin": {
+        "Id": "kcm_sanchala_scheduler",
+        "Name": "Task Scheduler",
+        "Name[id]": "Penjadwal Tugas",
+        "Description": "Schedule automated tasks and system maintenance",
+        "Description[id]": "Jadwalkan tugas otomatis dan pemeliharaan sistem",
+        "Icon": "chronometer",
+        "Category": "System",
+        "Authors": [
+            {
+                "Name": "Sanchala OS Team",
+                "Email": "dev@sanchala-os.org"
+            }
+        ],
+        "License": "GPL-3.0",
+        "Version": "1.0.0"
+    },
+    "X-KDE-Keywords": "scheduler,timer,cron,automation,task,systemd,backup,maintenance",
+    "X-KDE-System-Settings-Parent-Category": "system",
+    "X-KDE-Weight": 60
+}

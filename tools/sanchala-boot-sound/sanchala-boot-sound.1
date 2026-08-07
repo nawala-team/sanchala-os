@@ -1,0 +1,34 @@
+.TH SANCHALA-BOOT-SOUND 1 "2024" "Sanchala OS" "User Commands"
+.SH NAME
+sanchala-boot-sound \- Startup and shutdown sound configuration
+.SH SYNOPSIS
+.B sanchala-boot-sound
+[\fIcommand\fR] [\fIoptions\fR]
+.SH DESCRIPTION
+Configure the sounds played during system startup and shutdown.
+.SH COMMANDS
+.TP
+.B status
+Show current settings
+.TP
+.B enable
+Enable boot sounds
+.TP
+.B disable
+Disable boot sounds
+.TP
+.B set \fIstartup|shutdown\fR \fIfile\fR
+Set custom sound file
+.TP
+.B volume \fIlevel\fR
+Set boot sound volume (0-100)
+.TP
+.B preview \fIstartup|shutdown\fR
+Play the configured sound
+.SH EXAMPLES
+.TP
+sanchala-boot-sound enable
+.TP
+sanchala-boot-sound set startup ~/Sounds/chime.wav
+.SH AUTHOR
+Sanchala OS Team

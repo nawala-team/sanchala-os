@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Wake-on-LAN
+Comment=Wake computers remotely using magic packets
+Exec=sanchala-wake-on-lan
+Icon=network-wired
+Terminal=false
+Type=Application
+Categories=Network;Utility;System;
+Keywords=wake;wol;lan;remote;power;magic packet;
+StartupNotify=true

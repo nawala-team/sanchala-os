@@ -1,0 +1,13 @@
+[Unit]
+Description=Sanchala OS Bandwidth Scheduler
+Documentation=https://sanchala.org/docs/downloads
+After=sanchala-aria2@%i.service
+
+[Service]
+Type=simple
+ExecStart=/usr/lib/sanchala/sanchala-bandwidth-scheduler.sh daemon
+Restart=on-failure
+RestartSec=30
+
+[Install]
+WantedBy=default.target

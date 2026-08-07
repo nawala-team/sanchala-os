@@ -1,0 +1,159 @@
+# ============================================================================
+# SANCHALA OS - USB Device Permissions & Configuration
+# ============================================================================
+# Location: /etc/udev/rules.d/81-sanchala-usb-devices.rules
+# Purpose: Proper permissions for USB peripherals (non-storage)
+# ============================================================================
+
+# ===========================================
+# USB SERIAL/MODEM DEVICES
+# ===========================================
+# USB Serial adapters
+SUBSYSTEM=="tty", KERNEL=="ttyUSB[0-9]*", MODE="0666", GROUP="dialout"
+SUBSYSTEM=="tty", KERNEL=="ttyACM[0-9]*", MODE="0666", GROUP="dialout"
+
+# ===========================================
+# ARDUINO / MICROCONTROLLERS
+# ===========================================
+# Arduino boards
+SUBSYSTEM=="usb", ATTR{idVendor}=="2341", MODE="0666", GROUP="uucp"
+SUBSYSTEM=="usb", ATTR{idVendor}=="1a86", MODE="0666", GROUP="uucp"
+
+# ESP32/ESP8266
+SUBSYSTEM=="usb", ATTR{idVendor}=="10c4", MODE="0666", GROUP="uucp"
+SUBSYSTEM=="usb", ATTR{idVendor}=="1a86", ATTR{idProduct}=="7523", MODE="0666", GROUP="uucp"
+
+# Teensy
+SUBSYSTEM=="usb", ATTR{idVendor}=="16c0", MODE="0666", GROUP="uucp"
+
+# STM32 bootloader
+SUBSYSTEM=="usb", ATTR{idVendor}=="0483", ATTR{idProduct}=="df11", MODE="0666", GROUP="uucp"
+
+# ===========================================
+# ANDROID DEVICES (ADB/Fastboot)
+# ===========================================
+# Generic Android ADB
+SUBSYSTEM=="usb", ATTR{idVendor}=="18d1", MODE="0666", GROUP="adbusers"
+
+# Samsung
+SUBSYSTEM=="usb", ATTR{idVendor}=="04e8", MODE="0666", GROUP="adbusers"
+
+# Xiaomi
+SUBSYSTEM=="usb", ATTR{idVendor}=="2717", MODE="0666", GROUP="adbusers"
+
+# OnePlus
+SUBSYSTEM=="usb", ATTR{idVendor}=="2a70", MODE="0666", GROUP="adbusers"
+
+# Huawei
+SUBSYSTEM=="usb", ATTR{idVendor}=="12d1", MODE="0666", GROUP="adbusers"
+
+# Sony
+SUBSYSTEM=="usb", ATTR{idVendor}=="0fce", MODE="0666", GROUP="adbusers"
+
+# LG
+SUBSYSTEM=="usb", ATTR{idVendor}=="1004", MODE="0666", GROUP="adbusers"
+
+# Motorola
+SUBSYSTEM=="usb", ATTR{idVendor}=="22b8", MODE="0666", GROUP="adbusers"
+
+# Pixel/Google
+SUBSYSTEM=="usb", ATTR{idVendor}=="18d1", MODE="0666", GROUP="adbusers"
+
+# ===========================================
+# GAME CONTROLLERS
+# ===========================================
+# Generic game controllers
+SUBSYSTEM=="usb", ATTR{bInterfaceClass}=="03", ATTR{bInterfaceSubClass}=="00", ATTR{bInterfaceProtocol}=="00", MODE="0666"
+
+# Xbox controllers
+SUBSYSTEM=="usb", ATTR{idVendor}=="045e", ATTR{idProduct}=="028e", MODE="0666"
+SUBSYSTEM=="usb", ATTR{idVendor}=="045e", ATTR{idProduct}=="02ea", MODE="0666"
+SUBSYSTEM=="usb", ATTR{idVendor}=="045e", ATTR{idProduct}=="0b12", MODE="0666"
+
+# PlayStation controllers
+SUBSYSTEM=="usb", ATTR{idVendor}=="054c", ATTR{idProduct}=="0ce6", MODE="0666"
+SUBSYSTEM=="usb", ATTR{idVendor}=="054c", ATTR{idProduct}=="09cc", MODE="0666"
+SUBSYSTEM=="usb", ATTR{idVendor}=="054c", ATTR{idProduct}=="05c4", MODE="0666"
+
+# Nintendo Switch Pro Controller
+SUBSYSTEM=="usb", ATTR{idVendor}=="057e", ATTR{idProduct}=="2009", MODE="0666"
+
+# Steam Controller
+SUBSYSTEM=="usb", ATTR{idVendor}=="28de", MODE="0666"
+
+# 8BitDo controllers
+SUBSYSTEM=="usb", ATTR{idVendor}=="2dc8", MODE="0666"
+
+# ===========================================
+# USB HID RAW ACCESS
+# ===========================================
+# Allow hidraw access for HID devices
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0666"
+
+# ===========================================
+# GRAPHICS TABLETS
+# ===========================================
+# Wacom tablets
+SUBSYSTEM=="usb", ATTR{idVendor}=="056a", MODE="0666", GROUP="input"
+KERNEL=="hidraw*", ATTRS{idVendor}=="056a", MODE="0666", GROUP="input"
+
+# Huion tablets
+SUBSYSTEM=="usb", ATTR{idVendor}=="256c", MODE="0666", GROUP="input"
+
+# XP-Pen tablets
+SUBSYSTEM=="usb", ATTR{idVendor}=="28bd", MODE="0666", GROUP="input"
+
+# ===========================================
+# USB AUDIO INTERFACES
+# ===========================================
+# Allow users to access USB audio devices
+SUBSYSTEM=="usb", ATTR{bInterfaceClass}=="01", MODE="0666", GROUP="audio"
+
+# Focusrite Scarlett
+SUBSYSTEM=="usb", ATTR{idVendor}=="1235", MODE="0666", GROUP="audio"
+
+# Behringer
+SUBSYSTEM=="usb", ATTR{idVendor}=="1397", MODE="0666", GROUP="audio"
+
+# Native Instruments
+SUBSYSTEM=="usb", ATTR{idVendor}=="17cc", MODE="0666", GROUP="audio"
+
+# ===========================================
+# MIDI DEVICES
+# ===========================================
+# USB MIDI class devices
+SUBSYSTEM=="usb", ATTR{bInterfaceClass}=="01", ATTR{bInterfaceSubClass}=="03", MODE="0666", GROUP="audio"
+KERNEL=="midi*", MODE="0666", GROUP="audio"
+
+# ===========================================
+# PRINTERS & SCANNERS
+# ===========================================
+# USB printers - lp group access
+SUBSYSTEM=="usb", ATTR{bInterfaceClass}=="07", MODE="0664", GROUP="lp"
+
+# SANE scanners
+SUBSYSTEM=="usb", ENV{libsane_matched}=="yes", MODE="0664", GROUP="scanner"
+
+# ===========================================
+# SMART CARD READERS
+# ===========================================
+SUBSYSTEM=="usb", ATTR{bInterfaceClass}=="0b", MODE="0666", GROUP="scard"
+
+# ===========================================
+# YUBIKEY / SECURITY KEYS
+# ===========================================
+# YubiKey
+SUBSYSTEM=="usb", ATTR{idVendor}=="1050", MODE="0666"
+KERNEL=="hidraw*", ATTRS{idVendor}=="1050", MODE="0666"
+
+# FIDO U2F devices
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1050", ATTRS{idProduct}=="0113|0114|0115|0116|0120|0121|0200|0402|0403|0406|0407|0410", MODE="0666"
+
+# Google Titan Key
+KERNEL=="hidraw*", ATTRS{idVendor}=="18d1", ATTRS{idProduct}=="5026", MODE="0666"
+
+# ===========================================
+# USB NETWORK ADAPTERS
+# ===========================================
+# Ethernet adapters - auto configure
+ACTION=="add", SUBSYSTEM=="net", ENV{ID_USB_DRIVER}=="*", RUN+="/usr/bin/systemctl restart NetworkManager"

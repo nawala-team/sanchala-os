@@ -1,0 +1,41 @@
+[Desktop Entry]
+Type=Service
+ServiceTypes=KonqPopupMenu/Plugin
+MimeType=all/allfiles;inode/directory;
+Actions=setOwnershipUser;setPermissions644;setPermissions755;makeExecutable
+X-KDE-Priority=TopLevel
+X-KDE-StartupNotify=false
+X-KDE-Submenu=Permissions
+X-KDE-Submenu-Icon=object-locked
+
+[Desktop Action setOwnershipUser]
+Name=Take Ownership
+Name[es]=Tomar propiedad
+Name[fr]=Prendre possession
+Name[de]=Besitz übernehmen
+Icon=user-identity
+Exec=pkexec chown -R $USER:$USER %F
+
+[Desktop Action setPermissions644]
+Name=Set Standard File Permissions (644)
+Name[es]=Establecer permisos estándar (644)
+Name[fr]=Définir les permissions standards (644)
+Name[de]=Standard-Dateiberechtigungen setzen (644)
+Icon=document-properties
+Exec=chmod 644 %F
+
+[Desktop Action setPermissions755]
+Name=Set Directory Permissions (755)
+Name[es]=Establecer permisos de directorio (755)
+Name[fr]=Définir les permissions de dossier (755)
+Name[de]=Ordnerberechtigungen setzen (755)
+Icon=folder-locked
+Exec=chmod 755 %F
+
+[Desktop Action makeExecutable]
+Name=Make Executable
+Name[es]=Hacer ejecutable
+Name[fr]=Rendre exécutable
+Name[de]=Ausführbar machen
+Icon=application-x-executable
+Exec=chmod +x %F

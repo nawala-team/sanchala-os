@@ -1,0 +1,12 @@
+NAME="Sanchala OS"
+PRETTY_NAME="Sanchala OS Gati"
+ID=sanchala
+ID_LIKE=arch
+BUILD_ID=rolling
+ANSI_COLOR="0;34"
+HOME_URL="https://sanchala.id"
+DOCUMENTATION_URL="https://docs.sanchala.id"
+SUPPORT_URL="https://forum.sanchala.id"
+BUG_REPORT_URL="https://github.com/dansiapa/sanchala-os/issues"
+PRIVACY_POLICY_URL="https://sanchala.id/privacy"
+LOGO=sanchala-logo

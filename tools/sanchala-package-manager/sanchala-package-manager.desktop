@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Sanchala Package Manager
+Comment=Install and manage software packages
+Exec=sanchala-package-manager-gui
+Icon=system-software-install
+Type=Application
+Categories=System;PackageManager;
+Keywords=package;install;software;pacman;

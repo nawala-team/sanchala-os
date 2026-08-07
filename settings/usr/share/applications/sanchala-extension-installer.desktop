@@ -1,0 +1,15 @@
+[Desktop Entry]
+Version=1.0
+Name=Sanchala Extension Installer
+Name[id]=Pemasang Ekstensi Sanchala
+Comment=Install Sanchala extension packages
+Comment[id]=Pasang paket ekstensi Sanchala
+GenericName=Extension Installer
+Exec=/usr/lib/sanchala/extension-installer %f
+Terminal=false
+Type=Application
+Icon=sanchala-extension
+Categories=Settings;
+MimeType=application/x-sanchala-extension;application/x-sanchala-widget;
+NoDisplay=true
+StartupNotify=true

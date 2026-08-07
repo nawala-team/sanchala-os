@@ -1,0 +1,150 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# SANCHALA OS - Package Build Pipeline
+# ══════════════════════════════════════════════════════════════════════════════
+# Builds Sanchala custom packages from pkgbuilds/ directory
+
+name: Build Packages
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'pkgbuilds/**'
+      - '.github/workflows/package-build.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'pkgbuilds/**'
+  workflow_dispatch:
+    inputs:
+      package:
+        description: 'Package to build (or "all")'
+        required: false
+        default: 'all'
+
+concurrency:
+  group: pkg-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ════════════════════════════════════════════════════════════════════════════
+  # DETECT CHANGED PACKAGES
+  # ════════════════════════════════════════════════════════════════════════════
+  detect:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    outputs:
+      packages: ${{ steps.detect.outputs.packages }}
+      matrix: ${{ steps.detect.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed packages
+        id: detect
+        run: |
+          if [[ "${{ github.event.inputs.package }}" == "all" ]] || [[ -z "${{ github.event.inputs.package }}" && "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            # Build all packages
+            PACKAGES=$(ls -d pkgbuilds/*/ 2>/dev/null | xargs -n1 basename | jq -R -s -c 'split("\n")[:-1]')
+          elif [[ -n "${{ github.event.inputs.package }}" ]]; then
+            # Build specific package
+            PACKAGES='["${{ github.event.inputs.package }}"]'
+          else
+            # Detect changed packages
+            CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- pkgbuilds/ | cut -d'/' -f2 | sort -u)
+            if [[ -z "$CHANGED" ]]; then
+              PACKAGES='[]'
+            else
+              PACKAGES=$(echo "$CHANGED" | jq -R -s -c 'split("\n")[:-1]')
+            fi
+          fi
+          echo "packages=${PACKAGES}" >> $GITHUB_OUTPUT
+          echo "matrix={\"package\":${PACKAGES}}" >> $GITHUB_OUTPUT
+          echo "📦 Packages to build: ${PACKAGES}"
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # BUILD PACKAGES
+  # ════════════════════════════════════════════════════════════════════════════
+  build:
+    name: Build ${{ matrix.package }}
+    needs: detect
+    if: needs.detect.outputs.packages != '[]'
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.detect.outputs.matrix) }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup build environment
+        run: |
+          pacman-key --init && pacman-key --populate archlinux
+          pacman -Syu --noconfirm
+          pacman -S --noconfirm --needed base-devel git namcap
+          
+          # Create build user (makepkg won't run as root)
+          useradd -m builder
+          echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+          chown -R builder:builder .
+
+      - name: Build package
+        run: |
+          cd pkgbuilds/${{ matrix.package }}
+          sudo -u builder makepkg -sf --noconfirm
+          
+          # List built packages
+          ls -la *.pkg.tar.*
+
+      - name: Validate with namcap
+        run: |
+          cd pkgbuilds/${{ matrix.package }}
+          for pkg in *.pkg.tar.*; do
+            echo "🔍 Checking $pkg..."
+            namcap "$pkg" || true
+          done
+          namcap PKGBUILD || true
+
+      - name: Upload package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pkg-${{ matrix.package }}
+          path: pkgbuilds/${{ matrix.package }}/*.pkg.tar.*
+          retention-days: 30
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # PUBLISH TO REPOSITORY
+  # ════════════════════════════════════════════════════════════════════════════
+  publish:
+    name: Publish to Repository
+    needs: [detect, build]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && needs.detect.outputs.packages != '[]'
+    environment: production
+    steps:
+      - name: Download all packages
+        uses: actions/download-artifact@v4
+        with:
+          pattern: pkg-*
+          path: packages/
+          merge-multiple: true
+
+      - name: List packages
+        run: ls -la packages/
+
+      - name: Upload to package repository
+        if: ${{ vars.REPO_UPLOAD_URL != '' }}
+        env:
+          REPO_SSH_KEY: ${{ secrets.REPO_SSH_KEY }}
+          REPO_UPLOAD_URL: ${{ vars.REPO_UPLOAD_URL }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$REPO_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "${REPO_UPLOAD_URL%%:*}" >> ~/.ssh/known_hosts 2>/dev/null || true
+          
+          rsync -avz --progress packages/*.pkg.tar.* "$REPO_UPLOAD_URL"
+          echo "✅ Packages uploaded to repository"

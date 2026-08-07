@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+check_cam() { lsof /dev/video* 2>/dev/null | grep -v COMMAND >/dev/null && echo active || echo inactive; }
+check_mic() { pactl list source-outputs 2>/dev/null | grep -q RUNNING && echo active || echo inactive; }
+check_loc() { pgrep -f geoclue >/dev/null 2>&1 && echo active || echo inactive; }
+case "${1:-status}" in
+  status) echo "Camera: $(check_cam)"; echo "Mic: $(check_mic)"; echo "Location: $(check_loc)" ;;
+  monitor) while true; do clear; echo "Camera: $(check_cam)"; echo "Mic: $(check_mic)"; sleep 2; done ;;
+  camera) check_cam ;; mic) check_mic ;; location) check_loc ;;
+  *) echo "Usage: sanchala-privacy-indicator {status|monitor|camera|mic|location}" ;;
+esac

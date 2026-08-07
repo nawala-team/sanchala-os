@@ -1,0 +1,113 @@
+#!/usr/bin/env python3
+"""Sanchala PDF Viewer - PDF Document Viewer"""
+import sys
+from pathlib import Path
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+
+class PDFViewer(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Sanchala PDF Viewer")
+        self.setMinimumSize(800, 600)
+        self.current_page = 1
+        self.total_pages = 1
+        self.zoom = 100
+        self.init_ui()
+        if len(sys.argv) > 1: self.open_file(sys.argv[1])
+    
+    def init_ui(self):
+        self.setStyleSheet("QMainWindow{background:#525659;}QLabel{color:#fff;}QPushButton{background:#3c3f41;color:#fff;border:none;padding:8px 12px;border-radius:4px;}QPushButton:hover{background:#4a4d4f;}")
+        
+        # Toolbar
+        tb = QToolBar(); tb.setStyleSheet("background:#3c3f41;border:none;padding:5px;spacing:5px;")
+        
+        open_btn = QPushButton("📂 Open"); open_btn.clicked.connect(lambda: self.open_file()); tb.addWidget(open_btn)
+        tb.addSeparator()
+        
+        self.prev_btn = QPushButton("◀"); self.prev_btn.clicked.connect(self.prev_page); tb.addWidget(self.prev_btn)
+        self.page_label = QLabel("1 / 1"); self.page_label.setStyleSheet("padding:0 10px;"); tb.addWidget(self.page_label)
+        self.next_btn = QPushButton("▶"); self.next_btn.clicked.connect(self.next_page); tb.addWidget(self.next_btn)
+        tb.addSeparator()
+        
+        zoom_out = QPushButton("−"); zoom_out.clicked.connect(lambda: self.set_zoom(-10)); tb.addWidget(zoom_out)
+        self.zoom_label = QLabel("100%"); self.zoom_label.setStyleSheet("padding:0 10px;"); tb.addWidget(self.zoom_label)
+        zoom_in = QPushButton("+"); zoom_in.clicked.connect(lambda: self.set_zoom(10)); tb.addWidget(zoom_in)
+        tb.addSeparator()
+        
+        for icon, tip in [("🔍", "Search"), ("🖨️", "Print"), ("💾", "Save")]:
+            b = QPushButton(icon); b.setToolTip(tip); tb.addWidget(b)
+        
+        self.addToolBar(tb)
+        
+        # Main area
+        main = QHBoxLayout()
+        
+        # Sidebar - thumbnails
+        self.sidebar = QListWidget()
+        self.sidebar.setFixedWidth(120)
+        self.sidebar.setStyleSheet("background:#2b2b2b;border:none;")
+        self.sidebar.currentRowChanged.connect(self.goto_page)
+        main.addWidget(self.sidebar)
+        
+        # PDF view
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setStyleSheet("border:none;")
+        self.pdf_view = QLabel("📄\n\nNo PDF loaded\n\nClick 'Open' to load a PDF file")
+        self.pdf_view.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.pdf_view.setStyleSheet("background:#fff;color:#333;font-size:16px;min-width:600px;min-height:800px;")
+        scroll.setWidget(self.pdf_view)
+        main.addWidget(scroll, 1)
+        
+        c = QWidget(); c.setLayout(main); self.setCentralWidget(c)
+        
+        # Status
+        self.status = self.statusBar()
+        self.status.setStyleSheet("background:#3c3f41;color:#fff;")
+    
+    def open_file(self, path=None):
+        if not path:
+            path, _ = QFileDialog.getOpenFileName(self, "Open PDF", "", "PDF Files (*.pdf)")
+        if path:
+            self.setWindowTitle(f"Sanchala PDF Viewer - {Path(path).name}")
+            self.total_pages = 10  # Simulated
+            self.current_page = 1
+            self.update_view()
+            
+            # Add thumbnails
+            self.sidebar.clear()
+            for i in range(1, self.total_pages + 1):
+                item = QListWidgetItem(f"Page {i}")
+                self.sidebar.addItem(item)
+            self.sidebar.setCurrentRow(0)
+            self.status.showMessage(f"Loaded: {path}")
+    
+    def update_view(self):
+        self.page_label.setText(f"{self.current_page} / {self.total_pages}")
+        self.pdf_view.setText(f"📄\n\nPage {self.current_page}\n\n[PDF content rendered here]\n\nZoom: {self.zoom}%")
+        self.prev_btn.setEnabled(self.current_page > 1)
+        self.next_btn.setEnabled(self.current_page < self.total_pages)
+    
+    def prev_page(self):
+        if self.current_page > 1:
+            self.current_page -= 1; self.update_view()
+            self.sidebar.setCurrentRow(self.current_page - 1)
+    
+    def next_page(self):
+        if self.current_page < self.total_pages:
+            self.current_page += 1; self.update_view()
+            self.sidebar.setCurrentRow(self.current_page - 1)
+    
+    def goto_page(self, row):
+        if row >= 0:
+            self.current_page = row + 1; self.update_view()
+    
+    def set_zoom(self, delta):
+        self.zoom = max(25, min(400, self.zoom + delta))
+        self.zoom_label.setText(f"{self.zoom}%")
+        self.update_view()
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv); w = PDFViewer(); w.show(); sys.exit(app.exec())

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Clipboard Sync
+Comment=Sync clipboard content across all your devices
+Exec=sanchala-clipboard-sync
+Icon=edit-paste
+Terminal=false
+Type=Application
+Categories=Network;Utility;
+Keywords=clipboard;sync;copy;paste;share;
+StartupNotify=true

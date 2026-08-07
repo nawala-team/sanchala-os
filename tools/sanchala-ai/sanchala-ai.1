@@ -1,0 +1,50 @@
+.TH SANCHALA-AI 1 "August 2026" "Sanchala OS" "User Commands"
+.SH NAME
+sanchala-ai \- Local AI assistant for Sanchala OS
+.SH SYNOPSIS
+.B sanchala-ai
+[\fIOPTIONS\fR] [\fICOMMAND\fR] [\fIARGS\fR]
+.SH DESCRIPTION
+.B sanchala-ai
+provides local, privacy-respecting AI capabilities including chat,
+OCR, smart suggestions, and system assistance. All processing runs
+locally using llama.cpp with no cloud dependency.
+.SH COMMANDS
+.TP
+.B chat \fR[\fIMESSAGE\fR]
+Interactive chat or single query
+.TP
+.B models
+List and manage AI models
+.TP
+.B status
+Show AI service status
+.SH OPTIONS
+.TP
+.B \-m, \-\-model \fINAME\fR
+Select model to use
+.TP
+.B \-\-json
+Output in JSON format
+.TP
+.B \-h, \-\-help
+Show help message
+.SH RELATED COMMANDS
+.TP
+.B sanchala-ocr \fIIMAGE\fR
+Extract text from images
+.TP
+.B sanchala-suggest \fIQUERY\fR
+Get smart search suggestions
+.SH FILES
+.TP
+.I /etc/sanchala/ai/ai.toml
+Configuration file
+.TP
+.I ~/.local/share/sanchala-ai/models/
+User model storage
+.SH SEE ALSO
+.BR sanchala-ocr (1),
+.BR sanchala-suggest (1)
+.SH AUTHOR
+Sanchala OS Team <dev@sanchala.id>

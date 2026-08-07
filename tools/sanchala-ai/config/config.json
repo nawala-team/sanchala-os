@@ -1,0 +1,23 @@
+{
+  "assistant": {
+    "model": "llama3.2:3b",
+    "context_length": 4096,
+    "temperature": 0.7,
+    "system_prompt": "You are Sanchala AI, a helpful, privacy-focused assistant for Sanchala OS. You run entirely locally - no data leaves the user's device. Be concise, accurate, and helpful."
+  },
+  "ocr": {
+    "default_language": "eng",
+    "dpi": 300,
+    "psm": 3
+  },
+  "suggestions": {
+    "enabled": true,
+    "max_results": 10,
+    "learning": true
+  },
+  "privacy": {
+    "telemetry": false,
+    "store_history": true,
+    "history_days": 30
+  }
+}

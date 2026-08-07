@@ -1,0 +1,147 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0
+# Sanchala Workspaces - Virtual desktop management
+"""Manage workspaces with beautiful transitions and organization"""
+
+import sys, json, argparse, subprocess
+from pathlib import Path
+
+VERSION = "1.0.0"
+CONFIG_DIR = Path.home() / ".config" / "sanchala" / "workspaces"
+
+class WorkspacesConfig:
+    def __init__(self):
+        CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+        self.file = CONFIG_DIR / "config.json"
+        self.data = self._load()
+    
+    def _load(self):
+        defaults = {"count": 4, "rows": 1, "wrap": True,
+                    "animation": "slide", "names": ["Main", "Work", "Personal", "Media"],
+                    "wallpapers": {}}
+        if self.file.exists():
+            try: defaults.update(json.load(open(self.file)))
+            except: pass
+        return defaults
+    
+    def save(self):
+        with open(self.file, 'w') as f: json.dump(self.data, f, indent=2)
+
+def get_current():
+    try:
+        r = subprocess.run(["wmctrl", "-d"], capture_output=True, text=True)
+        for line in r.stdout.strip().split('\n'):
+            parts = line.split()
+            if len(parts) > 1 and parts[1] == "*":
+                return int(parts[0])
+    except: pass
+    return 0
+
+def get_count():
+    try:
+        r = subprocess.run(["wmctrl", "-d"], capture_output=True, text=True)
+        return len(r.stdout.strip().split('\n'))
+    except: return 4
+
+def switch_to(index: int):
+    subprocess.run(["wmctrl", "-s", str(index)])
+
+def cmd_status(args):
+    config = WorkspacesConfig()
+    current = get_current()
+    count = get_count()
+    
+    print(f"\n🖥️  Workspaces\n" + "━"*40)
+    for i in range(count):
+        marker = "●" if i == current else "○"
+        name = config.data["names"][i] if i < len(config.data["names"]) else f"Desktop {i+1}"
+        print(f"  {marker} {i+1}. {name}")
+    print()
+    return 0
+
+def cmd_switch(args):
+    idx = args.number - 1
+    if idx < 0: idx = 0
+    switch_to(idx)
+    config = WorkspacesConfig()
+    name = config.data["names"][idx] if idx < len(config.data["names"]) else f"Desktop {idx+1}"
+    print(f"✅ Switched to: {name}")
+    return 0
+
+def cmd_next(args):
+    current = get_current()
+    count = get_count()
+    next_ws = (current + 1) % count
+    switch_to(next_ws)
+    return 0
+
+def cmd_prev(args):
+    current = get_current()
+    count = get_count()
+    prev_ws = (current - 1) % count
+    switch_to(prev_ws)
+    return 0
+
+def cmd_move(args):
+    """Move current window to workspace"""
+    subprocess.run(["wmctrl", "-r", ":ACTIVE:", "-t", str(args.number - 1)])
+    print(f"✅ Moved window to workspace {args.number}")
+    return 0
+
+def cmd_rename(args):
+    config = WorkspacesConfig()
+    idx = args.number - 1
+    while len(config.data["names"]) <= idx:
+        config.data["names"].append(f"Desktop {len(config.data['names'])+1}")
+    config.data["names"][idx] = args.name
+    config.save()
+    print(f"✅ Workspace {args.number} renamed to: {args.name}")
+    return 0
+
+def cmd_add(args):
+    config = WorkspacesConfig()
+    config.data["count"] += 1
+    config.data["names"].append(args.name or f"Desktop {config.data['count']}")
+    config.save()
+    # Apply to desktop
+    subprocess.run(["kwriteconfig5", "--file", "kwinrc", "--group", "Desktops",
+                   "--key", "Number", str(config.data["count"])], capture_output=True)
+    subprocess.run(["qdbus", "org.kde.KWin", "/KWin", "reconfigure"], capture_output=True)
+    print(f"✅ Added workspace: {config.data['names'][-1]}")
+    return 0
+
+def cmd_remove(args):
+    config = WorkspacesConfig()
+    if config.data["count"] > 1:
+        config.data["count"] -= 1
+        if config.data["names"]:
+            config.data["names"].pop()
+        config.save()
+        subprocess.run(["kwriteconfig5", "--file", "kwinrc", "--group", "Desktops",
+                       "--key", "Number", str(config.data["count"])], capture_output=True)
+        subprocess.run(["qdbus", "org.kde.KWin", "/KWin", "reconfigure"], capture_output=True)
+        print(f"✅ Removed last workspace")
+    return 0
+
+def main():
+    p = argparse.ArgumentParser(prog="sanchala-workspaces", description="🖥️ Workspaces")
+    p.add_argument("--version", action="version", version=f"%(prog)s {VERSION}")
+    sub = p.add_subparsers(dest="cmd")
+    
+    sub.add_parser("status", aliases=["list"], help="Show workspaces")
+    s = sub.add_parser("switch", aliases=["go"], help="Switch workspace"); s.add_argument("number", type=int)
+    sub.add_parser("next", help="Next workspace")
+    sub.add_parser("prev", help="Previous workspace")
+    s = sub.add_parser("move", help="Move window"); s.add_argument("number", type=int)
+    s = sub.add_parser("rename", help="Rename"); s.add_argument("number", type=int); s.add_argument("name")
+    s = sub.add_parser("add", help="Add workspace"); s.add_argument("name", nargs="?")
+    sub.add_parser("remove", help="Remove last workspace")
+    
+    args = p.parse_args()
+    cmds = {"status": cmd_status, "list": cmd_status, "switch": cmd_switch, "go": cmd_switch,
+            "next": cmd_next, "prev": cmd_prev, "move": cmd_move, "rename": cmd_rename,
+            "add": cmd_add, "remove": cmd_remove}
+    if args.cmd in cmds: return cmds[args.cmd](args)
+    return cmd_status(args)
+
+if __name__ == "__main__": sys.exit(main())

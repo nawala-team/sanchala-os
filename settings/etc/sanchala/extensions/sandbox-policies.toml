@@ -1,0 +1,110 @@
+# ============================================
+# SANCHALA OS - Extension Sandbox Policies
+# ============================================
+# Security policies for different extension types
+# ============================================
+
+# Plasmoid sandbox profile
+[profile.plasmoid]
+description = "Desktop widgets and panel applets"
+security_level = "medium"
+
+# Filesystem access
+[profile.plasmoid.filesystem]
+read = [
+    "/usr/share/plasma",
+    "/usr/share/icons",
+    "/usr/share/fonts",
+    "/usr/share/color-schemes",
+    "~/.local/share/plasma/plasmoids/${id}",
+    "~/.config/plasma*",
+    "~/.config/kdeglobals"
+]
+write = [
+    "~/.config/sanchala/extensions/${id}",
+    "/tmp/sanchala-ext-${id}"
+]
+deny = [
+    "~/.ssh",
+    "~/.gnupg",
+    "~/.config/sanchala/security"
+]
+
+# Network access (requires permission)
+[profile.plasmoid.network]
+default = "none"
+allowed_protocols = ["https"]
+blocked_hosts = ["localhost", "127.0.0.1", "::1"]
+
+# D-Bus access
+[profile.plasmoid.dbus]
+session = [
+    "org.kde.StatusNotifierWatcher",
+    "org.kde.plasma.*",
+    "org.freedesktop.Notifications",
+    "org.freedesktop.PowerManagement"
+]
+system = []
+
+# Seccomp filter
+[profile.plasmoid.seccomp]
+deny = [
+    "mount", "umount", "umount2",
+    "ptrace", "process_vm_readv", "process_vm_writev",
+    "reboot", "sethostname", "setdomainname",
+    "init_module", "delete_module",
+    "kexec_load", "kexec_file_load"
+]
+
+# KWin script sandbox profile
+[profile.kwin-script]
+description = "Window management scripts"
+security_level = "medium"
+
+[profile.kwin-script.filesystem]
+read = [
+    "/usr/share/kwin",
+    "~/.local/share/kwin/scripts/${id}",
+    "~/.config/kwinrc",
+    "~/.config/kwinrulesrc"
+]
+write = [
+    "~/.config/sanchala/extensions/${id}"
+]
+
+[profile.kwin-script.network]
+default = "none"
+
+[profile.kwin-script.dbus]
+session = ["org.kde.KWin"]
+system = []
+
+# Theme sandbox profile (static content only)
+[profile.theme]
+description = "Visual themes and color schemes"
+security_level = "high"
+
+[profile.theme.filesystem]
+read = [
+    "/usr/share/plasma/desktoptheme/${id}",
+    "/usr/share/color-schemes",
+    "/usr/share/aurorae/themes/${id}"
+]
+write = []
+
+[profile.theme.network]
+default = "none"
+
+[profile.theme.dbus]
+session = []
+system = []
+
+# Trusted extensions (Sanchala-signed)
+[profile.trusted]
+description = "Verified Sanchala extensions"
+security_level = "low"
+inherit = "plasmoid"
+
+[profile.trusted.limits]
+cpu_percent = 25
+memory_mb = 256

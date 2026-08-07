@@ -1,0 +1,36 @@
+#!/bin/bash
+# Sanchala Default Applications
+set -euo pipefail
+
+CONFIG_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/mimeapps.list"
+
+get_default() {
+    local mime="$1"
+    xdg-mime query default "$mime" 2>/dev/null
+}
+
+set_default() {
+    local mime="$1" app="$2"
+    xdg-mime default "$app" "$mime" && echo "Set $mime -> $app"
+}
+
+show_defaults() {
+    echo "=== Default Applications ==="
+    echo "Web Browser: $(get_default x-scheme-handler/http)"
+    echo "Email: $(get_default x-scheme-handler/mailto)"
+    echo "File Manager: $(get_default inode/directory)"
+    echo "Text Editor: $(get_default text/plain)"
+    echo "Image Viewer: $(get_default image/jpeg)"
+    echo "Video Player: $(get_default video/mp4)"
+    echo "Music Player: $(get_default audio/mpeg)"
+    echo "PDF Reader: $(get_default application/pdf)"
+}
+
+case "${1:-show}" in
+    show) show_defaults ;;
+    set) set_default "$2" "$3" ;;
+    browser) set_default "x-scheme-handler/http" "$2"; set_default "x-scheme-handler/https" "$2" ;;
+    email) set_default "x-scheme-handler/mailto" "$2" ;;
+    gui) exec sanchala-default-apps-gui ;;
+    *) echo "Usage: $0 {show|set|browser|email|gui}" ;;
+esac

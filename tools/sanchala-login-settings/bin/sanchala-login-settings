@@ -1,0 +1,124 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0
+# Sanchala Login Settings - Configure login screen (SDDM)
+"""Customize the login screen appearance and behavior"""
+
+import sys, json, argparse, subprocess
+from pathlib import Path
+
+VERSION = "1.0.0"
+CONFIG_DIR = Path.home() / ".config" / "sanchala" / "login"
+SDDM_CONF = Path("/etc/sddm.conf.d/sanchala.conf")
+
+class LoginConfig:
+    def __init__(self):
+        CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+        self.file = CONFIG_DIR / "config.json"
+        self.data = self._load()
+    
+    def _load(self):
+        defaults = {"theme": "breeze", "background": "", "autologin_user": "",
+                    "autologin_enabled": False, "numlock": "on", "show_user_list": True}
+        if self.file.exists():
+            try: defaults.update(json.load(open(self.file)))
+            except: pass
+        return defaults
+    
+    def save(self):
+        with open(self.file, 'w') as f: json.dump(self.data, f, indent=2)
+
+def get_themes():
+    themes = []
+    theme_dirs = [Path("/usr/share/sddm/themes"), Path("/usr/local/share/sddm/themes")]
+    for d in theme_dirs:
+        if d.exists():
+            themes.extend([t.name for t in d.iterdir() if t.is_dir()])
+    return themes
+
+def cmd_status(args):
+    config = LoginConfig()
+    print(f"\n🔐 Login Screen Settings\n" + "━"*40)
+    print(f"  Theme:      {config.data['theme']}")
+    print(f"  Background: {config.data['background'] or 'Default'}")
+    print(f"  Autologin:  {'Enabled' if config.data['autologin_enabled'] else 'Disabled'}")
+    print(f"  NumLock:    {config.data['numlock']}")
+    print()
+    return 0
+
+def cmd_theme(args):
+    config = LoginConfig()
+    if args.name:
+        themes = get_themes()
+        if args.name not in themes:
+            print(f"❌ Theme not found. Available: {', '.join(themes)}")
+            return 1
+        config.data["theme"] = args.name
+        config.save()
+        print(f"✅ Theme set to: {args.name}")
+        print("   Restart SDDM to apply: sudo systemctl restart sddm")
+    else:
+        print("\n🎨 Available Themes:")
+        for t in get_themes():
+            marker = "→" if t == config.data["theme"] else " "
+            print(f"  {marker} {t}")
+        print()
+    return 0
+
+def cmd_background(args):
+    config = LoginConfig()
+    if args.path:
+        path = Path(args.path).resolve()
+        if not path.exists():
+            print(f"❌ File not found: {args.path}")
+            return 1
+        config.data["background"] = str(path)
+        config.save()
+        print(f"✅ Background set")
+    return 0
+
+def cmd_autologin(args):
+    config = LoginConfig()
+    if args.action == "enable":
+        if not args.user:
+            print("❌ Specify user: --user USERNAME")
+            return 1
+        config.data["autologin_enabled"] = True
+        config.data["autologin_user"] = args.user
+        config.save()
+        print(f"✅ Autologin enabled for: {args.user}")
+    elif args.action == "disable":
+        config.data["autologin_enabled"] = False
+        config.save()
+        print("✅ Autologin disabled")
+    return 0
+
+def cmd_numlock(args):
+    config = LoginConfig()
+    config.data["numlock"] = args.state
+    config.save()
+    print(f"✅ NumLock: {args.state}")
+    return 0
+
+def main():
+    p = argparse.ArgumentParser(prog="sanchala-login-settings", description="🔐 Login Settings")
+    p.add_argument("--version", action="version", version=f"%(prog)s {VERSION}")
+    sub = p.add_subparsers(dest="cmd")
+    
+    sub.add_parser("status", help="Show settings")
+    s = sub.add_parser("theme", help="Set theme"); s.add_argument("name", nargs="?")
+    s = sub.add_parser("background", help="Set background"); s.add_argument("path")
+    s = sub.add_parser("autologin", help="Autologin settings")
+    s.add_argument("action", choices=["enable","disable"])
+    s.add_argument("-u", "--user")
+    s = sub.add_parser("numlock", help="NumLock state")
+    s.add_argument("state", choices=["on","off","keep"])
+    sub.add_parser("gui", help="Open GUI")
+    
+    args = p.parse_args()
+    cmds = {"status": cmd_status, "theme": cmd_theme, "background": cmd_background,
+            "autologin": cmd_autologin, "numlock": cmd_numlock,
+            "gui": lambda a: subprocess.run(["kcmshell5", "sddm"]) or 0}
+    if args.cmd in cmds: return cmds[args.cmd](args)
+    return cmd_status(args)
+
+if __name__ == "__main__": sys.exit(main())

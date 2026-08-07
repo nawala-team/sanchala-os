@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Sanchala Archive Manager
+Comment=Compress and extract archives
+Exec=sanchala-archive-manager-gui %F
+Icon=ark
+Type=Application
+Categories=Utility;Archiving;
+MimeType=application/x-tar;application/x-gzip;application/zip;application/x-7z-compressed;
+Keywords=archive;compress;extract;zip;tar;

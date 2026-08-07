@@ -1,0 +1,83 @@
+# Sanchala Browser Build Configuration
+import("//build/config/chrome_build.gni")
+import("//build/config/features.gni")
+
+declare_args() {
+  sanchala_product_name = "Sanchala"
+  sanchala_version = "1.0.0"
+  sanchala_vendor = "Sanchala OS"
+  sanchala_enable_shield = true
+  sanchala_enable_tor = true
+  sanchala_enable_vpn = true
+  sanchala_strict_isolation = true
+  sanchala_doh_default = true
+  sanchala_ech_enabled = true
+  sanchala_fingerprint_protection = true
+  sanchala_keychain_integration = true
+  sanchala_kde_theme = true
+}
+
+executable("sanchala_browser") {
+  output_name = "sanchala"
+  sources = [
+    "src/core/main.cc",
+    "src/core/browser_main.cc",
+  ]
+  deps = [
+    ":sanchala_core",
+    ":sanchala_shield", 
+    ":sanchala_security",
+    ":sanchala_ui",
+    ":sanchala_services",
+    "//chrome:chrome_initial",
+  ]
+  defines = [ "SANCHALA_BROWSER", "SANCHALA_VERSION=\"$sanchala_version\"" ]
+}
+
+source_set("sanchala_core") {
+  sources = [
+    "src/core/sanchala_browser.cc",
+    "src/core/sanchala_browser.h",
+    "src/core/sanchala_content_client.cc",
+    "src/core/sanchala_content_browser_client.cc",
+  ]
+  deps = [ "//base", "//content/public/browser" ]
+}
+
+source_set("sanchala_shield") {
+  sources = [
+    "src/shield/shield_service.cc",
+    "src/shield/filter_engine.cc",
+    "src/shield/adblock_rules.cc",
+    "src/shield/tracker_database.cc",
+  ]
+  deps = [ "//base", "//net" ]
+}
+
+source_set("sanchala_security") {
+  sources = [
+    "src/security/fingerprint_protection.cc",
+    "src/security/webrtc_protection.cc",
+    "src/security/canvas_protection.cc",
+    "src/security/doh_service.cc",
+  ]
+  deps = [ "//base", "//net", "//components/safe_browsing" ]
+}
+
+source_set("sanchala_ui") {
+  sources = [
+    "src/ui/sanchala_window.cc",
+    "src/ui/vertical_tabs.cc",
+    "src/ui/sidebar.cc",
+  ]
+  deps = [ "//ui/views" ]
+}
+
+source_set("sanchala_services") {
+  sources = [
+    "src/services/sync_service.cc",
+    "src/services/password_manager.cc",
+    "src/services/tor_service.cc",
+  ]
+  deps = [ "//components/sync" ]
+}

@@ -1,0 +1,11 @@
+[Unit]
+Description=Sanchala Backup - Daily Cloud Sync Timer
+Documentation=man:rclone(1)
+
+[Timer]
+OnCalendar=*-*-* 03:00:00
+Persistent=true
+RandomizedDelaySec=30min
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,71 @@
+#!/bin/bash
+# ============================================
+# SANCHALA OS - Guest Session Start Script
+# ============================================
+# Called by PAM when guest user logs in
+# /usr/lib/sanchala/guest-session-start
+# ============================================
+
+set -e
+
+GUEST_USER="guest"
+GUEST_HOME="/home/guest"
+GUEST_UID=65534
+TMPFS_SIZE="512M"
+LOG_FILE="/var/log/sanchala/guest-session.log"
+
+log() {
+    echo "$(date '+%Y-%m-%d %H:%M:%S') [guest-session] $1" >> "$LOG_FILE"
+}
+
+# Only run for guest user
+if [ "$PAM_USER" != "$GUEST_USER" ]; then
+    exit 0
+fi
+
+log "Starting guest session"
+
+# Create log directory
+mkdir -p /var/log/sanchala
+
+# Create tmpfs for guest home
+log "Mounting tmpfs for guest home"
+mkdir -p "$GUEST_HOME"
+mount -t tmpfs -o size=$TMPFS_SIZE,mode=700,uid=$GUEST_UID,gid=$GUEST_UID tmpfs "$GUEST_HOME"
+
+# Copy skeleton files
+log "Copying skeleton files"
+cp -rT /etc/skel "$GUEST_HOME"
+
+# Apply guest-specific overlay
+if [ -d /etc/skel-guest ]; then
+    cp -rT /etc/skel-guest "$GUEST_HOME"
+fi
+
+# Create standard directories
+mkdir -p "$GUEST_HOME"/{Documents,Downloads,Pictures,Music,Videos}
+mkdir -p "$GUEST_HOME/.cache"
+mkdir -p "$GUEST_HOME/.local/share"
+
+# Set ownership
+chown -R $GUEST_UID:$GUEST_UID "$GUEST_HOME"
+
+# Create private /tmp for guest
+GUEST_TMP="/tmp/guest-session-$$"
+mkdir -p "$GUEST_TMP"
+chmod 700 "$GUEST_TMP"
+chown $GUEST_UID:$GUEST_UID "$GUEST_TMP"
+
+# Set environment
+echo "TMPDIR=$GUEST_TMP" >> "$GUEST_HOME/.pam_environment"
+
+# Apply AppArmor profile if available
+if command -v aa-exec &> /dev/null; then
+    log "AppArmor guest profile available"
+fi
+
+# Record session start
+echo "$(date '+%Y-%m-%d %H:%M:%S')" > "$GUEST_HOME/.session_start"
+
+log "Guest session started successfully"
+exit 0

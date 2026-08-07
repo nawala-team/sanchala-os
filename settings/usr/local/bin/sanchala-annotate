@@ -1,0 +1,96 @@
+#!/bin/bash
+# ============================================
+# SANCHALA OS - Screenshot Annotation Tool
+# ============================================
+# Quick annotation for screenshots
+# Usage: sanchala-annotate [image_file]
+# ============================================
+
+set -euo pipefail
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+usage() {
+    cat << EOF
+SANCHALA OS - Screenshot Annotation Tool
+
+Usage: $(basename "$0") [OPTIONS] [IMAGE_FILE]
+
+Options:
+    -k, --krita         Open in Krita (full editor)
+    -g, --gwenview      Open in Gwenview (quick edit)
+    -s, --spectacle     Open in Spectacle (built-in)
+    -c, --clipboard     Get image from clipboard
+    -h, --help          Show this help
+
+Without options, uses Spectacle's built-in annotation.
+EOF
+    exit 0
+}
+
+check_image() {
+    local file="$1"
+    [[ -f "$file" ]] || { echo -e "${RED}File not found: $file${NC}" >&2; exit 1; }
+    file --mime-type "$file" | grep -q "image/" || { echo -e "${RED}Not an image: $file${NC}" >&2; exit 1; }
+}
+
+annotate_spectacle() {
+    local image="$1"
+    echo -e "${BLUE}Opening in Spectacle...${NC}"
+    spectacle -e "$image" 2>/dev/null &
+}
+
+annotate_krita() {
+    local image="$1"
+    echo -e "${BLUE}Opening in Krita...${NC}"
+    krita "$image" 2>/dev/null &
+}
+
+annotate_gwenview() {
+    local image="$1"
+    echo -e "${BLUE}Opening in Gwenview...${NC}"
+    gwenview "$image" 2>/dev/null &
+}
+
+main() {
+    local image_file="" editor="spectacle" from_clipboard=false
+    
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -k|--krita) editor="krita"; shift ;;
+            -g|--gwenview) editor="gwenview"; shift ;;
+            -s|--spectacle) editor="spectacle"; shift ;;
+            -c|--clipboard) from_clipboard=true; shift ;;
+            -h|--help) usage ;;
+            -*) echo -e "${RED}Unknown: $1${NC}" >&2; usage ;;
+            *) image_file="$1"; shift ;;
+        esac
+    done
+    
+    # Get from clipboard if requested
+    if [[ "$from_clipboard" == true ]] || [[ -z "$image_file" ]]; then
+        image_file=$(mktemp --suffix=.png)
+        if wl-paste -t image/png > "$image_file" 2>/dev/null && [[ -s "$image_file" ]]; then
+            echo -e "${GREEN}Using image from clipboard${NC}"
+        else
+            rm -f "$image_file"
+            echo -e "${RED}No image in clipboard${NC}" >&2
+            exit 1
+        fi
+    fi
+    
+    check_image "$image_file"
+    
+    case "$editor" in
+        krita) annotate_krita "$image_file" ;;
+        gwenview) annotate_gwenview "$image_file" ;;
+        spectacle) annotate_spectacle "$image_file" ;;
+    esac
+    
+    echo -e "${GREEN}✓ Annotation tool opened${NC}"
+}
+
+main "$@"

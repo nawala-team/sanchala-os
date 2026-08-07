@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+# Sanchala Cloud System Tray Application
+# Provides quick access to cloud sync status and controls
+
+set -euo pipefail
+
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/sanchala-cloud"
+CLOUD_ROOT="$HOME/Cloud"
+
+# Check for kdialog
+if ! command -v kdialog &>/dev/null; then
+    echo "Error: kdialog required" >&2
+    exit 1
+fi
+
+show_status_menu() {
+    local accounts status_text=""
+    accounts=$(sanchala-cloud list 2>/dev/null | tail -n +3 || echo "")
+    
+    if [[ -z "$accounts" ]]; then
+        status_text="No cloud accounts configured"
+    else
+        while IFS= read -r line; do
+            [[ -n "$line" ]] && status_text+="$line\n"
+        done <<< "$accounts"
+    fi
+    
+    local choice
+    choice=$(kdialog --icon folder-cloud --title "Sanchala Cloud" \
+        --menu "Cloud Storage Status" \
+        "sync" "🔄 Sync All Now" \
+        "add" "➕ Add Account" \
+        "open" "📂 Open Cloud Folder" \
+        "settings" "⚙️ Settings" \
+        "status" "📊 Detailed Status" \
+        2>/dev/null) || return
+    
+    case "$choice" in
+        sync)
+            kdialog --passivepopup "Syncing all accounts..." 3
+            sanchala-cloud sync
+            kdialog --passivepopup "Sync complete" 3
+            ;;
+        add)
+            show_add_account
+            ;;
+        open)
+            xdg-open "$CLOUD_ROOT"
+            ;;
+        settings)
+            xdg-open "$CONFIG_DIR/config.conf"
+            ;;
+        status)
+            sanchala-cloud status | kdialog --textbox - 400 300
+            ;;
+    esac
+}
+
+show_add_account() {
+    local provider
+    provider=$(kdialog --icon folder-cloud --title "Add Cloud Account" \
+        --menu "Select Provider" \
+        "gdrive" "Google Drive" \
+        "dropbox" "Dropbox" \
+        "onedrive" "Microsoft OneDrive" \
+        "nextcloud" "Nextcloud" \
+        "mega" "MEGA" \
+        "webdav" "WebDAV Server" \
+        "sftp" "SFTP/SSH" \
+        2>/dev/null) || return
+    
+    konsole -e sanchala-cloud add "$provider"
+}
+
+# Main tray loop using kdialog
+main() {
+    while true; do
+        show_status_menu
+        sleep 1
+    done
+}
+
+main "$@"

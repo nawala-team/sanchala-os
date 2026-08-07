@@ -1,0 +1,21 @@
+{
+    "KPlugin": {
+        "Id": "sanchala-stage-manager",
+        "Name": "Sanchala Stage Manager",
+        "Description": "macOS-style Stage Manager for SANCHALA OS with window grouping and elegant overview",
+        "Icon": "preferences-system-windows",
+        "Authors": [
+            {
+                "Name": "SANCHALA OS Team",
+                "Email": "dev@sanchala.os"
+            }
+        ],
+        "Category": "Window Management",
+        "License": "GPL-3.0",
+        "Version": "1.0.0",
+        "Website": "https://sanchala.os",
+        "EnabledByDefault": true
+    },
+    "X-Plasma-API": "javascript",
+    "X-Plasma-MainScript": "contents/code/main.js"
+}

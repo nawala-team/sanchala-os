@@ -1,0 +1,12 @@
+[Unit]
+Description=Sanchala Bluetooth Auto-Connect for %i
+After=bluetooth.target
+Wants=bluetooth.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/sanchala-bt-autoconnect
+RemainAfterExit=no
+
+[Install]
+WantedBy=multi-user.target

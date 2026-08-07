@@ -1,0 +1,46 @@
+# Maintainer: Sanchala Team <dev@sanchala.id>
+
+pkgname=sanchala-welcome
+pkgver=1.0.0
+pkgrel=1
+pkgdesc='Sanchala OS Welcome application'
+arch=('x86_64' 'aarch64')
+url='https://sanchala.id'
+license=('GPL3')
+groups=('sanchala')
+depends=(
+    'qt6-base'
+    'qt6-declarative'
+    'qt6-svg'
+    'hicolor-icon-theme'
+)
+makedepends=('cmake' 'qt6-tools')
+optdepends=(
+    'calamares: system installer'
+    'sanchala-guardian: security center'
+)
+
+build() {
+    cd "$srcdir/sanchala-welcome"
+    cmake -B build \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DCMAKE_BUILD_TYPE=Release
+    cmake --build build
+}
+
+package() {
+    cd "$srcdir/sanchala-welcome"
+    DESTDIR="$pkgdir" cmake --install build
+    
+    # Desktop entry
+    install -Dm644 "sanchala-welcome.desktop" \
+        "$pkgdir/usr/share/applications/sanchala-welcome.desktop"
+    
+    # Autostart on first login
+    install -Dm644 "sanchala-welcome.desktop" \
+        "$pkgdir/etc/xdg/autostart/sanchala-welcome.desktop"
+    
+    # Icon
+    install -Dm644 "icons/sanchala-welcome.svg" \
+        "$pkgdir/usr/share/icons/hicolor/scalable/apps/sanchala-welcome.svg"
+}

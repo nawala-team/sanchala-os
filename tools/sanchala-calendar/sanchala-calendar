@@ -1,0 +1,3 @@
+#!/bin/bash
+# Sanchala Calendar
+exec sanchala-calendar-gui "$@"

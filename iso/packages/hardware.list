@@ -1,0 +1,197 @@
+# ============================================================================
+# SANCHALA OS - Hardware & Peripheral Packages
+# ============================================================================
+# Complete plug-and-play support for printers, scanners, USB, Thunderbolt,
+# external displays, and common peripherals
+# ============================================================================
+
+# ===========================================
+# PRINTING (CUPS)
+# ===========================================
+cups
+cups-filters
+cups-pk-helper
+cups-pdf
+system-config-printer
+print-manager
+
+# Printer drivers - comprehensive coverage
+gutenprint
+foomatic-db
+foomatic-db-engine
+foomatic-db-gutenprint-ppds
+foomatic-db-nonfree
+foomatic-db-nonfree-ppds
+
+# HP printers (very common)
+hplip
+
+# Brother printers
+# brother-mfc (AUR - manual install)
+
+# Canon printers
+# cnijfilter2 (AUR - manual install)
+
+# Epson printers
+# epson-inkjet-printer-escpr (AUR)
+# epson-inkjet-printer-escpr2 (AUR)
+
+# IPP Everywhere (driverless printing)
+ipp-usb
+
+# Avahi for network printer discovery
+avahi
+nss-mdns
+
+# ===========================================
+# SCANNING (SANE)
+# ===========================================
+sane
+sane-airscan
+simple-scan
+skanlite
+
+# Scanner backends
+libieee1284
+
+# ===========================================
+# USB SUPPORT
+# ===========================================
+usbutils
+usb_modeswitch
+usbguard
+libusb
+
+# USB storage
+udisks2
+udiskie
+gvfs
+gvfs-mtp
+gvfs-gphoto2
+gvfs-afc
+gvfs-smb
+gvfs-nfs
+
+# MTP (Android phones)
+libmtp
+android-file-transfer
+jmtpfs
+
+# PTP (Cameras)
+gphoto2
+libgphoto2
+
+# ===========================================
+# THUNDERBOLT/USB4
+# ===========================================
+bolt
+thunderbolt-tools
+
+# ===========================================
+# EXTERNAL DISPLAYS
+# ===========================================
+# Monitor control via DDC/CI
+ddcutil
+ddcui
+i2c-tools
+
+# Display configuration
+autorandr
+arandr
+
+# KDE display management (already in desktop.list)
+# kscreen
+
+# Color management
+colord
+argyllcms
+
+# ===========================================
+# INPUT DEVICES
+# ===========================================
+libinput
+xf86-input-libinput
+
+# Graphics tablets
+libwacom
+xf86-input-wacom
+
+# Game controllers
+game-devices-udev
+xboxdrv
+steam-devices
+
+# ===========================================
+# SMART CARD & SECURITY KEYS
+# ===========================================
+ccid
+pcsc-tools
+opensc
+libfido2
+
+# ===========================================
+# SERIAL/EMBEDDED DEVELOPMENT
+# ===========================================
+picocom
+minicom
+arduino-cli
+
+# ===========================================
+# WEBCAM/VIDEO CAPTURE
+# ===========================================
+v4l-utils
+libv4l
+v4l2loopback-dkms
+cameractrls
+cheese
+
+# ===========================================
+# OPTICAL DRIVES
+# ===========================================
+libcdio
+dvd+rw-tools
+cdrdao
+cdrtools
+brasero
+
+# ===========================================
+# BLUETOOTH
+# ===========================================
+bluez
+bluez-utils
+bluez-tools
+bluez-obex
+blueman
+
+# Bluetooth audio codecs
+libldac
+libfreeaptx
+
+# Bluetooth file transfer (OBEX)
+obexftp
+obexfs
+
+# KDE Bluetooth integration
+bluedevil
+
+# ===========================================
+# FINGERPRINT READERS
+# ===========================================
+fprintd
+libfprint
+
+# ===========================================
+# INFRARED
+# ===========================================
+lirc
+
+# ===========================================
+# UPS (Uninterruptible Power Supply)
+# ===========================================
+nut
+
+# ===========================================
+# FIRMWARE
+# ===========================================
+linux-firmware
+fwupd

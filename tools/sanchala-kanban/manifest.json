@@ -1,0 +1,10 @@
+{
+    "name": "Sanchala Kanban",
+    "version": "2.0.0",
+    "description": "Kanban project board manager",
+    "category": "Productivity",
+    "icon": "📋",
+    "launch": "./kanban.sh",
+    "author": "Sanchala OS",
+    "features": ["Create boards", "Todo/Doing/Done columns", "Move tasks", "Multiple boards"]
+}

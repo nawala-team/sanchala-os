@@ -1,0 +1,46 @@
+#!/bin/bash
+# Sanchala Sensors - Hardware Sensor Monitor
+set -euo pipefail
+
+show_temps() {
+    echo "=== Temperature Sensors ==="
+    if command -v sensors &>/dev/null; then
+        sensors 2>/dev/null | grep -E "(temp|Core|Tdie)" || echo "No temperature data"
+    else
+        # Fallback to /sys
+        for f in /sys/class/thermal/thermal_zone*/temp; do
+            [[ -f "$f" ]] && echo "$(dirname "$f" | xargs -I{} cat {}/type 2>/dev/null): $(($(cat "$f")/1000))°C"
+        done
+    fi
+}
+
+show_fans() {
+    echo "=== Fan Sensors ==="
+    if command -v sensors &>/dev/null; then
+        sensors 2>/dev/null | grep -i fan || echo "No fan data"
+    fi
+}
+
+show_all() {
+    echo "=== Sanchala Sensors ==="
+    echo
+    show_temps
+    echo
+    show_fans
+    echo
+    echo "=== CPU Frequency ==="
+    cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq 2>/dev/null | head -1 | awk '{print $1/1000 " MHz"}' || echo "N/A"
+}
+
+watch_sensors() {
+    watch -n 2 "sensors 2>/dev/null || echo 'sensors not available'"
+}
+
+case "${1:-all}" in
+    all|-a) show_all ;;
+    temp|-t) show_temps ;;
+    fan|-f) show_fans ;;
+    watch|-w) watch_sensors ;;
+    gui) exec sanchala-sensors-gui ;;
+    *) echo "Usage: $0 {all|temp|fan|watch|gui}" ;;
+esac
